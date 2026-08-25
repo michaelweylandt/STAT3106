@@ -1,0 +1,7 @@
+course:
+  short: "STAT 3106"
+  owner: "michaelweylandt"
+  semester: "Fall 2026"
+  repo-url: "https://github.com/michaelweylandt/STAT3106"
+  web-url: "https://michael-weylandt.com/STAT3106/"
+  title: "Applied Machine Learning"

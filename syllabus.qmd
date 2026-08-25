@@ -1,0 +1,469 @@
+---
+title: "STAT UN3106\nApplied Machine Learning"
+date: "Last Updated: `r Sys.Date()`"
+---
+
+```{r}
+#| echo: false
+system("soffice --convert-to csv key_dates.ods")
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(tidyverse)
+library(glue)
+
+monday_date <- function(week=WEEK){
+  starting_monday <- read_csv("key_dates.csv") |> 
+    pull(Date) |> 
+    min() |>
+    floor_date("week", week_start=1)
+  
+  starting_monday + 7 * (week - 1)
+}
+
+wednesday_date <- function(week=WEEK){
+  monday_date(week) + 2 
+}
+
+friday_date <- function(week=WEEK){
+  monday_date(week) + 4
+}
+
+wednesday_topic <- function(week=WEEK){
+  read_csv("key_dates.csv", show_col_types=FALSE) |>
+    filter(Date == wednesday_date(week)) |>
+    pull(Details) |>
+    coalesce("")
+}
+
+wednesday_reading <- function(week=WEEK){
+  read_csv("key_dates.csv", show_col_types=FALSE) |>
+    filter(Date == wednesday_date(week)) |>
+    pull(`Suggested Reading`) |>
+    coalesce("")
+}
+
+
+monday_topic <- function(week=WEEK){
+  read_csv("key_dates.csv", show_col_types=FALSE) |>
+    filter(Date == monday_date(week)) |>
+    pull(Details) |>
+    coalesce("")
+}
+
+monday_reading <- function(week=WEEK){
+  read_csv("key_dates.csv", show_col_types=FALSE) |>
+    filter(Date == monday_date(week)) |>
+    pull(`Suggested Reading`) |>
+    coalesce("")
+}
+
+hw <- function(week=WEEK){
+  hw_text <- read_csv("key_dates.csv", show_col_types=FALSE) |>
+    filter(Date == friday_date(week)) |> 
+    pull(Details) 
+  
+  if(NROW(hw_text) == 0) return("")
+  
+  hw_number <- str_extract(hw_text, "[:digit:]+")
+  
+  glue("[{hw_text}](problem_sets/ps{hw_number}.qmd) due on {strftime(friday_date(week), '%Y-%m-%d')} at 5:00pm")
+  
+}
+
+class_date <- function(n, details=FALSE){
+    c <- read_csv("key_dates.csv") |>
+        filter(`Course Element` == "Class Session") |>
+        filter(`Item Number` == n)
+    
+    if(details){
+        c |> pull(Details)
+    } else {
+        c |> pull(Date) |>
+             as.Date() |>
+             format("%Y-%m-%d")
+    }
+}
+```
+
+**All syllabus and schedule provisions subject to change with 
+suitable advance notice. Changes will be announced in class and posted 
+on Canvas.**
+
+## Course Description
+
+*Applied Machine Learning* (`STAT UN3106`) is a lecture course meant to follow
+*Introduction to Applied Data Science* (`STAT UN2108`).  Building on a foundation
+of classical linear and logistic regression models, core principles of modern
+statistical learning will be covered: cross-validation, resampling methods, 
+regularization, model selection, ridge and lasso regression, margin-based 
+classifiers, semi-parametric and kernel methods, tree-based methods, ensemble 
+methods and neural networks. The primary focus of this course will be on the
+implementation and application of these methods, not formal theory. 
+
+Students will complete the course with a strong conceptual understanding the 
+fundamentals of statistical machine learning and a practical understanding of 
+many of the most useful methods of modern machine learning. 
+
+## Course Staff
+
+### Instructor
+
+[Michael Weylandt](https://michael-weylandt.com)
+
+- Office Hours: TBD
+- Location: TBD
+- Email: TBD
+
+### Teaching Assistant(s)
+
+[Lenny Aharon](https://lennyaharon.github.io/index.html)
+
+- Office Hours: TBD
+- Location: Virtual (Zoom)
+- Email: <lenny.aharon@columbia.edu>
+
+### Asynchronous Support
+
+In addition to office hours, asynchronous support will be available via
+the course Ed Discussion board. The Course Staff will endeavor to reply to
+student posts within two business days, so plan to ask questions well in advance
+of any tests or homework due dates. 
+
+## Textbooks & Course Materials
+
+The primary textbook for this course will be *An Introduction to Statistical Learning with Applications in Python* (ISLP) by Gareth James, Daniela Witten, 
+Trevor Hastie, Robert Tibshirani, and Jonathan Taylor. This textbook is freely 
+available online at <https://www.statlearning.com>. 
+
+Additional readings will be assigned by the instructor from the following
+texts, all of which are freely available online: 
+
+- [*Patterns, Predictions, and Actions: A story about machine
+  learning*](https://mlstory.org/) by Moritz Hardt and Benjamin Recht
+- [*Fairness and Machine Learning: Limitations and
+  Opportunities*](https://fairmlbook.org/) by 
+  Solon Barocas, Moritz Hardt, and Arvind Narayanan
+- [*The Emerging Science of Machine Learning 
+  Benchmarks*](https://www.mlbenchmarks.org/) by Moritz Hardt
+  
+## Grading
+
+Modern statistical learning requires mastery on multiple levels: theory, 
+methodology, and applications. While the main focus of this course lies in
+applications, the grading in this course is designed to evaluate students on
+all three elements. Specifically, your grade depends on three major components
+
+- 30% In-Class Tests (2):
+  - 15% Test 1: Regression
+  - 15% Test 2: Classification and Ensemble Methods
+- 30% Homework (Best 4 of 5)
+- 40% Applied Final Exam (Prediction Contest)
+
+Points will be aggregated for a maximum class score of 1000. Final grades
+will be curved upwards in accordance with relevant program, departmental,
+and college policies. (Final grades will not be curved downwards.) Roughly,
+the following portion of final grades are expected: 
+
+- A Range (A to A-): <= 40%
+- B Range (B+ to B-): <= 40%
+- C- and Lower: <20% 
+
+### In-Class Tests (Theory and Concepts)
+
+Two in-class tests, each worth 150 points, will be given near the middle and the
+end of the semester. Each tests will have a mixture of multiple choice, short
+answer, and long-answer questions covering material covered in lecture, 
+instructor notes, and assigned readings.
+
+Rules to avoid opportunities for cheating will be distributed in class before 
+the midterm.  Please review the rules and let your instructor know before the 
+exam if you need an accommodation regarding the rules.  There will be zero 
+tolerance for failure to abide by those rules.
+
+No outside materials will be allowed during the tests. If necessary, the 
+instructor will provide a sheet of key definitions and formulas. 
+
+### Homework (Methodology)
+
+Five problem sets, each worth a total of 75 points, will be assigned throughout
+the semester. These will cover applications of the methods discussed in class
+to a variety of data sets. Each homework assignment will be submitted online
+through Columbia Courseworks. 
+
+Each homework assignment will be due at 5:00pm on Friday, with an automatic 
+grace period lasting until the following Monday at 8:00am. During the grace 
+period, course staff will not typically answer questions, so make sure to ask 
+any questions well in advance of the deadlines. You do not need to request 
+this grace period; it will be automatically applied. 
+
+Other than the standard grace period, no late work will be accepted on any 
+homework outside of **truly exceptional** circumstances, but your lowest grade 
+of the five will be automatically dropped. (Non-hospitalizing illness,
+extracurricular conflicts, or commitments for other courses are not considered
+exceptional.) You are **strongly** to complete all five assignments or to at 
+least save your dropped assignment until the end of the semester. 
+
+After each assignments is submitted, the instructor or TAs may require students
+to meet and to discuss their submissions. Students who are not able to clearly
+demonstrate understanding of their submissions will be significantly penalized. 
+
+### Applied Final Exam (Applications)
+
+In lieu of a traditional final exam, STAT UN3106 has a semester-long "prediction
+competition" in which students will develop, tune, and deploy machine learning
+algorithms on a difficult instructor-provided data set. Your grade in this
+competition will be based on two components: 
+
+- 300 Points: Prediction Accuracy
+- 100 Points: Final Report
+
+#### Prediction Accuracy
+
+Prediction accuracy will be assessed using a private *Kaggle Competition*. 
+The instructor will provide Kaggle with a private test set on which your
+predictions will be evaluated. Kaggle will further divide the test set into a
+*public leaderboard* and a *private leaderboard*. You will be able to see your 
+accuracy on the public leaderboard but final scores will be based on private 
+leaderboard accuracy *so don't overfit*. 
+
+You will be allowed to submit only two sets of predictions to Kaggle per day so
+use them wisely. At the end of the competition, you will be able to select two
+sets of predictions to be used for your final evaluation (taking the better of 
+the two) so track your submissions carefully.
+
+Further details about the data set, prediction metrics and grading scheme will 
+be provided later in the course. 
+
+#### Final Report
+
+After the competition ends, you will submit a final report of no more than 10
+pages (10-12 point, single- or double-spaced) providing an *After-Action Report* 
+of you competition performance. This report should focus on three topics:
+
+- Are there any systematic errors in model predictions that need to be addressed
+  before this model could be applied broadly. (*E.g.*, is it systematically low 
+  or high in a particular subgroup; does it under-predict for especially high
+  outcome samples; *etc*?)
+- What insights into the underlying data can be gleaned from the model? *E.g.*,
+  are certain features especially important for making predictions? Are certain
+  features which you would expect to be important not actually particularly
+  important?
+- What steps did you take that were particularly helpful to maximizing 
+  predictive performance? Or, what parts of your model development cycle were 
+  weak and could be the most improved?
+
+Note that this report is not solely focused on predictive performance. Analysis
+that dives deep into the underlying structure of the data and generates novel
+insights will score as well (or perhaps even better) than a highly performant
+but noninterpretable model.
+
+To assist in developing this After-Action Report, the instructor will provide
+non-anonymized versions of the data (as well as a mapping to the anonymized 
+data) after the Kaggle competition ends.
+
+The report should include all code used to prepare the data and train and 
+predict from the best performing models in an Appendix. Significant penalties
+may be applied if the instructor is unable to reliably reproduce your
+predictions. (You may choose to submit this Appendix in the form of an iPython
+Notebook, Quarto document, Docker container, etc to maximize reproducibility.)
+Note that this appendix does not count against your 10 page limit. You will 
+submit your appendix either via an emailed Zip archive or a link to a public
+code hosting platform such as GitHub. 
+
+## Course Policies
+
+### Disability Accomodations
+
+Students should review the material at 
+<https://www.college.columbia.edu/rightsandresponsibilities>. If you believe 
+that you might have a disability that requires accommodation, you should contact
+Disability Services (Columbia) or CARDS (Barnard).
+
+### Academic Integrity
+
+Students should review Columbia College's Academic Integrity standards at
+<https://www.cc-seas.columbia.edu/academic-integrity> and consult with the
+instructor if they have any questions. 
+
+Problem Sets: Students are allowed (and encouraged!) to work with each other
+on problem sets. Additionally, students may use *free* tiers of 
+generative AI software or any other free web resources to complete any aspect 
+of the problem sets. Students will be required to list all resources used 
+(including generative AI tools or classmates) at the end of each problem set. 
+
+Tests: No external resources may be used.
+
+Applied Final Exam: Students are allowed to work with each other on the 
+prediction competition (but keep in mind that this is a *competition* and your 
+grade is based on your outcome relative to your classmates). Additionally, 
+students may use *free* tiers of generative AI software or any other free web 
+resources to develop and implement predictive models. Generative AI may not be
+used to write the final report. Students will be required to list all resources 
+used(including generative AI tools or classmates) as part of their final submission.
+
+**Punishment for violations of relevant academic integrity standards range from
+a 50% penalty on the assignment to an automatic failure of the course. 
+In matters of academic integrity, it is *far* better to ask permission than
+forgiveness.**
+
+## Tentative Schedule
+
+Class sessions will alternate between traditional "lecture" sessions, focused on
+key concepts and methods in machine learning, and "lab" sessions, focused on
+application and interpretation of methods to real data sets. This is not a hard
+distinction: some applications may be demonstrated in "lecture" sessions and
+ideas will be introduced and reviewd in "lab" sessions.
+
+For each class session, suggested "pre-reading" will be 
+
+::: {.list-table width="1,1,3,2,1, 3,2,1" aligns="c,l,l,l,l,l,l,l" header-rows=1 .hover}
+
+  * - Week 
+    - Monday Date
+    - Monday Topic
+    - Monday Pre-Reading
+    - Wednesday Date
+    - Wednesday Topic
+    - Wednesday Pre-Reading
+    - Homework
+
+  * - `r (WEEK <- 1)`
+    - 
+    - 
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()` 
+
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    - `r wednesday_date()`
+    - `r wednesday_topic()`
+    - `r wednesday_reading()`
+    - `r hw()`
+    
+  * - `r (WEEK <- WEEK + 1)`
+    - `r monday_date()`
+    - `r monday_topic()`
+    - `r monday_reading()`
+    
+:::
+
+
+**All syllabus and schedule provisions subject to change with 
+suitable advance notice. Changes will be announced in class and posted 
+on Canvas.**

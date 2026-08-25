@@ -1,0 +1,56 @@
+project:
+  type: website
+  output-dir: docs
+  execute-dir: project
+  render:
+    - "*.qmd"
+    - "**/*.qmd"
+
+website:
+  title: "STAT 3106"
+  description:
+    Basic Software Tools for Data Analysis
+  site-url: "https://michael-weylandt.com/STAT3106/"
+  repo-url: https://github.com/michaelweylandt/STAT3106
+  repo-actions: [edit, source, issue]
+  navbar:
+    background: primary
+    search: false
+    right:
+      - text: "Syllabus"
+        href: "./syllabus.html"
+      - text: "Lecture Notes"
+        href: "./notes.html"
+      - text: "Labs"
+        href: "./labs.html"
+      - text: "Problem Sets"
+        href: "./problem_sets.html"
+      - text: "Applied Final Exam"
+        href: "./competition.html"
+      - text: "Additional Resources and Course Policies"
+        href: "./resources.html"
+format:
+  html:
+    theme: darkly
+    margin-left: 0em
+    toc: true
+    code-copy: true
+    code-link: true
+    toc_depth: 5
+    toc-location: "left"
+    page-layout: "full"
+  live-html:
+    theme: darkly
+    margin-left: 0em
+    toc: true
+    code-copy: true
+    code-link: true
+    toc_depth: 5
+    toc-location: "left"
+    page-layout: "full"
+
+execute:
+  freeze: false
+
+editor:
+  mode: source
