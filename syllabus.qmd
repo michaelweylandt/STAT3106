@@ -5,7 +5,11 @@ date: "Last Updated: `r Sys.Date()`"
 
 ```{r}
 #| echo: false
-system("soffice --convert-to csv key_dates.ods")
+mtime_ods <- fs::file_info("key_dates.ods")$modification_time
+mtime_csv <- fs::file_info("key_dates.csv")$modification_time
+if(mtime_ods > mtime_csv){
+  system("soffice --convert-to csv key_dates.ods")
+}
 ```
 
 ```{r}
@@ -70,7 +74,7 @@ hw <- function(week=WEEK){
   
   hw_number <- str_extract(hw_text, "[:digit:]+")
   
-  glue("[{hw_text}](problem_sets/ps{hw_number}.qmd) due on {strftime(friday_date(week), '%Y-%m-%d')} at 5:00pm")
+  glue("[{hw_text}](problem_sets/ps0{hw_number}.qmd) due on {strftime(friday_date(week), '%Y-%m-%d')} at 5:00pm")
   
 }
 
@@ -86,6 +90,19 @@ class_date <- function(n, details=FALSE){
              as.Date() |>
              format("%Y-%m-%d")
     }
+}
+
+report_date <- function(){
+  read_csv("key_dates.csv") |>
+        filter(str_detect(Details, "Report Due")) |>
+        pull(Date)
+}
+
+
+grade_submission_date <- function(){
+  read_csv("key_dates.csv") |>
+        filter(str_detect(Details, "Grade Submission")) |>
+        pull(Date)
 }
 ```
 
@@ -135,20 +152,28 @@ of any tests or homework due dates.
 
 ## Textbooks & Course Materials
 
-The primary textbook for this course will be *An Introduction to Statistical Learning with Applications in Python* (ISLP) by Gareth James, Daniela Witten, 
-Trevor Hastie, Robert Tibshirani, and Jonathan Taylor. This textbook is freely 
-available online at <https://www.statlearning.com>. 
+The primary textbook for this course will be *An Introduction to Statistical 
+Learning with Applications* (ISL) by Gareth James, Daniela Witten, 
+Trevor Hastie, Robert Tibshirani, and Jonathan Taylor. There are two versions of
+this textbook freely 
+available online at <https://www.statlearning.com>: 
+
+- *An Introduction to Statistical Learning with Applications in R* (ISLR)
+- *An Introduction to Statistical Learning with Applications in Python* (ISLP)
+
+The two versions cover the same material, only using different languages for the
+examples, so please feel free to use whichever version you find more comfortable.
 
 Additional readings will be assigned by the instructor from the following
 texts, all of which are freely available online: 
 
 - [*Patterns, Predictions, and Actions: A story about machine
-  learning*](https://mlstory.org/) by Moritz Hardt and Benjamin Recht
+  learning*](https://mlstory.org/) by Moritz Hardt and Benjamin Recht (PPA)
 - [*Fairness and Machine Learning: Limitations and
   Opportunities*](https://fairmlbook.org/) by 
-  Solon Barocas, Moritz Hardt, and Arvind Narayanan
+  Solon Barocas, Moritz Hardt, and Arvind Narayanan (FML)
 - [*The Emerging Science of Machine Learning 
-  Benchmarks*](https://www.mlbenchmarks.org/) by Moritz Hardt
+  Benchmarks*](https://www.mlbenchmarks.org/) by Moritz Hardt (MLB)
   
 ## Grading
 
@@ -157,10 +182,8 @@ methodology, and applications. While the main focus of this course lies in
 applications, the grading in this course is designed to evaluate students on
 all three elements. Specifically, your grade depends on three major components
 
-- 30% In-Class Tests (2):
-  - 15% Test 1: Regression
-  - 15% Test 2: Classification and Ensemble Methods
-- 30% Homework (Best 4 of 5)
+- 30% In-Class Midterm Exam
+- 30% Homework (4, Equally Weighted)
 - 40% Applied Final Exam (Prediction Contest)
 
 Points will be aggregated for a maximum class score of 1000. Final grades
@@ -172,11 +195,11 @@ the following portion of final grades are expected:
 - B Range (B+ to B-): <= 40%
 - C- and Lower: <20% 
 
-### In-Class Tests (Theory and Concepts)
+### In-Class Midterm (Theory and Concepts)
 
-Two in-class tests, each worth 150 points, will be given near the middle and the
-end of the semester. Each tests will have a mixture of multiple choice, short
-answer, and long-answer questions covering material covered in lecture, 
+One in-class test, worth 300 points, will be given approximately two-thirds of
+the way through the semester. Each tests will have a mixture of multiple choice, 
+short answer, and long-answer questions covering material covered in lecture, 
 instructor notes, and assigned readings.
 
 Rules to avoid opportunities for cheating will be distributed in class before 
@@ -189,10 +212,10 @@ instructor will provide a sheet of key definitions and formulas.
 
 ### Homework (Methodology)
 
-Five problem sets, each worth a total of 75 points, will be assigned throughout
+Four problem sets, each worth a total of 75 points, will be assigned throughout
 the semester. These will cover applications of the methods discussed in class
 to a variety of data sets. Each homework assignment will be submitted online
-through Columbia Courseworks. 
+through Gradescope.  
 
 Each homework assignment will be due at 5:00pm on Friday, with an automatic 
 grace period lasting until the following Monday at 8:00am. During the grace 
@@ -201,24 +224,26 @@ any questions well in advance of the deadlines. You do not need to request
 this grace period; it will be automatically applied. 
 
 Other than the standard grace period, no late work will be accepted on any 
-homework outside of **truly exceptional** circumstances, but your lowest grade 
-of the five will be automatically dropped. (Non-hospitalizing illness,
-extracurricular conflicts, or commitments for other courses are not considered
-exceptional.) You are **strongly** to complete all five assignments or to at 
-least save your dropped assignment until the end of the semester. 
+homework outside of **exceptional** circumstances. (Non-hospitalizing 
+illness, extracurricular conflicts, or commitments for other courses are not 
+considered exceptional, so plan ahead.) If you have a foreseeable circumstance
+that you believe warrants an extension, please contact the instructor or the
+TA well in advance; no extensions will be given for foreseeable circumstances
+without specific prior written authorization.
 
-After each assignments is submitted, the instructor or TAs may require students
+After each assignment is submitted, the instructor or TAs may require students
 to meet and to discuss their submissions. Students who are not able to clearly
 demonstrate understanding of their submissions will be significantly penalized. 
 
 ### Applied Final Exam (Applications)
 
-In lieu of a traditional final exam, STAT UN3106 has a semester-long "prediction
-competition" in which students will develop, tune, and deploy machine learning
-algorithms on a difficult instructor-provided data set. Your grade in this
-competition will be based on two components: 
+In lieu of a traditional final exam, {{< var course.short >}} has a 
+semester-long "prediction competition" in which students will develop, tune, 
+and deploy machine learning algorithms on a difficult instructor-provided 
+data set. Your grade in this competition will be based on three components: 
 
-- 300 Points: Prediction Accuracy
+- 200 Points: Prediction Accuracy
+- 100 Points: In-Class Presentation
 - 100 Points: Final Report
 
 #### Prediction Accuracy
@@ -238,11 +263,34 @@ the two) so track your submissions carefully.
 Further details about the data set, prediction metrics and grading scheme will 
 be provided later in the course. 
 
+#### In-Class Presentation
+
+During the final full week of class[^week], students will give a **6** minute
+presentation, primarily focused on the *models and methods* they used to build
+their predictive model. Details of presentations, including the presentation
+schedule, will be made available later in the course. 
+
+**Students will present in an order established by the instructor and should 
+expect to attend course on both presentation days.**
+
+If you have a foreseeable circumstance that requires you to present on a 
+particular date, please contact the instructor or the TA well in advance.
+Failure to present on the assigned day will incur an automatic 0 on this portion
+of your grade. 
+
+[^week]: If it turns out to be possible to have all students present in a single
+class period, presentations will be on the *Wednesday* and Monday will be used
+for a special topics lecture. This will be announced as we get closer to the
+end of the semester.
+
 #### Final Report
 
-After the competition ends, you will submit a final report of no more than 10
-pages (10-12 point, single- or double-spaced) providing an *After-Action Report* 
-of you competition performance. This report should focus on three topics:
+After the competition ends, you will submit a final report of no more than 8
+pages[^limit] (10-12 point, one-and-one-half- or double-spaced) providing an 
+*After-Action Report* of your competition performance. This report should 
+focus on three topics:
+
+[^limit]: Any pages after the first 8 will be discarded and not graded.
 
 - Are there any systematic errors in model predictions that need to be addressed
   before this model could be applied broadly. (*E.g.*, is it systematically low 
@@ -267,16 +315,16 @@ data) after the Kaggle competition ends.
 
 The report should include all code used to prepare the data and train and 
 predict from the best performing models in an Appendix. Significant penalties
-may be applied if the instructor is unable to reliably reproduce your
+will be applied if the instructor is unable to reliably reproduce your
 predictions. (You may choose to submit this Appendix in the form of an iPython
-Notebook, Quarto document, Docker container, etc to maximize reproducibility.)
-Note that this appendix does not count against your 10 page limit. You will 
+Notebook, Quarto document, Docker container, *etc.* to maximize reproducibility.)
+Note that this appendix does not count against your 8 page limit. You will 
 submit your appendix either via an emailed Zip archive or a link to a public
 code hosting platform such as GitHub. 
 
 ## Course Policies
 
-### Disability Accomodations
+### Disability Accommodations
 
 Students should review the material at 
 <https://www.college.columbia.edu/rightsandresponsibilities>. If you believe 
@@ -318,7 +366,10 @@ application and interpretation of methods to real data sets. This is not a hard
 distinction: some applications may be demonstrated in "lecture" sessions and
 ideas will be introduced and reviewd in "lab" sessions.
 
-For each class session, suggested "pre-reading" will be 
+For each class session, suggested "pre-reading" will be assigned from one of
+the course textbooks, typically ISLR/ISLP. This is optional, but strongly 
+recommended, for students who want to have prior exposure to the fundamentals
+of that day's topic before lecture.
 
 ::: {.list-table width="1,1,3,2,1, 3,2,1" aligns="c,l,l,l,l,l,l,l" header-rows=1 .hover}
 
@@ -332,6 +383,7 @@ For each class session, suggested "pre-reading" will be
     - Homework
 
   * - `r (WEEK <- 1)`
+    - 
     - 
     - 
     - `r wednesday_date()`
@@ -460,7 +512,18 @@ For each class session, suggested "pre-reading" will be
     - `r monday_date()`
     - `r monday_topic()`
     - `r monday_reading()`
-    
+    - 
+    - 
+    - 
+    - `r hw()`
+
+  * - 
+    - Finals Period
+      <td colspan="6" style="text-align:center"> 
+        <p>Final Report due `r report_date()` (Tentative)</p> 
+        </br> 
+        <p>Final Grades posted by `r grade_submission_date()`</p>
+      </td>
 :::
 
 

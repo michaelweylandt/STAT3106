@@ -1,0 +1,37 @@
+Date,Day of Week,Item,Number,Details,Suggested Reading
+2026-09-09,Wednesday,Class Session,1,Course Introduction,"ISLP §2.1, 2.3"
+2026-09-14,Monday,Class Session,2,Unit I. ML Fundamentals: Review of Linear Regression,ISLP §3.1-3.3
+2026-09-16,Wednesday,Class Session,3,Unit I. ML Fundamentals: Applied Linear Regression,ISLP §3.6
+2026-09-21,Monday,Class Session,4,Unit I. ML Fundamentals: Loss & Error in Machine Learning,ISLP §5.1-5.2
+2026-09-23,Wednesday,Class Session,5,Unit I. ML Fundamentals: Resampling Methods for Machine Learning,ISLP §5.3
+2026-09-28,Monday,Class Session,6,Unit I. ML Fundamentals: A Friendly Foray into First Order Optimization: SGD and Friends,
+2026-09-30,Wednesday,Class Session,7,Unit I. ML Fundamentals: A Funny Thing Happened on the Way to the nth Dimension – Challenges of High-Dimensional Statistics,ISLP §13.1-13.4
+2026-10-02,Friday,Homework,1,Problem Set #1 Due,
+2026-10-05,Monday,Class Session,8,Unit II. Regression: Regression in High Dimensions & the Role of Regularization,"ISLP §6.2.1,6.4"
+2026-10-07,Wednesday,Class Session,9,Unit II. Regression: Regularization Methods for Model Selection,"ISLP §6.1, 6.2.2"
+2026-10-12,Monday,Class Session,10,Unit II. Regression: Stability Approaches in Applied Machine Learning,ISLP §6.5
+2026-10-14,Wednesday,Class Session,11,Unit II. Regression: Higher and Higher – Feature Expansion Methods for Non-Linear Regression,"ISLP §7.1-7.3,7.7"
+2026-10-19,Monday,Class Session,12,Unit II. Regression: Applied High-Dimensional Regression,ISLP §7.8
+2026-10-21,Wednesday,Class Session,13,Introduction to Course Competition & Unit I. Classification: Introduction to Classification,
+2026-10-23,Friday,Homework,2,Problem Set #2 Due,
+2026-10-26,Monday,Class Session,14,Unit III. Classification & Ensemble Methods: Review of Logistic Regression,ISLP §4.1-4.7
+2026-10-28,Wednesday,Class Session,15,Unit III. Classification & Ensemble Methods: Other Linear Classifiers,ISLP §9.1-9.6
+2026-11-02,Monday,No Class,1,University Holiday: Day Before Elections,
+2026-11-04,Wednesday,Class Session,16,Unit III. Classification & Ensemble Methods: Tree Based Methods,"ISLP §8.1, 8.3.1-8.3.2"
+2026-11-09,Monday,Class Session,17,Unit III. Classification & Ensemble Methods: Stacking and Bagging,"ISLP §8.2.1-8.2.2, 8.3.3"
+2026-11-11,Wednesday,Class Session,18,Unit III. Classification & Ensemble Methods: Boosting,"ISLP §8.2.3, 8.3.4"
+2026-11-13,Friday,Homework,3,Problem Set #3 Due,
+2026-11-16,Monday,Class Session,19,Unit III. Classification & Ensemble Methods: Practical Challenges,
+2026-11-18,Wednesday,Class Session,20,Test: Units I – III,
+2026-11-23,Monday,Class Session,21,Unit IV. Neural Methods: A Shallow Introduction to Deep Learning,"ISLP §10.1-10.2, 10.6-10.8"
+2026-11-25,Wednesday,No Class,2,University Holiday: Wednesday Before Thanksgiving,
+2026-11-30,Monday,Class Session,22,Unit IV. Neural Methods: A Convoluted Approach to Computer Vision,
+2026-12-02,Wednesday,Class Session,23,Unit IV. Neural Methods: Transformers – Robots in Disguise,
+2026-12-07,Monday,Class Session,24,Student Presentations I,
+2026-12-09,Wednesday,Class Session,25,Student Presentations II,
+2026-12-14,Monday,No Class,3,TBD,
+2026-12-18,Friday,Homework,4,Problem Set #4 Due,
+2026-10-21,Wednesday,Prediction Competition,,Competition Opened,
+2026-12-06,Sunday,Prediction Competition,,Competition Closed,
+2026-12-23,Wednesday,Prediction Competition,,Final Report Due [Tentative],
+2027-01-04,Monday,Grade Deadline,,Grade Submission Deadline,

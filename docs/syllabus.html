@@ -2,18 +2,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-08-25">
+<meta name="dcterms.date" content="2026-09-04">
 <title>STAT UN3106 Applied Machine Learning – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -36,10 +39,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-cc609553b3b15c4dcd446814cf488934.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-d0bce4a04b23f422c7b30105ccc472a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -128,7 +131,7 @@ ul.task-list li input[type="checkbox"] {
   <li>
 <a href="#grading" id="toc-grading" class="nav-link" data-scroll-target="#grading">Grading</a>
   <ul class="collapse">
-<li><a href="#in-class-tests-theory-and-concepts" id="toc-in-class-tests-theory-and-concepts" class="nav-link" data-scroll-target="#in-class-tests-theory-and-concepts">In-Class Tests (Theory and Concepts)</a></li>
+<li><a href="#in-class-midterm-theory-and-concepts" id="toc-in-class-midterm-theory-and-concepts" class="nav-link" data-scroll-target="#in-class-midterm-theory-and-concepts">In-Class Midterm (Theory and Concepts)</a></li>
   <li><a href="#homework-methodology" id="toc-homework-methodology" class="nav-link" data-scroll-target="#homework-methodology">Homework (Methodology)</a></li>
   <li><a href="#applied-final-exam-applications" id="toc-applied-final-exam-applications" class="nav-link" data-scroll-target="#applied-final-exam-applications">Applied Final Exam (Applications)</a></li>
   </ul>
@@ -136,7 +139,7 @@ ul.task-list li input[type="checkbox"] {
   <li>
 <a href="#course-policies" id="toc-course-policies" class="nav-link" data-scroll-target="#course-policies">Course Policies</a>
   <ul class="collapse">
-<li><a href="#disability-accomodations" id="toc-disability-accomodations" class="nav-link" data-scroll-target="#disability-accomodations">Disability Accomodations</a></li>
+<li><a href="#disability-accommodations" id="toc-disability-accommodations" class="nav-link" data-scroll-target="#disability-accommodations">Disability Accommodations</a></li>
   <li><a href="#academic-integrity" id="toc-academic-integrity" class="nav-link" data-scroll-target="#academic-integrity">Academic Integrity</a></li>
   </ul>
 </li>
@@ -159,7 +162,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 25, 2026</p>
+      <p class="date">September 4, 2026</p>
     </div>
   </div>
   
@@ -201,13 +204,8 @@ ul.task-list li input[type="checkbox"] {
 </ul></section><section id="grading" class="level2"><h2 class="anchored" data-anchor-id="grading">Grading</h2>
 <p>Modern statistical learning requires mastery on multiple levels: theory, methodology, and applications. While the main focus of this course lies in applications, the grading in this course is designed to evaluate students on all three elements. Specifically, your grade depends on three major components</p>
 <ul>
-<li>30% In-Class Tests (2):
-<ul>
-<li>15% Test 1: Regression</li>
-<li>15% Test 2: Classification and Ensemble Methods</li>
-</ul>
-</li>
-<li>30% Homework</li>
+<li>30% In-Class Midterm Exam</li>
+<li>30% Homework (4, Equally Weighted)</li>
 <li>40% Applied Final Exam (Prediction Contest)</li>
 </ul>
 <p>Points will be aggregated for a maximum class score of 1000. Final grades will be curved upwards in accordance with relevant program, departmental, and college policies. (Final grades will not be curved downwards.) Roughly, the following portion of final grades are expected:</p>
@@ -216,27 +214,32 @@ ul.task-list li input[type="checkbox"] {
 <li>B Range (B+ to B-): &lt;= 40%</li>
 <li>C- and Lower: &lt;20%</li>
 </ul>
-<section id="in-class-tests-theory-and-concepts" class="level3"><h3 class="anchored" data-anchor-id="in-class-tests-theory-and-concepts">In-Class Tests (Theory and Concepts)</h3>
-<p>Two in-class tests, each worth 150 points, will be given near the middle and the end of the semester. Each tests will have a mixture of multiple choice, short answer, and long-answer questions covering material covered in lecture, instructor notes, and assigned readings.</p>
+<section id="in-class-midterm-theory-and-concepts" class="level3"><h3 class="anchored" data-anchor-id="in-class-midterm-theory-and-concepts">In-Class Midterm (Theory and Concepts)</h3>
+<p>One in-class test, worth 300 points, will be given approximately two-thirds of the way through the semester. Each tests will have a mixture of multiple choice, short answer, and long-answer questions covering material covered in lecture, instructor notes, and assigned readings.</p>
 <p>Rules to avoid opportunities for cheating will be distributed in class before the midterm. Please review the rules and let your instructor know before the exam if you need an accommodation regarding the rules. There will be zero tolerance for failure to abide by those rules.</p>
 <p>No outside materials will be allowed during the tests. If necessary, the instructor will provide a sheet of key definitions and formulas.</p>
 </section><section id="homework-methodology" class="level3"><h3 class="anchored" data-anchor-id="homework-methodology">Homework (Methodology)</h3>
-<p>Five problem sets, each worth a total of 75 points, will be assigned throughout the semester. These will cover applications of the methods discussed in class to a variety of data sets. Each homework assignment will be submitted online through Columbia Courseworks.</p>
+<p>Four problem sets, each worth a total of 75 points, will be assigned throughout the semester. These will cover applications of the methods discussed in class to a variety of data sets. Each homework assignment will be submitted online through Gradescope.</p>
 <p>Each homework assignment will be due at 5:00pm on Friday, with an automatic grace period lasting until the following Monday at 8:00am. During the grace period, course staff will not typically answer questions, so make sure to ask any questions well in advance of the deadlines. You do not need to request this grace period; it will be automatically applied.</p>
-<p>Other than the standard grace period, no late work will be accepted on any homework outside of <strong>truly exceptional</strong> circumstances, but your lowest grade of the five will be automatically dropped. (Non-hospitalizing illness, extracurricular conflicts, or commitments for other courses are not considered exceptional.) You are <strong>strongly</strong> to complete all five assignments or to at least save your dropped assignment until the end of the semester.</p>
-<p>After each assignments is submitted, the instructor or TAs may require students to meet and to discuss their submissions. Students who are not able to clearly demonstrate understanding of their submissions will be significantly penalized.</p>
+<p>Other than the standard grace period, no late work will be accepted on any homework outside of <strong>exceptional</strong> circumstances. (Non-hospitalizing illness, extracurricular conflicts, or commitments for other courses are not considered exceptional, so plan ahead.) If you have a foreseeable circumstance that you believe warrants an extension, please contact the instructor or the TA well in advance; no extensions will be given for foreseeable circumstances without specific prior written authorization.</p>
+<p>After each assignment is submitted, the instructor or TAs may require students to meet and to discuss their submissions. Students who are not able to clearly demonstrate understanding of their submissions will be significantly penalized.</p>
 </section><section id="applied-final-exam-applications" class="level3"><h3 class="anchored" data-anchor-id="applied-final-exam-applications">Applied Final Exam (Applications)</h3>
-<p>In lieu of a traditional final exam, STAT UN3106 has a semester-long “prediction competition” in which students will develop, tune, and deploy machine learning algorithms on a difficult instructor-provided data set. Your grade in this competition will be based on two components:</p>
+<p>In lieu of a traditional final exam, STAT 3106 has a semester-long “prediction competition” in which students will develop, tune, and deploy machine learning algorithms on a difficult instructor-provided data set. Your grade in this competition will be based on three components:</p>
 <ul>
-<li>300 Points: Prediction Accuracy</li>
+<li>200 Points: Prediction Accuracy</li>
+<li>100 Points: In-Class Presentation</li>
 <li>100 Points: Final Report</li>
 </ul>
 <section id="prediction-accuracy" class="level4"><h4 class="anchored" data-anchor-id="prediction-accuracy">Prediction Accuracy</h4>
 <p>Prediction accuracy will be assessed using a private <em>Kaggle Competition</em>. The instructor will provide Kaggle with a private test set on which your predictions will be evaluated. Kaggle will further divide the test set into a <em>public leaderboard</em> and a <em>private leaderboard</em>. You will be able to see your accuracy on the public leaderboard but final scores will be based on private leaderboard accuracy <em>so don’t overfit</em>.</p>
 <p>You will be allowed to submit only two sets of predictions to Kaggle per day so use them wisely. At the end of the competition, you will be able to select two sets of predictions to be used for your final evaluation (taking the better of the two) so track your submissions carefully.</p>
 <p>Further details about the data set, prediction metrics and grading scheme will be provided later in the course.</p>
+</section><section id="in-class-presentation" class="level4"><h4 class="anchored" data-anchor-id="in-class-presentation">In-Class Presentation</h4>
+<p>During the final full week of class<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, students will give a <strong>6</strong> minute presentation, primarily focused on the <em>models and methods</em> they used to build their predictive model. Details of presentations, including the presentation schedule, will be made available later in the course.</p>
+<p><strong>Students will present in an order established by the instructor and should expect to attend course on both presentation days.</strong></p>
+<p>If you have a foreseeable circumstance that requires you to present on a particular date, please contact the instructor or the TA well in advance. Failure to present on the assigned day will incur an automatic 0 on this portion of your grade.</p>
 </section><section id="final-report" class="level4"><h4 class="anchored" data-anchor-id="final-report">Final Report</h4>
-<p>After the competition ends, you will submit a final report of no more than 10 pages (10-12 point, single- or double-spaced) providing an <em>After-Action Report</em> of you competition performance. This report should focus on three topics:</p>
+<p>After the competition ends, you will submit a final report of no more than 8 pages<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> (10-12 point, one-and-one-half- or double-spaced) providing an <em>After-Action Report</em> of your competition performance. This report should focus on three topics:</p>
 <ul>
 <li>Are there any systematic errors in model predictions that need to be addressed before this model could be applied broadly. (<em>E.g.</em>, is it systematically low or high in a particular subgroup; does it under-predict for especially high outcome samples; <em>etc</em>?)</li>
 <li>What insights into the underlying data can be gleaned from the model? <em>E.g.</em>, are certain features especially important for making predictions? Are certain features which you would expect to be important not actually particularly important?</li>
@@ -244,9 +247,9 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p>Note that this report is not solely focused on predictive performance. Analysis that dives deep into the underlying structure of the data and generates novel insights will score as well (or perhaps even better) than a highly performant but noninterpretable model.</p>
 <p>To assist in developing this After-Action Report, the instructor will provide non-anonymized versions of the data (as well as a mapping to the anonymized data) after the Kaggle competition ends.</p>
-<p>The report should include all code used to prepare the data and train and predict from the best performing models in an Appendix. Significant penalties may be applied if the instructor is unable to reliably reproduce your predictions. (You may choose to submit this Appendix in the form of an iPython Notebook, Quarto document, Docker container, etc to maximize reproducibility.) Note that this appendix does not count against your 10 page limit. You will submit your appendix either via an emailed Zip archive or a link to a public code hosting platform such as GitHub.</p>
+<p>The report should include all code used to prepare the data and train and predict from the best performing models in an Appendix. Significant penalties will be applied if the instructor is unable to reliably reproduce your predictions. (You may choose to submit this Appendix in the form of an iPython Notebook, Quarto document, Docker container, <em>etc.</em> to maximize reproducibility.) Note that this appendix does not count against your 8 page limit. You will submit your appendix either via an emailed Zip archive or a link to a public code hosting platform such as GitHub.</p>
 </section></section></section><section id="course-policies" class="level2"><h2 class="anchored" data-anchor-id="course-policies">Course Policies</h2>
-<section id="disability-accomodations" class="level3"><h3 class="anchored" data-anchor-id="disability-accomodations">Disability Accomodations</h3>
+<section id="disability-accommodations" class="level3"><h3 class="anchored" data-anchor-id="disability-accommodations">Disability Accommodations</h3>
 <p>Students should review the material at <a href="https://www.college.columbia.edu/rightsandresponsibilities" class="uri">https://www.college.columbia.edu/rightsandresponsibilities</a>. If you believe that you might have a disability that requires accommodation, you should contact Disability Services (Columbia) or CARDS (Barnard).</p>
 </section><section id="academic-integrity" class="level3"><h3 class="anchored" data-anchor-id="academic-integrity">Academic Integrity</h3>
 <p>Students should review Columbia College’s Academic Integrity standards at <a href="https://www.cc-seas.columbia.edu/academic-integrity" class="uri">https://www.cc-seas.columbia.edu/academic-integrity</a> and consult with the instructor if they have any questions.</p>
@@ -256,7 +259,7 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Punishment for violations of relevant academic integrity standards range from a 50% penalty on the assignment to an automatic failure of the course. In matters of academic integrity, it is <em>far</em> better to ask permission than forgiveness.</strong></p>
 </section></section><section id="tentative-schedule" class="level2"><h2 class="anchored" data-anchor-id="tentative-schedule">Tentative Schedule</h2>
 <p>Class sessions will alternate between traditional “lecture” sessions, focused on key concepts and methods in machine learning, and “lab” sessions, focused on application and interpretation of methods to real data sets. This is not a hard distinction: some applications may be demonstrated in “lecture” sessions and ideas will be introduced and reviewd in “lab” sessions.</p>
-<p>For each class session, suggested “pre-reading” will be</p>
+<p>For each class session, suggested “pre-reading” will be assigned from one of the course textbooks, typically ISLR/ISLP. This is optional, but strongly recommended, for students who want to have prior exposure to the fundamentals of that day’s topic before lecture.</p>
 <table class="caption-top table">
 <thead><tr class="header">
 <th style="text-align: center;">Week</th>
@@ -273,82 +276,82 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: center;">1</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;">2026-09-09</td>
-<td style="text-align: left;">Lecture #1: Course Introduction</td>
-<td style="text-align: left;">ISLP §2.1, 2.3</td>
 <td style="text-align: left;"></td>
+<td style="text-align: left;">2026-09-09</td>
+<td style="text-align: left;">Course Introduction</td>
+<td style="text-align: left;">ISLP §2.1, 2.3</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
 <td style="text-align: left;">2026-09-14</td>
-<td style="text-align: left;">Lecture #2: Review of Linear Regression</td>
+<td style="text-align: left;">Unit I. ML Fundamentals: Review of Linear Regression</td>
 <td style="text-align: left;">ISLP §3.1-3.3</td>
 <td style="text-align: left;">2026-09-16</td>
-<td style="text-align: left;">Lab #2: Applied Linear Regression</td>
+<td style="text-align: left;">Unit I. ML Fundamentals: Applied Linear Regression</td>
 <td style="text-align: left;">ISLP §3.6</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">3</td>
 <td style="text-align: left;">2026-09-21</td>
-<td style="text-align: left;">Lecture #3: Loss &amp; Error in Machine Learning</td>
+<td style="text-align: left;">Unit I. ML Fundamentals: Loss &amp; Error in Machine Learning</td>
 <td style="text-align: left;">ISLP §5.1-5.2</td>
 <td style="text-align: left;">2026-09-23</td>
-<td style="text-align: left;">Lab #3: Resampling Methods for Machine Learning</td>
+<td style="text-align: left;">Unit I. ML Fundamentals: Resampling Methods for Machine Learning</td>
 <td style="text-align: left;">ISLP §5.3</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">4</td>
 <td style="text-align: left;">2026-09-28</td>
-<td style="text-align: left;">Lecture #4: A Funny Thing Happened on the Way to the nth Dimension</td>
-<td style="text-align: left;">ISLP §13.1-13.4</td>
-<td style="text-align: left;">2026-09-30</td>
-<td style="text-align: left;">Lab #4: A Friendly Foray into First Order Optimization</td>
+<td style="text-align: left;">Unit I. ML Fundamentals: A Friendly Foray into First Order Optimization: SGD and Friends</td>
 <td style="text-align: left;"></td>
+<td style="text-align: left;">2026-09-30</td>
+<td style="text-align: left;">Unit I. ML Fundamentals: A Funny Thing Happened on the Way to the nth Dimension – Challenges of High-Dimensional Statistics</td>
+<td style="text-align: left;">ISLP §13.1-13.4</td>
 <td style="text-align: left;">
-<a href="problem_sets/ps1.qmd">Homework #1 Due</a> due on 2026-10-02 at 5:00pm</td>
+<a href="./problem_sets/ps01.html">Problem Set #1 Due</a> due on 2026-10-02 at 5:00pm</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">5</td>
 <td style="text-align: left;">2026-10-05</td>
-<td style="text-align: left;">Lecture #5: Regression in High Dimensions &amp; the Role of Regularization</td>
+<td style="text-align: left;">Unit II. Regression: Regression in High Dimensions &amp; the Role of Regularization</td>
 <td style="text-align: left;">ISLP §6.2.1,6.4</td>
 <td style="text-align: left;">2026-10-07</td>
-<td style="text-align: left;">Lab #5: Getting Ridge-y with It</td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Unit II. Regression: Regularization Methods for Model Selection</td>
+<td style="text-align: left;">ISLP §6.1, 6.2.2</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">6</td>
 <td style="text-align: left;">2026-10-12</td>
-<td style="text-align: left;">Lecture #6: Methods for Model Selection</td>
-<td style="text-align: left;">ISLP §6.1, 6.2.2</td>
-<td style="text-align: left;">2026-10-14</td>
-<td style="text-align: left;">Lab #6: Stability Approaches in Applied Machine Learning</td>
+<td style="text-align: left;">Unit II. Regression: Stability Approaches in Applied Machine Learning</td>
 <td style="text-align: left;">ISLP §6.5</td>
+<td style="text-align: left;">2026-10-14</td>
+<td style="text-align: left;">Unit II. Regression: Higher and Higher – Feature Expansion Methods for Non-Linear Regression</td>
+<td style="text-align: left;">ISLP §7.1-7.3,7.7</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">7</td>
 <td style="text-align: left;">2026-10-19</td>
-<td style="text-align: left;">Lecture #7: Higher and Higher – Feature Expansion Methods for Non-Linear Regression</td>
-<td style="text-align: left;">ISLP §7.1-7.3,7.7</td>
-<td style="text-align: left;">2026-10-21</td>
-<td style="text-align: left;">Lab #7: Applied Non-Linear Regression</td>
+<td style="text-align: left;">Unit II. Regression: Applied High-Dimensional Regression</td>
 <td style="text-align: left;">ISLP §7.8</td>
+<td style="text-align: left;">2026-10-21</td>
+<td style="text-align: left;">Introduction to Course Competition &amp; Unit I. Classification: Introduction to Classification, Competition Opened</td>
+<td style="text-align: left;">,</td>
 <td style="text-align: left;">
-<a href="problem_sets/ps2.qmd">Homework #2 Due</a> due on 2026-10-23 at 5:00pm</td>
+<a href="./problem_sets/ps02.html">Problem Set #2 Due</a> due on 2026-10-23 at 5:00pm</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">8</td>
 <td style="text-align: left;">2026-10-26</td>
-<td style="text-align: left;">Introduction to Course Competition &amp; Review of Regression</td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Unit III. Classification &amp; Ensemble Methods: Review of Logistic Regression</td>
+<td style="text-align: left;">ISLP §4.1-4.7</td>
 <td style="text-align: left;">2026-10-28</td>
-<td style="text-align: left;">Test I: Regression</td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Unit III. Classification &amp; Ensemble Methods: Other Linear Classifiers</td>
+<td style="text-align: left;">ISLP §9.1-9.6</td>
 <td style="text-align: left;"></td>
 </tr>
 <tr class="odd">
@@ -357,37 +360,36 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;">University Holiday: Day Before Elections</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">2026-11-04</td>
-<td style="text-align: left;">Lecture #8: Review of Logistic Regression &amp; Classification</td>
-<td style="text-align: left;">ISLP §4.1-4.7</td>
-<td style="text-align: left;">
-<a href="problem_sets/ps3.qmd">Homework #3 Due</a> due on 2026-11-06 at 5:00pm</td>
+<td style="text-align: left;">Unit III. Classification &amp; Ensemble Methods: Tree Based Methods</td>
+<td style="text-align: left;">ISLP §8.1, 8.3.1-8.3.2</td>
+<td style="text-align: left;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">10</td>
 <td style="text-align: left;">2026-11-09</td>
-<td style="text-align: left;">Lecture #9: Margin-Based Methods for Classification</td>
-<td style="text-align: left;">ISLP §9.1-9.5</td>
+<td style="text-align: left;">Unit III. Classification &amp; Ensemble Methods: Stacking and Bagging</td>
+<td style="text-align: left;">ISLP §8.2.1-8.2.2, 8.3.3</td>
 <td style="text-align: left;">2026-11-11</td>
-<td style="text-align: left;">Lab #9: SVMs and Kernel Machines</td>
-<td style="text-align: left;">ISLP §9.6</td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;">Unit III. Classification &amp; Ensemble Methods: Boosting</td>
+<td style="text-align: left;">ISLP §8.2.3, 8.3.4</td>
+<td style="text-align: left;">
+<a href="./problem_sets/ps03.html">Problem Set #3 Due</a> due on 2026-11-13 at 5:00pm</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">11</td>
 <td style="text-align: left;">2026-11-16</td>
-<td style="text-align: left;">Lecture #10: Tree-Based Methods</td>
-<td style="text-align: left;">ISLP §8.1, 8.3.1-8.3.2</td>
-<td style="text-align: left;">2026-11-18</td>
-<td style="text-align: left;">Special Topics Lecture</td>
+<td style="text-align: left;">Unit III. Classification &amp; Ensemble Methods: Practical Challenges</td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;">
-<a href="problem_sets/ps4.qmd">Homework #4 Due</a> due on 2026-11-20 at 5:00pm</td>
+<td style="text-align: left;">2026-11-18</td>
+<td style="text-align: left;">Test: Units I – III</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">12</td>
 <td style="text-align: left;">2026-11-23</td>
-<td style="text-align: left;">Lecture #11: Ensemble Methods I: Stacking and Bagging</td>
-<td style="text-align: left;">ISLP §8.2.1-8.2.2, 8.3.3</td>
+<td style="text-align: left;">Unit IV. Neural Methods: A Shallow Introduction to Deep Learning</td>
+<td style="text-align: left;">ISLP §10.1-10.2, 10.6-10.8</td>
 <td style="text-align: left;">2026-11-25</td>
 <td style="text-align: left;">University Holiday: Wednesday Before Thanksgiving</td>
 <td style="text-align: left;"></td>
@@ -396,21 +398,20 @@ ul.task-list li input[type="checkbox"] {
 <tr class="odd">
 <td style="text-align: center;">13</td>
 <td style="text-align: left;">2026-11-30</td>
-<td style="text-align: left;">Lecture #12: Ensemble Methods II: Boosting</td>
-<td style="text-align: left;">ISLP §8.2.3, 8.3.4</td>
-<td style="text-align: left;">2026-12-02</td>
-<td style="text-align: left;">Lab #12: Ensemble Workflows for Tabular Data</td>
+<td style="text-align: left;">Unit IV. Neural Methods: A Convoluted Approach to Computer Vision</td>
 <td style="text-align: left;"></td>
-<td style="text-align: left;">
-<a href="problem_sets/ps5.qmd">Homework #5 Due</a> due on 2026-12-04 at 5:00pm</td>
+<td style="text-align: left;">2026-12-02</td>
+<td style="text-align: left;">Unit IV. Neural Methods: Transformers – Robots in Disguise</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">14</td>
 <td style="text-align: left;">2026-12-07</td>
-<td style="text-align: left;">Lecture #13: A Shallow Introduction to Deep Learning</td>
-<td style="text-align: left;">ISLP §10.1-10.2, 10.6-10.8</td>
+<td style="text-align: left;">Student Presentations I</td>
+<td style="text-align: left;"></td>
 <td style="text-align: left;">2026-12-09</td>
-<td style="text-align: left;">Test II: Classification, Ensemble Methods, and Deep Learning</td>
+<td style="text-align: left;">Student Presentations II</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
@@ -422,6 +423,27 @@ ul.task-list li input[type="checkbox"] {
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
+<td style="text-align: left;">
+<a href="./problem_sets/ps04.html">Problem Set #4 Due</a> due on 2026-12-18 at 5:00pm</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: left;">Finals Period
+</td>
+<td colspan="6" style="text-align:center">
+<p>
+Final Report due 2026-12-23 (Tentative)
+</p>
+
+<p>
+Final Grades posted by 2027-01-04
+</p>
+</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
 <td style="text-align: left;"></td>
 </tr>
 </tbody>
@@ -429,7 +451,11 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>All syllabus and schedule provisions subject to change with suitable advance notice. Changes will be announced in class and posted on Canvas.</strong></p>
 
 
-</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>If it turns out to be possible to have all students present in a single class period, presentations will be on the <em>Wednesday</em> and Monday will be used for a special topics lecture. This will be announced as we get closer to the end of the semester.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Any pages after the first 8 will be discarded and not graded.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
