@@ -144,16 +144,16 @@ many of the most useful methods of modern machine learning.
 
 [Lenny Aharon](https://lennyaharon.github.io/index.html)
 
-- Office Hours: TBD
-- Location: Virtual (Zoom)
+- Office Hours: Thursdays 8:30-9:30am 
+- Location: Virtual (Zoom - Link Distributed via Courseworks)
 - Email: <lenny.aharon@columbia.edu>
 
 ### Asynchronous Support
 
 In addition to office hours, asynchronous support will be available via
 the course Ed Discussion board. The Course Staff will endeavor to reply to
-student posts within **two business days**, so plan to ask questions well in advance
-of any tests or homework due dates. 
+student posts within **two business days**, so plan to ask questions well in 
+advance of any tests or homework due dates. 
 
 ## Textbooks & Course Materials
 
