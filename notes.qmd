@@ -1,0 +1,79 @@
+---
+title: "{{< var course.short >}} - Handouts and Additional Notes"
+aliases:
+    - "./notes/index.html"
+date: "`r Sys.Date()`"
+language: 
+  title-block-published: "Last Updated"
+---
+
+Supplemental course notes and links to useful external resources will be
+posted here. These will be updated repeatedly throughout the semester without
+fanfare, so please check here often.
+
+Note that the course notes posted here are not guaranteed to cover all topics
+discussed in class. Students are responsible for topics discussed in class or
+in the assigned readings even that material is not also covered in these notes.
+
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+library(glue)
+
+notes_link <- function(N){
+    fname <- sprintf("./notes/notes%02g.qmd", N)
+    
+    lecture_name <- read_csv("key_dates.csv") |> 
+            filter(Item == "Class Session", 
+                   Number == N) |> 
+            pull(Details) |> 
+            str_extract("Unit .*\\. .*: (.*)", group=1)
+        
+        lecture_date <- read_csv("key_dates.csv") |> 
+            filter(Item == "Class Session", 
+                   Number == N) |> 
+            pull(Date) |> 
+            strftime("%A %B %d")
+        
+        if(is.na(lecture_name)){
+            lecture_name <- read_csv("key_dates.csv") |> 
+            filter(Item == "Class Session", 
+                   Number == N) |> 
+            pull(Details)
+        }
+    
+    if(file.exists(fname) & file.info(fname)$size > 375){
+        sprintf("[Lecture #%02g](%s): %s - %s", N, fname, lecture_name, lecture_date)
+    } else {
+        sprintf("Lecture #%02g [Not Yet Posted]: %s - %s", N, lecture_name, lecture_date)
+    }
+}
+
+N <- 0
+```
+
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+- `r N <- N+1; notes_link(N)`
+

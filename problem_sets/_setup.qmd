@@ -1,0 +1,27 @@
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(tidyverse)
+get_ps_assigned <- function(N=ps){
+    read_csv("key_dates.csv") |> 
+        filter(Item == "Homework", 
+               Number == N, 
+               str_detect(Details, "Released")) |>
+        pull(Date) |>
+        format("%A %B %d")
+}
+
+get_ps_due <- function(N=ps){
+    read_csv("key_dates.csv") |> 
+        filter(Item == "Homework", 
+               Number == N, 
+               str_detect(Details, "Due")) |>
+        pull(Date) |>
+        format("%A %B %d at 5:00PM on Gradescope")
+}
+```
+
+- Problem Set Assigned: `r get_ps_assigned(ps)`
+- **Due Date: `r get_ps_due(ps)`**

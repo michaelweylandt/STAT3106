@@ -1,0 +1,279 @@
+---
+title: "{{< var course.short >}} - Course Prediction Competition"
+---
+
+```{r}
+#| echo: false
+mtime_ods <- fs::file_info("key_dates.ods")$modification_time
+mtime_csv <- fs::file_info("key_dates.csv")$modification_time
+if(mtime_ods > mtime_csv){
+  system("soffice --convert-to csv key_dates.ods")
+}
+```
+
+```{r}
+#| message: false
+#| echo: false
+library(tidyverse)
+COMPETITION_START <- read_csv("key_dates.csv") |>
+    filter(Item == "Prediction Competition") |>
+    filter(str_detect(Details, "Opened")) |> 
+    pull(Date) |> 
+    strftime("%A %B %d, %Y")
+
+COMPETITION_ENDS <- read_csv("key_dates.csv") |>
+    filter(Item == "Prediction Competition") |>
+    filter(str_detect(Details, "Closed")) |> 
+    pull(Date) |> 
+    strftime("%A %B %d, %Y")
+
+
+REPORT_DUE <- read_csv("key_dates.csv") |>
+    filter(Item == "Prediction Competition") |>
+    filter(str_detect(Details, "Report")) |> 
+    mutate(dt = as.POSIXct(paste(Date, "23:59pm"))) |> 
+    pull(dt) |> 
+    strftime("%A %B %d, %Y at %H:%M %p")
+```
+
+In lieu of a final exam, {{< var course.short >}} has a prediction competition
+worth 40% of your final grade. The 400 total points associated with this 
+competition will be awarded as:
+
+- 300 points: Prediction Accuracy
+- 100 points: Final report 
+
+::: {.callout-important title="Use only Provided Information"}
+
+You **may not** use any external data beyond what the instructor provides.
+You will be required to attest to this in your final submission. 
+Students found to use data outside instructor-provided files will receive
+a zero on _all_ grades related to the course competition and will likely fail
+the course as a result.
+
+You may read published research about predictors of student success to gain
+*qualitative* background information, but you may not access their data. 
+You will be required to cite all background reading in your final report.
+
+:::
+
+## Background
+
+Relevant background for the competition will be posted by `r COMPETITION_START`.
+
+## Data
+
+Data files for the competition will be posted by `r COMPETITION_START`.
+
+## Example Predictions {#example_submission}
+
+Example scripts illustrating the use of the training data to create predictions
+and suitable formatting for Kaggle submission will be posted 
+by `r COMPETITION_START`. 
+
+## Grading
+
+### Prediction Accuracy (300 Points)
+
+Prediction accuracy will be assessed using *Kaggle Competitions*. I will
+provided Kaggle with a private test set on which your predictions will be
+evaluated. Kaggle will further divide the test set into a *public leaderboard*
+and a *private leaderboard*. You will be able to see your accuracy on the
+public leaderboard but final scores will be based on *private leaderboard*
+accuracy so *don't overfit*. 
+
+You will be allowed to submit only *two* sets of predictions to Kaggle per day
+so use them wisely. At the end of the competition, you will be able to select
+**two** sets of predictions to be used for your final evaluation (taking the
+better of the two) so track your submissions carefully. 
+
+**Kaggle will close for submissions at 11:55pm on `r COMPETITION_ENDS` 
+for this class. Make sure your final submissions have been made in time.**
+
+#### Grading
+
+Grades for this portion will be assigned based on your performance relative
+to both the instructor provided baselines (above) and the best score obtained by
+your fellow students.
+
+In particular, the top score in the class will get a score of 300 automatically.
+More details about the scoring formula will be provided when the competition
+opens on `r COMPETITION_START`.
+
+### Final Report (100 Points)
+
+By `r REPORT_DUE`, each competition unit (either an individual or a team) will
+submit a final report of no more than 10 pages (10-12 point, one-and-a-half or
+double-spaced) providing an *After-Action Report* of their competition 
+performance. This report should focus on three topics: 
+
+- 1) Are there any systematic errors in model predictions that need to be 
+  addressed before this model could be applied broadly. (*E.g.*, is it 
+  systmatically low or high in a particular subgroup; does it under-predict for 
+  especially high outcome samples; etc?)
+- 2) What insights into the underlying data can be gleaned from the model? 
+     *E.g.*, are certain features especially important for making predictions? 
+     Or are certain features which you would expect to be important not actually
+     particularly important? 
+- 3) What steps did your team take that were particularly helpful to maximizing
+     predictive performance? Or, what parts of your model development cycle were
+     weak and could be the most improved?[^selfeval] 
+
+[^selfeval]: In this 'self-evaluation' section, you are encouraged to be 
+truthful and honest in your reflections. I already know how well you did and 
+you won't be able to convince me otherwise, so if you made fundamental errors 
+that hindered your performance, I would rather see them discussed honestly 
+(indicating understanding of how you could improve) rather than minimized. 
+
+Note that this report is not solely focused on predictive performance. Analysis
+that dives deep into the underlying structure of the data and generates
+novel insights will score as well (or perhaps even better) than a highly 
+performant but noninterpretable model. 
+
+To assist in developing this After-Action Report, the instructor will provide
+non-anonymized versions of the data (as well as a mapping to the anonymized data)
+after the Kaggle competition ends. 
+
+The report should include all code used to prepare the data and train and predict
+from the best performing models in an Appendix. Significant penalties may be 
+applied if the course staff is unable to reliably reproduce your predictions. 
+(You may choose to submit this Appendix in the form of an iPython Notebook, 
+Quarto document, Docker container, *etc* to maximize reproducibility.) This
+appendix does not count against your 10 page limit.
+
+You may, but are not required to, share your code with the instructor via
+an emailed Zip file or link to a public code hosting platform such as GitHub.
+
+::: {.callout-tip title="Reproducibility Info"}
+
+To maximize the reproducibility of your code, make sure to: 
+
+1) Avoid hard-coding any file paths. It is better to download and/or read
+   directly from hosted copies whenever possible. 
+2) Save random seeds used to create data splits, initialize training, *etc.*
+3) List all software and packages used, *including version information.*
+4) Have a clear set of 'reproduction steps' and accompanying documentation.
+
+:::
+
+Teams of two should both submit a copy of their final report. The instructor
+will de-duplicate submissions.
+
+The report will *roughly* be assessed acccording to the following rubric though
+the instructor may deviate as necessary. 
+
+::: {.list-table width="1,1,1,1,1,1" aligns="c,c,c,c,c,c" header-rows=1 .hover}
+
+ * - Report Element
+   - Excellent. <br> "A-" to "A" (`90% to 100%`)
+   - Great. <br> "B-" to "B+" (`80% to 89%`)
+   - Average. <br> "C" to "C+" (`73% to 79%`)
+   - Poor. <br> "D" to "C-" (`60% to 72%`)
+   - Failure. <br> "F" (`0% to 59%`)
+ * - Quality of Report (15 points)
+   - Excellent Report. Report has excellent writing and formatting, with 
+     particularly effective tables and figures. Tables and Figures are
+     "publication-quality" and clearly and succinctly support claims made in 
+     the body text. Text is clear and compelling throughout. 
+   - Great Report. Report has strong writing formatting. Text is generally clear,
+     but has multiple minor weaknesses or one major weakness; tables and figures
+     make their intended points, but do not do so optimally. 
+   - Solid Report. Report exhibits solid written communication, key points are
+     made understandably and any grammatical errors do not impair
+     understanding. Code, results, and text could be better integrated, 
+     but it is clear which elements relate. Formatting is average; tables and 
+     figures do not clearly support arguments made in the text and/or are not
+     "publication quality".
+   - Poor Report. Written communication is below standard: points are not always
+     understandable and/or grammatical errors actively distract from
+     content. Code, results, and text are not actively integrated, but
+     are generally located 'near' each other in a semi-systematic fashion.
+     Poor formatting distracts from substance of report. Tables and
+     Figures exhibit significant deficiencies in formatting.
+   - Unacceptable Report. Written communication is far below standard, possibly
+     bordering on unintelligible. Formatting prohibits or significantly impairs
+     reader understanding.
+ * - Analysis of Predictive Accuracy (10 points)
+   - Excellent Analysis. Team is able to clearly identify strengths and 
+     weaknesses of their model and to propose extensions / next steps that
+     could use de-anonymized structure to further improve model performance. 
+   - Great Analysis. Team identifies strengths and weaknesses of their model, 
+     but without clear 'next steps' for model improvement.
+   - Solid Analysis. Accuracy analysis successfully identifies patterns of 
+     error, but does not connect these to modeling. 
+   - Poor Analysis. Accuracy analysis attemps to identify patterns of error, 
+     but fails to distinguish _systematic_ error from randomness. 
+   - Unacceptable Analysis. Accuracy analysis is superficial and does not
+     take advantage of data structure in a meaningful way. 
+ * - Model-Driven Insights into Data Generating Process (10 points)
+   - Excellent Insights. Modeling process creates significant new insights into
+     the economics of real property assessment. Insights are then used to 
+     further improve predictive modelling in a virtuous cycle. 
+   - Great Insights. Modeling process creates significant new insights into
+     the economics of real property assessment, but insights do not improve
+     predictive modeling. 
+   - Solid Insights. Modeling process creates new non-trivial insights, but 
+     not ones that have major impact on predictive performance. (*E.g.*, 
+     grey houses have a much higher chance of having rooftop solar than other
+     house colors because grey was the most popular 'builder spec color' by
+     the time that residential solar became commonplace. Interesting, but not
+     especially helpful.)
+   - Poor Insights. Modeling process only reproduces known / trivial insights
+     about data generating process (*e.g.*, bigger houses are worth more than
+     smaller houses *ceteris paribus*).
+   - Unacceptable Insights. No attempt is made at generating meaningful insights
+     from models. 
+ * - Reflection on Competition Workflow (10 points)
+   - Excellent Reflection. Clear identification of all important good and bad
+     decisions made over the course of the competition, with insightful 'take 
+     aways' that can be used by self and other teams to significantly improve
+     performance on future prediction tasks. Importance of key decisions is
+     clearly demonstrated. 
+   - Great Reflection. Impressive reflection on key decisions (good and bad)
+     made over the course of the competition. 'Take Away' messages would be 
+     useful if this competition were re-run as is (or with minor changes) but
+     do not necessarily generalize to other similar tasks. Importance of key
+     decisions is partially demonstrated. 
+   - Solid Reflection. Reflection on key decisions identifies major 
+     choices made throughout competition, but fails to fully analyze
+     their impact. 'Take away' messages are useful, but generic and not 
+     particularly relevant to this course or this competition. (*E.g.*, advice
+     on the best way to tune the lasso) Minimal effort to demonstrate importance
+     of key decisions. 
+   - Poor Reflection. Reflection seems to miss one or more major choices made
+     over the course of the semester OR attributes too much importance to an 
+     unimportant decision. Fails to demonstrate importance of key decisions.
+     'Take away' messages are of limited general applicability.
+   - Unacceptable Reflection. Minimal or shallow reflection. 'Take away' 
+     messages are trivial or misleading. 
+ * - Reproduction Code (5 points)
+   - Excellent Reproduction Code. Code is easy to read and execute, with excellent
+     commenting, formatting, *etc.* and clearly reproduces submitted predictions.
+   - Great Reproduction Code. Code is easy to read, but requires some effort
+     to execute and reproduce submitted predictions. 
+   - Solid Reproduction Code. Code lacks clarity, but still appears to reproduce
+     submitted predictions with reasonable effort. 
+   - Poor Reproduction Code. Instructor cannot reproduce submitted predictions
+     without significant effort. 
+   - Unacceptable Reproduction Code. Code cannot reproduce submitted predictions.
+   
+:::
+
+At the end of your report, you **must** include a detailed description of the 
+extent to  which you used Generative AI tools in this course competition or in
+preparation of your final report. Failure to include an AI disclosure will 
+result in an **automatic 25% penalty.**
+
+Recall that Generative AI **may not** be used for writing your final report;
+it may only be used for coding assistance.
+
+## Teams
+
+Students *may*, but are not required to, work in teams of 2 for this competition.
+Teams will submit one (shared) final presentation and final report and will 
+receive the same grade for **all course elements**. Students will create teams
+*via* Kaggle's team functionality. 
+
+Teams may be formed at any point in the competition. Teams will not be allowed
+to dissolve except under truly exceptional circumstances. (Unequal participation
+is sadly not an exceptional circumstance.)

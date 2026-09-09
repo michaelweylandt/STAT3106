@@ -1,0 +1,4 @@
+title: "Notes for Lecture #{{< meta notes_num >}}: {{< meta notes_title >}}"
+language:
+  title-block-published: "Last Updated"
+engine: knitr

@@ -1,0 +1,160 @@
+---
+title: "{{< var course.short >}} - {{< var course.title >}}"
+format: "html"
+---
+
+```{r}
+#| echo: false
+mtime_ods <- fs::file_info("key_dates.ods")$modification_time
+mtime_csv <- fs::file_info("key_dates.csv")$modification_time
+if(mtime_ods > mtime_csv){
+  system("soffice --convert-to csv key_dates.ods")
+}
+```
+
+Welcome to the course website for {{< var course.short >}}  - 
+{{< var course.title >}} ({{< var course.semester >}})!
+
+{{< var course.short >}} is a rigorous, but non-mathematical introduction to
+classical and modern machine learning techniques, with a focus on their 
+statistical foundations. Building on a foundation of classical linear and 
+logistic regression models, core principles of modern statistical learning will 
+be covered: cross-validation, resampling methods, regularization, model 
+selection, ridge and lasso regression, margin-based classifiers, semi-parametric
+and kernel methods, tree-based methods, ensemble methods and neural networks. 
+The primary focus of this course will be on the implementation and application 
+of these methods, not formal theory. 
+
+Students will complete the course with a strong conceptual understanding the 
+fundamentals of statistical machine learning and a practical understanding of 
+many of the most useful methods of modern machine learning. 
+
+On this site, you will find useful material including: the 
+[Course Syllabus](./syllabus.qmd), [Problem Sets](./problem_sets.qmd), 
+[Instructor Notes and Handouts](./notes.qmd), and details of the 
+[Applied Final Exam (Course Competition)](./competition.qmd). Copies of each
+of these documents can be found on our Courseworks page. 
+
+There are quite a few moving parts to this course, so this [key dates file](./key_dates.csv)
+or the list of upcoming course activities below may be useful:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(yaml)
+library(glue)
+library(tidyverse)
+if(file.exists("_variables.yml")){
+    variables <- read_yaml("_variables.yml")
+} else {
+    variables <- read_yaml("https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/_variables.yml")
+}
+course_short <- variables$course$short
+
+read_csv("key_dates.csv") |> 
+    filter(Item %in% c("Class Session", 
+                       "Homework", 
+                       "No Class", 
+                       "Prediction Competition")) |>
+    group_by(Item) |> 
+    mutate(Details = case_when(
+      Item == "Class Session" ~ paste0("Lecture #", row_number(), ": ", Details), 
+      TRUE ~ Details)) |>
+    ungroup() |> 
+    arrange(Date) |> 
+    mutate(Date = strftime(Date, "%a %b %d")) |>
+    select(-Item, -Number, -`Day of Week`) |>
+    DT::datatable(options=list(searching=FALSE,
+                               paging=TRUE,
+                               lengthChange=FALSE,
+                               ordering=FALSE),
+                  style='bootstrap',
+                  caption=glue("Upcoming Important Dates for {course_short}"))
+```
+
+<script defer>
+window.addEventListener("load", function(){
+  var filter_date = new Date();
+  filter_date.setDate(filter_date.getDate() - 1);
+  var filter_string = filter_date.toISOString().split('T')[0]
+  $("table").DataTable().rows((idx, data) => data[4] < filter_string).remove().draw();
+});
+</script>
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+library(tidyverse)
+## Generate Google Calendar Formatted CSV for Student Events
+DATES <- read_csv("key_dates.csv")
+
+ROOM <- "Hamilton Hall 602"
+START <- "10:10 AM"
+END <- "11:25 AM"
+
+library(yaml)
+location <- read_yaml("_variables.yml")$course$location
+course   <- read_yaml("_variables.yml")$course$short
+
+`%rep_na%` <- function(x, y) ifelse(is.na(x), y, x)
+
+### i) Lectures
+LECTURES <- DATES |>
+    filter(Item == "Class Session") |>
+    mutate(Subject=paste0(course, "Lecture", Number, ": ", Details),
+           `Start Date` = Date,
+           `Start Time` = START,
+           `End Date` = Date,
+           `End Time` = END,
+           `All Day Event` = "False",
+           `Location` = ROOM) |>
+    select(Subject, starts_with("Start"), starts_with("End"), `All Day Event`, Location)
+
+### ii) Assignments
+ASSIGNMENTS <- DATES |>
+    filter(Item == "Homework") |>
+    mutate(Subject = paste0(course, ": ", Details),
+           `Start Date` = Date,
+           `Start Time` = if_else(str_detect(Details, "Due"), "4:45 PM", NA),
+           `End Date` = Date,
+           `End Time` = if_else(str_detect(Details, "Due"), "5:00 PM", NA),
+           `All Day Event` = if_else(str_detect(Details, "Released"), "True", "False"),
+           `Location` = if_else(str_detect(Details, "Due"), "Gradescope", NA)) |>
+    select(Subject, starts_with("Start"), starts_with("End"), `All Day Event`, Location)
+
+
+### iii) Course Competition Elements
+COMPETITION <- DATES |>
+    filter(Item == "Prediction Competition") |>
+    mutate(Subject=paste0(course, ": ", Details),
+           `Start Date`= Date,
+           `Start Time`= if_else(str_detect(Details, "Due"), "11:30 PM", NA),
+           `End Date`= Date,
+           `End Time`= if_else(str_detect(Details, "Due"), "11:55 PM", NA),
+           `All Day Event` = if_else(str_detect(Details, "Due"), "False", "True"),
+           Location = if_else(str_detect(Details, "Due"), "Gradescope", NA)) |>
+    select(Subject, starts_with("Start"), starts_with("End"), `All Day Event`, Location)
+
+### iv) Midterm
+MIDTERM <- DATES |>
+    filter(Item == "Midterm Exam") |>
+    mutate(Subject=paste(course, "Midterm Exam: ", Details),
+           `Start Date` = Date,
+           `Start Time` = START,
+           `End Date` = Date,
+           `End Time` = END,
+           `All Day Event` = "False",
+           `Location` = ROOM) |>
+    select(Subject, starts_with("Start"), starts_with("End"), `All Day Event`, Location)
+
+bind_rows(LECTURES, ASSIGNMENTS, COMPETITION, MIDTERM) |>
+    arrange(`Start Date`) |>
+    write_csv("key_dates_students_gcal.csv")
+```
+
+A CSV file suitable for import into Google Calendar with all assignment deadlines
+can be found [here](./key_dates_students_gcal.csv).
+
+Instructor: [Michael Weylandt](https://michael-weylandt.com)

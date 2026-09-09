@@ -1,0 +1,380 @@
+---
+notes_num: "`r n <- knitr::current_input() |> stringr::str_extract('notes([:digit:]+).(qmd|rmarkdown)', group=1) |> as.integer(); sprintf('%02g', n)`"
+date: "`r Sys.Date()`"
+notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Class Session', Number == n) |> dplyr::pull(Details)`"
+---
+
+{{< include _latex_defines.qmd >}}
+
+Outline: 
+
+- Course Logistics
+- What is Statistical Machine Learning?
+- ML Taxonomy
+- Overture
+
+--- 
+
+
+## Statistical Machine Learning
+
+In this course, we focus on *(statistical) machine learning*, so defining
+machine learning seems a reasonable place to start. 
+
+A search of the literature suggests several different definitions of machine
+learning[^gemini]:
+
+- "The field of study that gives computers the ability to learn without being
+   explicitly programmed." Arthur Samuel (1959)
+- "The goal of machine learning is to find a function $f: \Xcal \to \Ycal$
+   that minimizes the expected risk $R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]$
+   given only a sample $\{(X_i, Y_i)\}_{i=1}^n$ of observations from an
+   unknown joint distribution $\Dcal$" 
+- "A computer program is said to learn from experience $E$ with respect to some
+   class of tasks $T$ and performance measure $P$, if its performance at tasks
+   in $T$, as measured by $P$, improves with experience $E$". (Mitchell, 1997)
+
+   
+Clearly, none of these are fully comprehensive, but they each add some useful 
+flavor. 
+
+[^gemini]: As of last update, I used Gemini to get the wording and citations
+for these quotes, but I have not verified them myself, so these may not be
+100% accurate. Regardless, the broader characterizations of ML remain accurate.
+
+
+### AS Definition
+
+> "The field of study that gives computers the ability to learn without being
+   explicitly programmed." Arthur Samuel (1959)
+   
+Arthur Samuel is credited with inventing the term "machine learning". His 
+definition is a bit circular - replacing the term "machine" with "computers" - 
+but the final phrase is essential: "without being explicitly programmed." 
+
+Much of Arthur Samuel's pioneering work on ML was directed towards building a
+game engine for [checkers](https://en.wikipedia.org/wiki/Checkers). While a
+simple game - at least as compared to Chess or Go - Checkers still admits an
+enormous number of _enormous_ number of possible configurations[^checkers] and
+the idea of coding up the _optimal_ move - or even a strong move - in every
+one of those scenarios was utterly impossible. 
+
+Samuel's insight was to write an 'approximation algorithm' within his program
+that would attempt to 'think through' the right set of moves in any scenario.
+The language of 'think through' has gotten us back to the anthropomorphizing
+language we wanted to avoid, so we can be a bit more precise: Samuel's algorithm
+was a _search_ algorithm that would enumerate all[^all] possible sequences of 
+the next set of $k$ moves and pick the move that resulted in the best position 
+for the player $k$ moves from now; here "best" was defined by a function that 
+captured the player's relative advantage over the opponent.[^chess] 
+
+While this approach still required some serious know-how about both checkers
+and programming, it still represented a significant step forward over older
+decision systems that attempted to 'hard code' every possible scenario. 
+
+Samuel's general strategy--designing a way for the computer to 'logically think 
+through' a problem, rather than simply hard-coding the answers--was incredibly 
+influential on early ML. Indeed, generations of AI researchers attempted to do
+this for ever more complex domains. In some fields, notably 'games' like checkers
+or later chess, 'search' techniques proved quite effective; in other fields, 
+ML researchers attempted to feed a bunch of facts into a system and to use the
+basic rules of propositional logic to 'solve' for the right answer. *E.g.*, a 
+medical assistant would have a series of yes/no questions that would attempt
+to settle on the right diagnosis for a patient. For certain simple domains, this
+type of _expert system_ could work well, but it generally struggled to deal with
+domains that were very complicated (actual medical diagnoses) or not easily
+expressed in simple decision rules (facial recognition). 
+
+The Samuels lineage assumed that the ML system could be built off the 
+programmer's pre-existing understanding of the problem space. For ML to have its
+next leap forward, tools were needed that could attempt to learn about the world
+directly, instead of piggybacking off human intuition. 
+
+[^checkers]: Over 500 _quadrillion_ by one estimate. See
+<https://doi.org/10.1126/science.1144079>. 
+
+[^all]: More precisely, it didn't look through _all_ possible $k$-steps forward;
+if one move clearly moved things severely against the player, the program would
+'cut off' that part of the search. 
+
+[^chess]: If you ever learned chess, you might have learned that different 
+pieces have different 'point values.' These points aren't relevant to winning
+or losing the game, but they let you put a number on why having a queen and a
+rook is better than having two bishops. Samuel's custom checkers score did
+something similar. 
+
+### Risk Minimization Definition
+
+> "The goal of machine learning is to find a function $f: \Xcal \to \Ycal$
+  that minimizes the expected risk $R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]$
+  given only a sample $\{(X_i, Y_i)\}_{i=1}^n$ of observations from an
+  unknown joint distribution $\Dcal$" 
+  
+Our next definition of ML focuses on learning _from noisy data_, an inherently 
+_statistical_ task. In this paradigm, we have some data, typically with inputs
+we call $X$ and outputs we call $Y$ and we want to learn the relationship
+between the two. In particular, we emphasize the _prediction_ task: given a 
+new, never-before-seen $\tilde{X}$, what do we _expect_ $\tilde{Y}$ to be?
+
+In this framework, our aim is to find a _predictor_ function $f(\cdot)$ such
+that $f(\tilde{X})$ will typically be 'close to' $\tilde{Y}$. To make this
+mathematically rigorous, we use a loss function $L(\text{guess}, \text{truth})$
+that puts a number on how good our guess was.[^min] Of course, we want to be 
+(nearly) correct regularly, ideally all of the time, so we don't just look at
+a single $\tilde{X}$, but we instead take an _average_ over many 
+$(\tilde{X}, \tilde{Y})$ pairs to smooth out any randomness. 
+
+This introduces a new element to our ML discourse: a 'new' set of points that
+we can use to _evaluate_ the performance of our predictor $f$. This new set of
+points is conventionally called the _test_ set and our performance of $f$ on the
+test set is its _test error_. A useful predictor will be one with small test 
+error.
+
+Of course, we haven't talked about where our predictor $f$ will come from. As we
+will see later, it is often found by picking an $f$ that would have done well
+on some other data, typically called the _training_ data. We'll come back to 
+this in a few days, but for now, it's important to see that there are two 
+data-driven steps: 
+
+- _training_ where we use data to pick a (hopefully good) predictor $f$
+- _testing_ where we use data to see how well a given $f$ actually performs
+
+Notably, unlike AS, we don't necessarily just 'write down' $f$ and hope it works.
+Instead, we try out several different $f$ on the training set and pick the 'best'
+one. As we will see later, this is generally done by picking an $f$ that is 
+'best' on the training set. As with AS, we're not 'hard coding' the
+final decision function, but we're instead deciding _how_ that decision
+is made: AS used a clever 'try it all' approach to maximize a specific outcome,
+in the statistical paradigm, we use the 'meta decision' of 'pick the $f$ that
+does best on the training data.'
+
+Our hope is that a predictor that is good in testing (based on the past data 
+we have already collected) will perform well in testing (when sent 'out into the
+world' to encounter new data). It's not obvious that this should work![^hume]
+
+This approach relies on a _strong_ assumption: that the future will not be
+too dissimilar to the past. This can be formalized, typically using the "IID" 
+concept you might have seen in a previous course, but this is still an important
+'load bearing' assumption. A model trained, *e.g.*, to predict health outcomes
+based on Sweedish administrative data, might struggle to perform to predict
+health outcomes for a sub-Saharan population, where the underlying medical 
+problems are quite different. 
+
+In this approach to ML, continuous _monitoring_ and _evaluation_ of a deployed
+predictor is important to make sure that the population doesn't shift (too much).
+
+To re-emphasize here, we never really hope to make _perfect_ predictions of the
+future - the world is much too hard for that - but we get a sense of how well
+a model has performed in the past and, if that's within some acceptable engineering
+tolerance, we go forward with that, keeping an eye on things to make sure nothing
+goes off the rails.
+
+This is the paradigm we will work within for most of this course, and it 
+represents the core of the _statistical_ approach to ML. We're learning from
+noisy data and we use statistical techniques to characterize the performance
+and reliability of any particular procedure. 
+
+This paradigm has been _incredibly_ successful in practice: it allows us to 
+learn patterns (hopefully beyond those we can just 'reason out') from large
+data sets and provides a robust and reliable way of building predictive models.
+As data sets get bigger and computers more powerful, we are able to use 
+ever-more-complex predictors and develop ever-more-powerful systems. 
+
+While this paradigm works quite well for 'simple' predictions - and has a 
+surprising degree of mathematical elegance to it - it's less obvious how it
+can be used for other things we might want AI to do: generating text, self-driving,
+*etc.* where there is no canonical _right_ answer. 
+
+This suggests we might consider a more general definition. 
+
+[^hume]: This is (roughly) the famous problem of _induction_ in philosophy. 
+See the work of David Hume and many, many others. 
+
+[^min]: Conventionally, we focus on _loss_ (or error) _minimization_, instead of
+_accuracy maximization_, but it's really just a sign convention. So we want
+$L(\cdot, \cdot)$ to take on _small_ values. 
+
+### Mitchell's Definition
+
+> "A computer program is said to learn from experience $E$ with respect to some
+  class of tasks $T$ and performance measure $P$, if its performance at tasks
+  in $T$, as measured by $P$, improves with experience $E$". (Mitchell, 1997)
+  
+Legendary ML researcher Tom Mitchell offered the above definition. 
+
+TODO
+
+## A Taxonomy of Machine Learning
+
+Having set up the most high-level definition of machine learning, let's 
+actually start talking about specific types of problems we might encounter. 
+For now, we'll mainly rely on the _prediction centered_ definition 
+(second definition) given above: where classical statistics focuses on learning 
+information about a population from a (representative) sample,  Machine Learning 
+focuses on out-of-sample prediction accuracy. 
+
+For example, given a large set of medical records, the natural
+instinct of a statistician is to find the indicators of cancer in
+order assess them via some sort of follow-on genetic study, while a
+ML practitioner will typically start by building a predictive
+algorithm to predict who will be diagnosed with cancer. The
+statistician will perform calculations with $p$-values, test
+statistics, and the like to make sure that any discovered
+relationship is accurate, while the ML practitioner will verify
+the performance by finding a new (hopefully similar) set of medical
+records to test algorithm performance. 
+
+Clearly, this difference is more one of style than substance: the
+statistician might see what features are important in the ML model to
+decide what to investigate, while the ML modeler will use statistical
+tools to make sure the model is finding something real and not just
+fitting to noise. In this course, the distinction may be even
+blurrier as our focus is *statistical machine learning* - that little
+niche right on the boundary between the two fields. 
+
+In brief, "statistics vs ML" is a bit of a meaningless distinction as
+both fields draw heavily from each other. I tend to say one is *doing
+statistics* whenever the end-goal is to *better understand* something
+about the real world (*ie.*, the end product is *knowledge*), while
+one is *doing ML* whenever one is building a system to be used in an
+automated fashion (*ie.*, the end product is *software*), but
+definitions vary.[^culture]
+
+Both worldviews ultimately do aim to generate actionable knowledge about the 
+world and the future, but their 'bridge' to the future is slightly different:
+
+- Statistics focuses on building an accurate model, which can be used to 
+  generalize via some immutable laws. (Think of the great successes of 19th 
+  and early 20th century science.) Once we know 'how the world works', making
+  predictions - at least on average - is easy.
+- ML takes a bit more of a "Just Do It" approach to making accurate future 
+  predictions. If we have a tool that has worked well in the past, _most_
+  of the time, if things aren't _too bad_, we can expect it to work 
+  _about as well_ going forward. This might feel less precise than the statistics
+  charicature, but it doesn't put the 'model in the middle' and is, hopefully,
+  more robust because of it. 
+  
+Again: these are differences of emphasis, not stark contrasts, but it's good
+to know where everyone is coming from.
+
+[^culture]: There are some cultural differences that come from ML's
+CS history vs Statistics' "Science-Support" history: notably, ML
+folks think of (binary) classification while statisticians think of
+regression as the first task to teach.
+
+### Types of Learning
+
+In this course we will use the following taxonomy borrowed from the
+ML literature: 
+
+- Supervised Learning: Tasks with a well-defined target variable (output)
+that we aim to predict
+
+  Examples: 
+  - Given an image of a car running a red-light, read its license plate.
+  - Given attendance records, predict which students will not pass a course.
+  - Given a cancer patient's medical records, predict whether a certain drug
+    will have a beneficial impact on their health outcomes. 
+  
+- Unsupervised Learning: Given a whole set of variables, none of which is
+  considered an output, learn useful underling structure. 
+
+  Examples: 
+  - Given a set of climate simulations, identify the general trends of a 
+    climate intervention.
+  - Given a set of students' class schedules, group them into sets. (You might
+    imagine these sets correspond to majors, but without that sort of "label" 
+    (output variable) this is only speculative, so we're unsupervised)
+  - Given a social network, identify the most influential users.
+
+There are other types of learning tasks: *e.g.* semi-supervised, online,
+reinforcement, but the Supervised/Unsupervised distinction is the main one
+we will use in this course. 
+
+Within Supervised Learning, we can further subdivide into two major categories:
+
+- Regression Problems: problems where the response (label) is a
+  real-valued number
+- Classification Problems: problems where the response (label) is a
+  category label.
+  
+  - Binary classification: there are only two categories
+  - Multi-way or Multinomial classification: multiple categories
+  
+Linear Regression, which we will study more below, is the canonical
+example of a *regression* tool for *supervised* learning.
+
+At this point, you can already foresee one of the (many) terminology
+inconsistencies will will encounter in this course: _logistic regression_
+is a tool for _classification_, not regression. As modern ML is the intersection
+of many distinct intellectual traditions, the terminology is rarely 
+consistent.[^uk]
+
+[^uk]: You may recall the famous quip about the US and the UK: "Two countries,
+separated by a common language."
+
+### Types of Data
+
+It is also worth thinking of the many types of data we might analyze: much of
+remarkable success of modern ML comes from an openness (and willingness) to 
+analyze types of data historically 'out of bounds' (or, at least, not in the 
+mainstream) for classical statistics.
+
+Let's divide this into two axes: i) _organizational_, what is the natural 
+way to store and represent this data on a computer; and ii) _modal_, what 
+"type" of thing is each individual datum. While these are useful questions to
+ask, these are not _fixed_ within a single problem. For instance, if given
+a large text sample (such as doctor's notes on a medical patient), it is possible
+to change this data from "sequence" data (things in a row) to "tabular" data,
+by simply counting the occurence of each word. This transformation is
+sometimes called a "bag-of-words" representation and it is lossy, but it can 
+often still be good enough for many applications: *e.g.*, if the notes have
+the word "cancer" appearing many times, it is a good guess that the patient
+should receive advanced cancer screening; while it is _theoretically_ possible
+that the doctor wrote "no sign of cancer" after each visit, this is unlikely.
+
+This example highlights two ways of arranging data: 
+
+- Tabular Data: this is your classic "spreadsheet"-style data, with rows
+  representing separate observations and columns corresponding to well-defined
+  features. (In [STA 9750](https://michael-weylandt.com/STA9750/), you may have
+  heard this referred to as a "data frame".)
+- Sequence Data: this is data presented as an organized sequence of 'tokens',
+  where the ordering has meaning. Examples of sequence data include natural
+  language (words as tokens), DNA sequence (the four amino acids as tokens), and
+  certain representations of computer signals (0/1 binary). Sequence data is
+  typically characterized by inconsistent length (sentences can be short or long)
+  as opposed to tabular data where we represent observations with fixed-length
+  vectors. 
+  
+Other data structures may include image data (data represented on a 2D grid), 
+3D imaging data (as often occuring in medical imaging), video data (image data
+with an additional time dimension), functional data (where we observe a 
+'function' on a continuous domain, *e.g.*, an audio recording), or even shape
+data (*e.g.*, inferring the malignancy of a strange growth on your skin
+from its _shape_). 
+
+Within these organizational patterns, we can also categorize data by the 
+_modality_ of each datum. We spoke a bit about continuous and binary
+data above (in the context of regression and classification), but you may also
+see ordinal data (rankings, not corresponding to specific values, like 
+survey responses to  "do you strongly agree, agree, slightly agree, *etc.*-type
+questions) and categorical data (where there is a finite set of possible
+unranked answers). Within categorical data, it is often useful to further
+distinguish low-cardinality and high-cardinality problems: low-cardinality refer
+to situations where there are relatively few possible categories
+("summer/fall/winter/spring"); high-cardinality problems are those where the 
+set of values is so impractically large that you can't handle each value 
+separately. It is typical to model text data, such as LLMs, as a 
+high-cardinality problem because, while there is technically a finite set of 
+possible output words from an LLM, the problem of guessing the next LLM output
+doesn't bear too much practical resemblance to a standard yes/no 
+classification.
+
+In this course, we focus on tabular real-valued data, but we will discuss
+extensions to other data where appropriate, particularly in Unit IV when we
+discuss neural approaches. 
+
+## Overture
+
+TODO

@@ -1,0 +1,4 @@
+title: "{{< var course.short >}} Problem Set #{{< meta lab_num >}}"
+format:
+  html:
+    code-link: true

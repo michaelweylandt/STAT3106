@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="dcterms.date" content="2026-09-09">
+<title>Notes for Lecture #01: Course Introduction – STAT 3106</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d0bce4a04b23f422c7b30105ccc472a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">STAT 3106</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href=".././syllabus.html"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href=".././notes.html"> 
+<span class="menu-text">Lecture Notes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href=".././problem_sets.html"> 
+<span class="menu-text">Problem Sets</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href=".././competition.html"> 
+<span class="menu-text">Applied Final Exam</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href=".././resources.html"> 
+<span class="menu-text">Additional Resources and Course Policies</span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li>
+<a href="#statistical-machine-learning" id="toc-statistical-machine-learning" class="nav-link active" data-scroll-target="#statistical-machine-learning">Statistical Machine Learning</a>
+  <ul class="collapse">
+<li><a href="#as-definition" id="toc-as-definition" class="nav-link" data-scroll-target="#as-definition">AS Definition</a></li>
+  <li><a href="#risk-minimization-definition" id="toc-risk-minimization-definition" class="nav-link" data-scroll-target="#risk-minimization-definition">Risk Minimization Definition</a></li>
+  <li><a href="#mitchells-definition" id="toc-mitchells-definition" class="nav-link" data-scroll-target="#mitchells-definition">Mitchell’s Definition</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#a-taxonomy-of-machine-learning" id="toc-a-taxonomy-of-machine-learning" class="nav-link" data-scroll-target="#a-taxonomy-of-machine-learning">A Taxonomy of Machine Learning</a>
+  <ul class="collapse">
+<li><a href="#types-of-learning" id="toc-types-of-learning" class="nav-link" data-scroll-target="#types-of-learning">Types of Learning</a></li>
+  <li><a href="#types-of-data" id="toc-types-of-data" class="nav-link" data-scroll-target="#types-of-data">Types of Data</a></li>
+  </ul>
+</li>
+  <li><a href="#overture" id="toc-overture" class="nav-link" data-scroll-target="#overture">Overture</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Notes for Lecture #01: Course Introduction</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-right">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Last Updated</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 9, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header><div style="display: none;">
+<p><span class="math display">\[
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+\]</span></p>
+</div>
+<p>Outline:</p>
+<ul>
+<li>Course Logistics</li>
+<li>What is Statistical Machine Learning?</li>
+<li>ML Taxonomy</li>
+<li>Overture</li>
+</ul>
+<hr>
+<section id="statistical-machine-learning" class="level2"><h2 class="anchored" data-anchor-id="statistical-machine-learning">Statistical Machine Learning</h2>
+<p>In this course, we focus on <em>(statistical) machine learning</em>, so defining machine learning seems a reasonable place to start.</p>
+<p>A search of the literature suggests several different definitions of machine learning<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:</p>
+<ul>
+<li>“The field of study that gives computers the ability to learn without being explicitly programmed.” Arthur Samuel (1959)</li>
+<li>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the expected risk <span class="math inline">\(R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</li>
+<li>“A computer program is said to learn from experience <span class="math inline">\(E\)</span> with respect to some class of tasks <span class="math inline">\(T\)</span> and performance measure <span class="math inline">\(P\)</span>, if its performance at tasks in <span class="math inline">\(T\)</span>, as measured by <span class="math inline">\(P\)</span>, improves with experience <span class="math inline">\(E\)</span>”. (Mitchell, 1997)</li>
+</ul>
+<p>Clearly, none of these are fully comprehensive, but they each add some useful flavor.</p>
+<section id="as-definition" class="level3"><h3 class="anchored" data-anchor-id="as-definition">AS Definition</h3>
+<blockquote class="blockquote">
+<p>“The field of study that gives computers the ability to learn without being explicitly programmed.” Arthur Samuel (1959)</p>
+</blockquote>
+<p>Arthur Samuel is credited with inventing the term “machine learning”. His definition is a bit circular - replacing the term “machine” with “computers” - but the final phrase is essential: “without being explicitly programmed.”</p>
+<p>Much of Arthur Samuel’s pioneering work on ML was directed towards building a game engine for <a href="https://en.wikipedia.org/wiki/Checkers">checkers</a>. While a simple game - at least as compared to Chess or Go - Checkers still admits an enormous number of <em>enormous</em> number of possible configurations<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and the idea of coding up the <em>optimal</em> move - or even a strong move - in every one of those scenarios was utterly impossible.</p>
+<p>Samuel’s insight was to write an ‘approximation algorithm’ within his program that would attempt to ‘think through’ the right set of moves in any scenario. The language of ‘think through’ has gotten us back to the anthropomorphizing language we wanted to avoid, so we can be a bit more precise: Samuel’s algorithm was a <em>search</em> algorithm that would enumerate all<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> possible sequences of the next set of <span class="math inline">\(k\)</span> moves and pick the move that resulted in the best position for the player <span class="math inline">\(k\)</span> moves from now; here “best” was defined by a function that captured the player’s relative advantage over the opponent.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>While this approach still required some serious know-how about both checkers and programming, it still represented a significant step forward over older decision systems that attempted to ‘hard code’ every possible scenario.</p>
+<p>Samuel’s general strategy–designing a way for the computer to ‘logically think through’ a problem, rather than simply hard-coding the answers–was incredibly influential on early ML. Indeed, generations of AI researchers attempted to do this for ever more complex domains. In some fields, notably ‘games’ like checkers or later chess, ‘search’ techniques proved quite effective; in other fields, ML researchers attempted to feed a bunch of facts into a system and to use the basic rules of propositional logic to ‘solve’ for the right answer. <em>E.g.</em>, a medical assistant would have a series of yes/no questions that would attempt to settle on the right diagnosis for a patient. For certain simple domains, this type of <em>expert system</em> could work well, but it generally struggled to deal with domains that were very complicated (actual medical diagnoses) or not easily expressed in simple decision rules (facial recognition).</p>
+<p>The Samuels lineage assumed that the ML system could be built off the programmer’s pre-existing understanding of the problem space. For ML to have its next leap forward, tools were needed that could attempt to learn about the world directly, instead of piggybacking off human intuition.</p>
+</section><section id="risk-minimization-definition" class="level3"><h3 class="anchored" data-anchor-id="risk-minimization-definition">Risk Minimization Definition</h3>
+<blockquote class="blockquote">
+<p>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the expected risk <span class="math inline">\(R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</p>
+</blockquote>
+<p>Our next definition of ML focuses on learning <em>from noisy data</em>, an inherently <em>statistical</em> task. In this paradigm, we have some data, typically with inputs we call <span class="math inline">\(X\)</span> and outputs we call <span class="math inline">\(Y\)</span> and we want to learn the relationship between the two. In particular, we emphasize the <em>prediction</em> task: given a new, never-before-seen <span class="math inline">\(\tilde{X}\)</span>, what do we <em>expect</em> <span class="math inline">\(\tilde{Y}\)</span> to be?</p>
+<p>In this framework, our aim is to find a <em>predictor</em> function <span class="math inline">\(f(\cdot)\)</span> such that <span class="math inline">\(f(\tilde{X})\)</span> will typically be ‘close to’ <span class="math inline">\(\tilde{Y}\)</span>. To make this mathematically rigorous, we use a loss function <span class="math inline">\(L(\text{guess}, \text{truth})\)</span> that puts a number on how good our guess was.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> Of course, we want to be (nearly) correct regularly, ideally all of the time, so we don’t just look at a single <span class="math inline">\(\tilde{X}\)</span>, but we instead take an <em>average</em> over many <span class="math inline">\((\tilde{X}, \tilde{Y})\)</span> pairs to smooth out any randomness.</p>
+<p>This introduces a new element to our ML discourse: a ‘new’ set of points that we can use to <em>evaluate</em> the performance of our predictor <span class="math inline">\(f\)</span>. This new set of points is conventionally called the <em>test</em> set and our performance of <span class="math inline">\(f\)</span> on the test set is its <em>test error</em>. A useful predictor will be one with small test error.</p>
+<p>Of course, we haven’t talked about where our predictor <span class="math inline">\(f\)</span> will come from. As we will see later, it is often found by picking an <span class="math inline">\(f\)</span> that would have done well on some other data, typically called the <em>training</em> data. We’ll come back to this in a few days, but for now, it’s important to see that there are two data-driven steps:</p>
+<ul>
+<li>
+<em>training</em> where we use data to pick a (hopefully good) predictor <span class="math inline">\(f\)</span>
+</li>
+<li>
+<em>testing</em> where we use data to see how well a given <span class="math inline">\(f\)</span> actually performs</li>
+</ul>
+<p>Notably, unlike AS, we don’t necessarily just ‘write down’ <span class="math inline">\(f\)</span> and hope it works. Instead, we try out several different <span class="math inline">\(f\)</span> on the training set and pick the ‘best’ one. As we will see later, this is generally done by picking an <span class="math inline">\(f\)</span> that is ‘best’ on the training set. As with AS, we’re not ‘hard coding’ the final decision function, but we’re instead deciding <em>how</em> that decision is made: AS used a clever ‘try it all’ approach to maximize a specific outcome, in the statistical paradigm, we use the ‘meta decision’ of ‘pick the <span class="math inline">\(f\)</span> that does best on the training data.’</p>
+<p>Our hope is that a predictor that is good in testing (based on the past data we have already collected) will perform well in testing (when sent ‘out into the world’ to encounter new data). It’s not obvious that this should work!<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
+<p>This approach relies on a <em>strong</em> assumption: that the future will not be too dissimilar to the past. This can be formalized, typically using the “IID” concept you might have seen in a previous course, but this is still an important ‘load bearing’ assumption. A model trained, <em>e.g.</em>, to predict health outcomes based on Sweedish administrative data, might struggle to perform to predict health outcomes for a sub-Saharan population, where the underlying medical problems are quite different.</p>
+<p>In this approach to ML, continuous <em>monitoring</em> and <em>evaluation</em> of a deployed predictor is important to make sure that the population doesn’t shift (too much).</p>
+<p>To re-emphasize here, we never really hope to make <em>perfect</em> predictions of the future - the world is much too hard for that - but we get a sense of how well a model has performed in the past and, if that’s within some acceptable engineering tolerance, we go forward with that, keeping an eye on things to make sure nothing goes off the rails.</p>
+<p>This is the paradigm we will work within for most of this course, and it represents the core of the <em>statistical</em> approach to ML. We’re learning from noisy data and we use statistical techniques to characterize the performance and reliability of any particular procedure.</p>
+<p>This paradigm has been <em>incredibly</em> successful in practice: it allows us to learn patterns (hopefully beyond those we can just ‘reason out’) from large data sets and provides a robust and reliable way of building predictive models. As data sets get bigger and computers more powerful, we are able to use ever-more-complex predictors and develop ever-more-powerful systems.</p>
+<p>While this paradigm works quite well for ‘simple’ predictions - and has a surprising degree of mathematical elegance to it - it’s less obvious how it can be used for other things we might want AI to do: generating text, self-driving, <em>etc.</em> where there is no canonical <em>right</em> answer.</p>
+<p>This suggests we might consider a more general definition.</p>
+</section><section id="mitchells-definition" class="level3"><h3 class="anchored" data-anchor-id="mitchells-definition">Mitchell’s Definition</h3>
+<blockquote class="blockquote">
+<p>“A computer program is said to learn from experience <span class="math inline">\(E\)</span> with respect to some class of tasks <span class="math inline">\(T\)</span> and performance measure <span class="math inline">\(P\)</span>, if its performance at tasks in <span class="math inline">\(T\)</span>, as measured by <span class="math inline">\(P\)</span>, improves with experience <span class="math inline">\(E\)</span>”. (Mitchell, 1997)</p>
+</blockquote>
+<p>Legendary ML researcher Tom Mitchell offered the above definition.</p>
+<p>TODO</p>
+</section></section><section id="a-taxonomy-of-machine-learning" class="level2"><h2 class="anchored" data-anchor-id="a-taxonomy-of-machine-learning">A Taxonomy of Machine Learning</h2>
+<p>Having set up the most high-level definition of machine learning, let’s actually start talking about specific types of problems we might encounter. For now, we’ll mainly rely on the <em>prediction centered</em> definition (second definition) given above: where classical statistics focuses on learning information about a population from a (representative) sample, Machine Learning focuses on out-of-sample prediction accuracy.</p>
+<p>For example, given a large set of medical records, the natural instinct of a statistician is to find the indicators of cancer in order assess them via some sort of follow-on genetic study, while a ML practitioner will typically start by building a predictive algorithm to predict who will be diagnosed with cancer. The statistician will perform calculations with <span class="math inline">\(p\)</span>-values, test statistics, and the like to make sure that any discovered relationship is accurate, while the ML practitioner will verify the performance by finding a new (hopefully similar) set of medical records to test algorithm performance.</p>
+<p>Clearly, this difference is more one of style than substance: the statistician might see what features are important in the ML model to decide what to investigate, while the ML modeler will use statistical tools to make sure the model is finding something real and not just fitting to noise. In this course, the distinction may be even blurrier as our focus is <em>statistical machine learning</em> - that little niche right on the boundary between the two fields.</p>
+<p>In brief, “statistics vs ML” is a bit of a meaningless distinction as both fields draw heavily from each other. I tend to say one is <em>doing statistics</em> whenever the end-goal is to <em>better understand</em> something about the real world (<em>ie.</em>, the end product is <em>knowledge</em>), while one is <em>doing ML</em> whenever one is building a system to be used in an automated fashion (<em>ie.</em>, the end product is <em>software</em>), but definitions vary.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+<p>Both worldviews ultimately do aim to generate actionable knowledge about the world and the future, but their ‘bridge’ to the future is slightly different:</p>
+<ul>
+<li>Statistics focuses on building an accurate model, which can be used to generalize via some immutable laws. (Think of the great successes of 19th and early 20th century science.) Once we know ‘how the world works’, making predictions - at least on average - is easy.</li>
+<li>ML takes a bit more of a “Just Do It” approach to making accurate future predictions. If we have a tool that has worked well in the past, <em>most</em> of the time, if things aren’t <em>too bad</em>, we can expect it to work <em>about as well</em> going forward. This might feel less precise than the statistics charicature, but it doesn’t put the ‘model in the middle’ and is, hopefully, more robust because of it.</li>
+</ul>
+<p>Again: these are differences of emphasis, not stark contrasts, but it’s good to know where everyone is coming from.</p>
+<section id="types-of-learning" class="level3"><h3 class="anchored" data-anchor-id="types-of-learning">Types of Learning</h3>
+<p>In this course we will use the following taxonomy borrowed from the ML literature:</p>
+<ul>
+<li>
+<p>Supervised Learning: Tasks with a well-defined target variable (output) that we aim to predict</p>
+<p>Examples:</p>
+<ul>
+<li>Given an image of a car running a red-light, read its license plate.</li>
+<li>Given attendance records, predict which students will not pass a course.</li>
+<li>Given a cancer patient’s medical records, predict whether a certain drug will have a beneficial impact on their health outcomes.</li>
+</ul>
+</li>
+<li>
+<p>Unsupervised Learning: Given a whole set of variables, none of which is considered an output, learn useful underling structure.</p>
+<p>Examples:</p>
+<ul>
+<li>Given a set of climate simulations, identify the general trends of a climate intervention.</li>
+<li>Given a set of students’ class schedules, group them into sets. (You might imagine these sets correspond to majors, but without that sort of “label” (output variable) this is only speculative, so we’re unsupervised)</li>
+<li>Given a social network, identify the most influential users.</li>
+</ul>
+</li>
+</ul>
+<p>There are other types of learning tasks: <em>e.g.</em> semi-supervised, online, reinforcement, but the Supervised/Unsupervised distinction is the main one we will use in this course.</p>
+<p>Within Supervised Learning, we can further subdivide into two major categories:</p>
+<ul>
+<li><p>Regression Problems: problems where the response (label) is a real-valued number</p></li>
+<li>
+<p>Classification Problems: problems where the response (label) is a category label.</p>
+<ul>
+<li>Binary classification: there are only two categories</li>
+<li>Multi-way or Multinomial classification: multiple categories</li>
+</ul>
+</li>
+</ul>
+<p>Linear Regression, which we will study more below, is the canonical example of a <em>regression</em> tool for <em>supervised</em> learning.</p>
+<p>At this point, you can already foresee one of the (many) terminology inconsistencies will will encounter in this course: <em>logistic regression</em> is a tool for <em>classification</em>, not regression. As modern ML is the intersection of many distinct intellectual traditions, the terminology is rarely consistent.<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a></p>
+</section><section id="types-of-data" class="level3"><h3 class="anchored" data-anchor-id="types-of-data">Types of Data</h3>
+<p>It is also worth thinking of the many types of data we might analyze: much of remarkable success of modern ML comes from an openness (and willingness) to analyze types of data historically ‘out of bounds’ (or, at least, not in the mainstream) for classical statistics.</p>
+<p>Let’s divide this into two axes: i) <em>organizational</em>, what is the natural way to store and represent this data on a computer; and ii) <em>modal</em>, what “type” of thing is each individual datum. While these are useful questions to ask, these are not <em>fixed</em> within a single problem. For instance, if given a large text sample (such as doctor’s notes on a medical patient), it is possible to change this data from “sequence” data (things in a row) to “tabular” data, by simply counting the occurence of each word. This transformation is sometimes called a “bag-of-words” representation and it is lossy, but it can often still be good enough for many applications: <em>e.g.</em>, if the notes have the word “cancer” appearing many times, it is a good guess that the patient should receive advanced cancer screening; while it is <em>theoretically</em> possible that the doctor wrote “no sign of cancer” after each visit, this is unlikely.</p>
+<p>This example highlights two ways of arranging data:</p>
+<ul>
+<li>Tabular Data: this is your classic “spreadsheet”-style data, with rows representing separate observations and columns corresponding to well-defined features. (In <a href="https://michael-weylandt.com/STA9750/">STA 9750</a>, you may have heard this referred to as a “data frame”.)</li>
+<li>Sequence Data: this is data presented as an organized sequence of ‘tokens’, where the ordering has meaning. Examples of sequence data include natural language (words as tokens), DNA sequence (the four amino acids as tokens), and certain representations of computer signals (0/1 binary). Sequence data is typically characterized by inconsistent length (sentences can be short or long) as opposed to tabular data where we represent observations with fixed-length vectors.</li>
+</ul>
+<p>Other data structures may include image data (data represented on a 2D grid), 3D imaging data (as often occuring in medical imaging), video data (image data with an additional time dimension), functional data (where we observe a ‘function’ on a continuous domain, <em>e.g.</em>, an audio recording), or even shape data (<em>e.g.</em>, inferring the malignancy of a strange growth on your skin from its <em>shape</em>).</p>
+<p>Within these organizational patterns, we can also categorize data by the <em>modality</em> of each datum. We spoke a bit about continuous and binary data above (in the context of regression and classification), but you may also see ordinal data (rankings, not corresponding to specific values, like survey responses to “do you strongly agree, agree, slightly agree, <em>etc.</em>-type questions) and categorical data (where there is a finite set of possible unranked answers). Within categorical data, it is often useful to further distinguish low-cardinality and high-cardinality problems: low-cardinality refer to situations where there are relatively few possible categories (”summer/fall/winter/spring”); high-cardinality problems are those where the set of values is so impractically large that you can’t handle each value separately. It is typical to model text data, such as LLMs, as a high-cardinality problem because, while there is technically a finite set of possible output words from an LLM, the problem of guessing the next LLM output doesn’t bear too much practical resemblance to a standard yes/no classification.</p>
+<p>In this course, we focus on tabular real-valued data, but we will discuss extensions to other data where appropriate, particularly in Unit IV when we discuss neural approaches.</p>
+</section></section><section id="overture" class="level2"><h2 class="anchored" data-anchor-id="overture">Overture</h2>
+<p>TODO</p>
+
+
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>As of last update, I used Gemini to get the wording and citations for these quotes, but I have not verified them myself, so these may not be 100% accurate. Regardless, the broader characterizations of ML remain accurate.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Over 500 <em>quadrillion</em> by one estimate. See <a href="https://doi.org/10.1126/science.1144079" class="uri">https://doi.org/10.1126/science.1144079</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>More precisely, it didn’t look through <em>all</em> possible <span class="math inline">\(k\)</span>-steps forward; if one move clearly moved things severely against the player, the program would ‘cut off’ that part of the search.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>If you ever learned chess, you might have learned that different pieces have different ‘point values.’ These points aren’t relevant to winning or losing the game, but they let you put a number on why having a queen and a rook is better than having two bishops. Samuel’s custom checkers score did something similar.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Conventionally, we focus on <em>loss</em> (or error) <em>minimization</em>, instead of <em>accuracy maximization</em>, but it’s really just a sign convention. So we want <span class="math inline">\(L(\cdot, \cdot)\)</span> to take on <em>small</em> values.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>This is (roughly) the famous problem of <em>induction</em> in philosophy. See the work of David Hume and many, many others.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>There are some cultural differences that come from ML’s CS history vs Statistics’ “Science-Support” history: notably, ML folks think of (binary) classification while statisticians think of regression as the first task to teach.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>You may recall the famous quip about the US and the UK: “Two countries, separated by a common language.”<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/michael-weylandt\.com\/STAT3106\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

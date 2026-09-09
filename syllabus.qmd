@@ -1,6 +1,11 @@
 ---
 title: "STAT UN3106\nApplied Machine Learning"
-date: "Last Updated: `r Sys.Date()`"
+date: "`r Sys.Date()`"
+language: 
+  title-block-published: "Last Updated"
+format:
+  html:
+    email-obfuscation: javascript
 ---
 
 ```{r}
@@ -133,7 +138,7 @@ many of the most useful methods of modern machine learning.
 
 - Office Hours: TBD
 - Location: TBD
-- Email: TBD
+- Email: <rmw2185@columbia.edu>
 
 ### Teaching Assistant(s)
 
@@ -147,7 +152,7 @@ many of the most useful methods of modern machine learning.
 
 In addition to office hours, asynchronous support will be available via
 the course Ed Discussion board. The Course Staff will endeavor to reply to
-student posts within two business days, so plan to ask questions well in advance
+student posts within **two business days**, so plan to ask questions well in advance
 of any tests or homework due dates. 
 
 ## Textbooks & Course Materials
@@ -212,28 +217,7 @@ instructor will provide a sheet of key definitions and formulas.
 
 ### Homework (Methodology)
 
-Four problem sets, each worth a total of 75 points, will be assigned throughout
-the semester. These will cover applications of the methods discussed in class
-to a variety of data sets. Each homework assignment will be submitted online
-through Gradescope.  
-
-Each homework assignment will be due at 5:00pm on Friday, with an automatic 
-grace period lasting until the following Monday at 8:00am. During the grace 
-period, course staff will not typically answer questions, so make sure to ask 
-any questions well in advance of the deadlines. You do not need to request 
-this grace period; it will be automatically applied. 
-
-Other than the standard grace period, no late work will be accepted on any 
-homework outside of **exceptional** circumstances. (Non-hospitalizing 
-illness, extracurricular conflicts, or commitments for other courses are not 
-considered exceptional, so plan ahead.) If you have a foreseeable circumstance
-that you believe warrants an extension, please contact the instructor or the
-TA well in advance; no extensions will be given for foreseeable circumstances
-without specific prior written authorization.
-
-After each assignment is submitted, the instructor or TAs may require students
-to meet and to discuss their submissions. Students who are not able to clearly
-demonstrate understanding of their submissions will be significantly penalized. 
+{{< include _homework_syllabus.qmd >}}
 
 ### Applied Final Exam (Applications)
 

@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://michael-weylandt.com/STAT3106/index.html</loc>
-    <lastmod>2026-08-25T18:15:20.177Z</lastmod>
+    <lastmod>2026-09-08T16:39:19.189Z</lastmod>
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/syllabus.html</loc>
-    <lastmod>2026-09-04T19:36:43.823Z</lastmod>
+    <lastmod>2026-09-08T15:35:10.781Z</lastmod>
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/competition.html</loc>
@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/problem_sets.html</loc>
-    <lastmod>2026-05-08T11:48:24.113Z</lastmod>
+    <lastmod>2026-09-08T16:40:20.212Z</lastmod>
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/labs.html</loc>
@@ -34,11 +34,11 @@
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/notes.html</loc>
-    <lastmod>2026-05-08T22:34:57.595Z</lastmod>
+    <lastmod>2026-09-09T13:45:30.228Z</lastmod>
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/problem_sets/ps01.html</loc>
-    <lastmod>2026-08-25T17:25:24.646Z</lastmod>
+    <lastmod>2026-09-08T15:45:25.733Z</lastmod>
   </url>
   <url>
     <loc>https://michael-weylandt.com/STAT3106/problem_sets/ps03.html</loc>
@@ -51,5 +51,93 @@
   <url>
     <loc>https://michael-weylandt.com/STAT3106/resources.html</loc>
     <lastmod>2026-05-08T11:48:24.113Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes01.html</loc>
+    <lastmod>2026-09-09T13:42:03.890Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes02.html</loc>
+    <lastmod>2026-09-08T17:36:39.375Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes22.html</loc>
+    <lastmod>2026-09-08T17:38:14.315Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes20.html</loc>
+    <lastmod>2026-09-08T17:38:14.314Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes18.html</loc>
+    <lastmod>2026-09-08T17:38:14.313Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes16.html</loc>
+    <lastmod>2026-09-08T17:38:14.312Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes14.html</loc>
+    <lastmod>2026-09-08T17:38:14.311Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes12.html</loc>
+    <lastmod>2026-09-08T17:38:14.311Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes10.html</loc>
+    <lastmod>2026-09-08T17:38:14.309Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes08.html</loc>
+    <lastmod>2026-09-08T17:38:14.308Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes06.html</loc>
+    <lastmod>2026-09-08T17:38:14.307Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes04.html</loc>
+    <lastmod>2026-09-08T17:38:14.305Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes03.html</loc>
+    <lastmod>2026-09-08T17:38:14.289Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes05.html</loc>
+    <lastmod>2026-09-08T17:38:14.306Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes07.html</loc>
+    <lastmod>2026-09-08T17:38:14.308Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes09.html</loc>
+    <lastmod>2026-09-08T17:38:14.309Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes11.html</loc>
+    <lastmod>2026-09-08T17:38:14.310Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes13.html</loc>
+    <lastmod>2026-09-08T17:38:14.311Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes15.html</loc>
+    <lastmod>2026-09-08T17:38:14.312Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes17.html</loc>
+    <lastmod>2026-09-08T17:38:14.313Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes19.html</loc>
+    <lastmod>2026-09-08T17:38:14.314Z</lastmod>
+  </url>
+  <url>
+    <loc>https://michael-weylandt.com/STAT3106/notes/notes21.html</loc>
+    <lastmod>2026-09-08T17:38:14.315Z</lastmod>
   </url>
 </urlset>

@@ -1,0 +1,11 @@
+---
+notes_num: "`r n <- knitr::current_input() |> stringr::str_extract('notes([:digit:]+).(qmd|rmarkdown)', group=1) |> as.integer(); sprintf('%02g', n)`"
+date: "`r Sys.Date()`"
+notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Class Session', Number == n) |> dplyr::pull(Details)`"
+---
+
+{{< include _latex_defines.qmd >}}
+
+Outline: 
+
+--- 

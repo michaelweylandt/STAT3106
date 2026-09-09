@@ -21,8 +21,6 @@ website:
         href: "./syllabus.html"
       - text: "Lecture Notes"
         href: "./notes.html"
-      - text: "Labs"
-        href: "./labs.html"
       - text: "Problem Sets"
         href: "./problem_sets.html"
       - text: "Applied Final Exam"
@@ -39,6 +37,7 @@ format:
     toc_depth: 5
     toc-location: "left"
     page-layout: "full"
+    email-obfuscation: javascript
   live-html:
     theme: darkly
     margin-left: 0em
