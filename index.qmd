@@ -63,7 +63,7 @@ read_csv("key_dates.csv") |>
       TRUE ~ Details)) |>
     ungroup() |> 
     arrange(Date) |> 
-    mutate(Date = strftime(Date, "%a %b %d")) |>
+    #mutate(Date = strftime(Date, "%a %b %d")) |>
     select(-Item, -Number, -`Day of Week`) |>
     DT::datatable(options=list(searching=FALSE,
                                paging=TRUE,
@@ -78,7 +78,7 @@ window.addEventListener("load", function(){
   var filter_date = new Date();
   filter_date.setDate(filter_date.getDate() - 1);
   var filter_string = filter_date.toISOString().split('T')[0]
-  $("table").DataTable().rows((idx, data) => data[4] < filter_string).remove().draw();
+  $("table").DataTable().rows((idx, data) => data[1] < filter_string).remove().draw();
 });
 </script>
 

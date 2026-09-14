@@ -73,7 +73,7 @@ by `r COMPETITION_START`.
 
 ## Grading
 
-### Prediction Accuracy (300 Points)
+### Prediction Accuracy (200 Points)
 
 Prediction accuracy will be assessed using *Kaggle Competitions*. I will
 provided Kaggle with a private test set on which your predictions will be
@@ -93,12 +93,18 @@ for this class. Make sure your final submissions have been made in time.**
 #### Grading
 
 Grades for this portion will be assigned based on your performance relative
-to both the instructor provided baselines (above) and the best score obtained by
-your fellow students.
+to both the instructor provided baselines and the best score obtained by
+your fellow students.[^curve]
 
-In particular, the top score in the class will get a score of 300 automatically.
+In particular, the top score in the class will get a score of 200 automatically.
 More details about the scoring formula will be provided when the competition
 opens on `r COMPETITION_START`.
+
+[^curve]: Note that this is essentially the same as 'curving' the scores so that
+the top-performing student automatically gets a perfect score and other grades
+are raised accordingly. By judging against the best student score, rather than
+an absolute benchmark like '0 error', all students' grades are implicitly 
+raised.
 
 ### Final Report (100 Points)
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-09-14">
 <title>Notes for Lecture #02: Unit I. ML Fundamentals: Review of Linear Regression – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,47 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#a-formal-definition-of-statistical-machine-learning" id="toc-a-formal-definition-of-statistical-machine-learning" class="nav-link active" data-scroll-target="#a-formal-definition-of-statistical-machine-learning">A Formal Definition of Statistical Machine Learning</a></li>
+  <li>
+<a href="#loss-functions" id="toc-loss-functions" class="nav-link" data-scroll-target="#loss-functions">Loss Functions</a>
+  <ul class="collapse">
+<li><a href="#means-variance-mse-and-rmse" id="toc-means-variance-mse-and-rmse" class="nav-link" data-scroll-target="#means-variance-mse-and-rmse">Means, Variance, MSE, and RMSE</a></li>
+  <li><a href="#other-loss-functions" id="toc-other-loss-functions" class="nav-link" data-scroll-target="#other-loss-functions">Other Loss Functions</a></li>
+  <li><a href="#custom-loss-functions" id="toc-custom-loss-functions" class="nav-link" data-scroll-target="#custom-loss-functions">Custom Loss Functions</a></li>
+  <li><a href="#metrical-determinism" id="toc-metrical-determinism" class="nav-link" data-scroll-target="#metrical-determinism">Metrical Determinism</a></li>
+  <li><a href="#empirical-risk-minimization" id="toc-empirical-risk-minimization" class="nav-link" data-scroll-target="#empirical-risk-minimization">Empirical Risk Minimization</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#ols-within-ml-taxonomy" id="toc-ols-within-ml-taxonomy" class="nav-link" data-scroll-target="#ols-within-ml-taxonomy">OLS within ML Taxonomy</a>
+  <ul class="collapse">
+<li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression">Linear Regression</a></li>
+  <li><a href="#linear-regression-taxonomy" id="toc-linear-regression-taxonomy" class="nav-link" data-scroll-target="#linear-regression-taxonomy">Linear Regression Taxonomy</a></li>
+  <li><a href="#ols-vs-linear-regression" id="toc-ols-vs-linear-regression" class="nav-link" data-scroll-target="#ols-vs-linear-regression">OLS vs Linear Regression</a></li>
+  </ul>
+</li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes02.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes02.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #02: Unit I. ML Fundamentals: Review of Linear Regression</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">September 14, 2026</p>
     </div>
   </div>
   
@@ -164,15 +222,244 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
 \]</span></p>
 </div>
 <p>Outline:</p>
+<ul>
+<li>Review of ‘Statistical Learning’ Definition</li>
+<li>Placing OLS within our ML Taxonomy</li>
+<li>Empirical Risk Minimization</li>
+<li>Review of OLS</li>
+<li>The Role of Model Classes</li>
+</ul>
 <hr>
+<section id="a-formal-definition-of-statistical-machine-learning" class="level2"><h2 class="anchored" data-anchor-id="a-formal-definition-of-statistical-machine-learning">A Formal Definition of Statistical Machine Learning</h2>
+<p>Recall that we posited this formal definition of <em>statistical learning</em>:</p>
+<blockquote class="blockquote">
+<p>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the risk <span class="math inline">\(R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</p>
+</blockquote>
+<p>That’s a bit of a math-full mouthful, so let’s start working through it. This definition has several interesting properties worth noting:</p>
+<ul>
+<li>It seems (reasonably) actionable. While finding the best possible <span class="math inline">\(f\)</span> can be hard in practice, the idea of finding ‘the best one’ can be made workable in theory pretty easily, as we will see below.</li>
+<li>It centers the role of <em>prediction</em>, possibly distinct from modeling. As far as the definition above is concerned, <span class="math inline">\(f(\cdot)\)</span> can be any function, whether it is physically plausible or not. Notably, this definition does not require <span class="math inline">\(f(\cdot)\)</span> to capture any sort of ‘realistic’ or ‘causal’ relationship.</li>
+<li>It is essentially restricted to <em>supervised</em> learning problems, in which our goal is to to predict a well-defined <span class="math inline">\(Y\)</span> from a given <span class="math inline">\(X\)</span>.</li>
+<li>We focus our predictions on <em>new</em> data (‘test data’ <span class="math inline">\((\tilde{X}, \tilde{Y})\)</span>), not on just fitting old data that we have already seen (‘training data’ <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span>) as well as possible.</li>
+</ul>
+<p>Our goal today is to think about how <em>Ordinary Least Squares</em> (OLS) relates to this definition. In doing so, we’ll hopefully unpack the rather-mathy definition above and make it a bit more easily understandable in a more familiar context.</p>
+</section><section id="loss-functions" class="level2"><h2 class="anchored" data-anchor-id="loss-functions">Loss Functions</h2>
+<p>Let’s start by taking a closer look at the mathematical part of our goal:</p>
+<p><span class="math display">\[R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]\]</span></p>
+<p>Here, the loss function <span class="math inline">\(L(\cdot, \cdot)\)</span> is a measure of how accurate our predictions are. Note that <span class="math inline">\(L\)</span> takes two inputs - our prediction <span class="math inline">\(\hat{Y}=f(X)\)</span> and the right answer <span class="math inline">\(Y\)</span>. Which <em>loss</em> function should we choose?</p>
+<p>For sanity, we typically require that i) <span class="math inline">\(L(y, y) = 0 \text{ for all } y\)</span>, <em>i.e.</em>, the loss is 0 if our prediction is exactly correct; ii) <span class="math inline">\(L\)</span> generally increases in <span class="math inline">\(|y - \hat{y}|\)</span>, <em>i.e.</em>, our loss is larger when our guess is ‘farther’ from the truth. As a consequence of these two, <span class="math inline">\(L\)</span> is typically non-negative (<span class="math inline">\(L \geq 0\)</span>), so we never have ‘negative loss’. Beyond these basics, there are <em>many</em> potential loss functions and they are often chosen for some combination of i) mathematical and computational ease of use; ii) inertia; and iii) relevance to the task at hand.</p>
+<p>We will discuss several of these loss functions over the semester, but the one you are almost certainly most familiar with is <em>mean squared error</em> (or its cousin <em>root mean squared error</em>). Here, we take squared error for a single point:</p>
+<p><span class="math display">\[L(\hat{y}, y) = (\hat{y} - y)^2\]</span></p>
+<p>and extend it ‘pointwise’ to larger data sets:</p>
+<p><span class="math display">\[\begin{align*}
+L &amp;= \frac{1}{n}\sum_{i=1}^n (\hat{y}_i - y_i)^2 \tag{MSE} \\
+L &amp;= \sqrt{\frac{1}{n}\sum_{i=1}^n (\hat{y}_i - y_i)^2} \tag{RMSE}
+\end{align*}\]</span></p>
+<p>Here, we are applying <span class="math inline">\(L\)</span> to a series of predictions <span class="math inline">\(\hat{y}_1, \hat{y}_2, \dots \hat{y}_n\)</span> and comparing against (different) true values <span class="math inline">\(y_1, y_2, \dots, y_n\)</span>. Note that the choice of MSE vs RMSE doesn’t really matter if we’re just comparing two possible sets of predictions: if one set of predictions <span class="math inline">\(\{\hat{y}_i\}_{i=1}^n\)</span> has a better MSE than another <span class="math inline">\(\{\hat{y}'_i\}_{i=1}^n\)</span>, it will have a better RMSE as well (and <em>vice versa</em>). The MSE/RMSE distinction is more one of interpretation and scale, parallel to standard deviation/variance.</p>
+<section id="means-variance-mse-and-rmse" class="level3"><h3 class="anchored" data-anchor-id="means-variance-mse-and-rmse">Means, Variance, MSE, and RMSE</h3>
+<p>You might have seen the <em>mean</em> or <em>expectation</em> of a random variable defined using some sort of probability-weighted sum or integral. I’d like to offer a different characterization that will be more helpful for building your ML definition.</p>
+<p>Suppose you have a random variable <span class="math inline">\(Z\)</span> and you have to make the ‘best’ unconditonal prediction of <span class="math inline">\(Z\)</span>. (By unconditional, I mean you have no ancillary information and you’re just making a broad / uniform / constant prediction.) If you are being evaluated under a squared error loss, the <em>mean</em> of <span class="math inline">\(Z\)</span> is the single value that will give you the best score on average. That is,<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p><span class="math display">\[\E[(Z - \mu_Z)^2] \leq \E[(Z - a)^2] \text{ for any } a \in \R\]</span></p>
+<p>(Note that this same characterization applies to a data set, not just a full random variable: if <span class="math inline">\(x_1, \dots, x_n\)</span> are known data points, the best prediction against an opponent who will pick one of the <span class="math inline">\(x_i\)</span> uniformly at random is the sample mean <span class="math inline">\(\overline{x}\)</span>.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>)</p>
+<p>So the <em>mean</em> is the value that minimizes (expected) squared error. But how good will our predictions actually be if we use the mean as our predictor? That is, what is <span class="math inline">\(\E[(Z - \mu_Z)^2]\)</span>? Why, that’s the variance of course!</p>
+<p>This gives a nice little set of identities: if asked to predict a random variable and evaluated under squared error loss:</p>
+<ul>
+<li>The <em>mean</em> is the loss-minimizer, <em>i.e.</em>, the best predictor</li>
+<li>The <em>variance</em> is the minimum-MSE-loss, <em>i.e.</em>, the MSE that you’d get with the best predictor</li>
+<li>The <em>standard deviation</em> is the minimum-RMSE-loss, <em>i.e.</em>, the RMSE that you’d get with the best predictor</li>
+</ul></section><section id="other-loss-functions" class="level3"><h3 class="anchored" data-anchor-id="other-loss-functions">Other Loss Functions</h3>
+<p>If we continue the above analysis for other losses, we might come across some other well-known statistical quantities. Suppose that, instead of being judged on <em>squared error</em>, we were judged on absolute error. Finding the minimizer here is a bit more mathematically complicated, so let’s explore this problem numerically instead.</p>
+<p>Let’s assume our data comes from an <em>exponential</em> distribution with mean <span class="math inline">\(3\)</span>. We can create samples from this distribution using the <code><a href="https://rdrr.io/r/stats/Exponential.html">rexp()</a></code> function in <code>R</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## Generate some exponential random variables</span></span>
+<span><span class="co">## Here rate=1/3 corresponds to mean = 3</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html">rexp</a></span><span class="op">(</span><span class="fl">20</span>, rate <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can define a <em>function</em> that computes:</p>
+<p><span class="math display">\[f(a) \E[|X - a|]\]</span></p>
+<p>for any guess <span class="math inline">\(a\)</span>. To do this, we’ll generate a <em>large</em> number of <span class="math inline">\(X\)</span>’s and use the fact that the <em>sample</em> expectation will converge to the <em>population</em> expectation (Law of Large Numbers).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">abs_error_expected_loss_exponential</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">n</span><span class="op">=</span><span class="fl">10000</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html">rexp</a></span><span class="op">(</span><span class="va">n</span>, rate<span class="op">=</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span><span class="op">)</span></span>
+<span>    <span class="co"># I have to be a bit fancy here to get around the fact that R's</span></span>
+<span>    <span class="co"># mean() will only return a single value.</span></span>
+<span>    <span class="co"># If you want something simpler, but a bit slower, use the map() function</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html">outer</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">X</span>, <span class="va">`-`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now we can try out a bunch of different values of <span class="math inline">\(a\)</span> and see what the best guess is:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_guess</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, length.out<span class="op">=</span><span class="fl">501</span><span class="op">)</span></span>
+<span><span class="va">x_guess_loss</span> <span class="op">&lt;-</span> <span class="fu">abs_error_expected_loss_exponential</span><span class="op">(</span><span class="va">x_guess</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">x_guess</span>, <span class="va">x_guess_loss</span>, type<span class="op">=</span><span class="st">'l'</span>,</span>
+<span>     xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, </span>
+<span>     ylab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">E</span><span class="op">[</span><span class="va">X</span> <span class="op">*</span> <span class="st">"~ Exp(3)"</span><span class="op">]</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">X</span> <span class="op">-</span> <span class="va">a</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes02_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If we look at this curve more closely, we see that the best guess <em>for this loss</em> is not <span class="math inline">\(3\)</span>, even though <span class="math inline">\(3\)</span> is the mean. Choosing a different loss function clearly changes the best guess. But what is that best guess?</p>
+<p>If we look closely, we can see that the minimizer is right around 2.088. But what is that value? After a bit of browsing the <a href="https://en.wikipedia.org/wiki/Exponential_distribution">Wikipedia page for the exponential distribution</a>, we can see that it is suspiciously close to the <em>median</em> of the distribution, which here is <span class="math inline">\(3 \log(2) \approx 2.08\)</span>.</p>
+<p>So our guess here is that the <em>median</em> is the best possible guess. To confirm our hunch, let’s try out another distribution. The <em>log-normal</em> distribution is skewed, so its mean and median are quite different. Specifically, let’s take</p>
+<p><span class="math display">\[X \sim \text{LogNormal}(3, 2^2) \Leftrightarrow \log X \sim \text{Normal}(3, 2^2)\]</span></p>
+<p>Reviewing the <a href="https://en.wikipedia.org/wiki/Log-normal_distribution">standard formulas</a>, we see that this distribution will have mean <span class="math inline">\(e^{3 + 2^2/2} = e^7 \approx 1097\)</span> but median <span class="math inline">\(e^3 \approx 20\)</span>. This is a lot of skew and will let us clearly see how much the median beats the mean.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">abs_error_expected_loss_logn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">n</span><span class="op">=</span><span class="fl">50000</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Lognormal.html">rlnorm</a></span><span class="op">(</span><span class="va">n</span>, meanlog<span class="op">=</span><span class="fl">3</span>, sdlog<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
+<span>    <span class="co"># I have to be a bit fancy here to get around the fact that R's</span></span>
+<span>    <span class="co"># mean() will only return a single value.</span></span>
+<span>    <span class="co"># If you want something simpler, but a bit slower, use the map() function</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html">outer</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">X</span>, <span class="va">`-`</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Need a nice big range here, but we need log-spaced values as well</span></span>
+<span><span class="va">x_guess</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">1500</span><span class="op">)</span>, length.out<span class="op">=</span><span class="fl">5001</span><span class="op">)</span> </span>
+<span><span class="va">x_guess_loss</span> <span class="op">&lt;-</span> <span class="fu">abs_error_expected_loss_logn</span><span class="op">(</span><span class="va">x_guess</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">x_guess</span>, <span class="va">x_guess_loss</span>, type<span class="op">=</span><span class="st">'l'</span>,</span>
+<span>     xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, log<span class="op">=</span><span class="st">"xy"</span>,</span>
+<span>     ylab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">E</span><span class="op">[</span><span class="va">X</span> <span class="op">*</span> <span class="st">"~ LogN(3, 2^2)"</span><span class="op">]</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">X</span> <span class="op">-</span> <span class="va">a</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span>v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"blue4"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span><span class="op">(</span>v<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes02_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here the blue line is the median and the red is the mean. You’ll note it’s not perfect - the log-normal is a pretty ‘heavy-tailed’ distribution so these things might take <em>many</em> more samples to converge - but hopefully you can at least see that the mean (red) is definitely not the best point.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="What About 'Exact' Answers?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What About ‘Exact’ Answers?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Suppose that instead you were graded on an ‘exact match’ loss: that is,</p>
+<p><span class="math display">\[L(\hat{y}, y) = \begin{cases} 1 &amp; \hat{y} = y \\ 0 &amp; \hat{y} \neq y \end{cases}\]</span></p>
+<p>What would the optimal guess be now?</p>
+<p><em>Hint</em>: It’s another ‘m’ data summary.</p>
+<p>Note that this loss function is pretty unnatural for continuous values, but is perfectly reasonable for classification.</p>
+</div>
+</div>
+</section><section id="custom-loss-functions" class="level3"><h3 class="anchored" data-anchor-id="custom-loss-functions">Custom Loss Functions</h3>
+<p>While the mean and median are well-understood statistically, it’s not clear that they are the <em>right</em> answer for most problems. For how many things in life is a <em>quadratic</em> (squared error) loss exactly correct?</p>
+<p>Often, some additional predictive power can be attained for a given model by determining a <em>bespoke</em> loss function for a problem. For example, one of the most confusing parts of the US tax code is that one has to guess how much one will owe in taxes at the end of the year before you compute your taxes: estimate too much and you’re giving the government and interest-free loan (and missing out on that sweet compounding interest), estimate too little and the IRS will charge you interest on the money you failed to pay. And, of course, the IRS interest that you get charged is often <em>much</em> higher than what your bank would pay to you.</p>
+<p>In this case, we have an <em>asymmetric</em> outcome and our loss is something like:</p>
+<p><span class="math display">\[L(\hat{y}, y) = \begin{cases} 0.02|\hat{y} - y| &amp; \hat{y} &gt; y \text{ (Overpaid estimated taxes)} \\
+0.07|y - \hat{y}| &amp; \hat{y} \leq y \text{ (Underpaid estimated taxes)} \end{cases}\]</span></p>
+<p>What should we do here? It’s not as obvious, but hopefully you can convince yourself that we definitely want to pay more than our <em>median</em> guess since things are asymmetric. (In fact, this type of loss moves away from the median to more general quantiles.)</p>
+<p>This family of losses is known as a check loss for (hopefully) obvious reasons:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">irs_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">delta_y</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">delta_y</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="fl">0.02</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">delta_y</span><span class="op">)</span>, <span class="fl">0.07</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">delta_y</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">201</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">d</span>, <span class="fu">irs_loss</span><span class="op">(</span><span class="va">d</span><span class="op">)</span>, xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html">hat</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">-</span> <span class="va">y</span><span class="op">)</span>, ylab<span class="op">=</span><span class="st">"Financial Loss"</span>, </span>
+<span>     main<span class="op">=</span><span class="st">"Check Loss"</span>, type<span class="op">=</span><span class="st">"l"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes02_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In classification problems, this asymmetry is often even more stark: when designing a medical test for cancer, there are two bad outcomes: ‘false positive’ when you tell someone they might have cancer and send them for unnecessary expensive follow-up tests and ‘false negative’ when you tell them they don’t have cancer and leave their tumors untreated and let them metastasize. Both bad, but here ‘false negative’ is much worse and clinical guidelines should reflect that.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Value of a Human Life">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Value of a Human Life
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A key question in medical economics is how much is a <em>human life</em> actually <em>worth</em>? While we would in a perfect world want everyone to receive all possible care, in a finite world decisions have to be made about how to ration finite medical resources. (In the US, we do this through infinitely-complicated health insurance markets; in more centralized systems like the UK, this decision is made by NHS analysts and economists.) As societies become richer, they can generally put a higher dollar value on human life.</p>
+<p>What do you expect this to do to the false negative/false positive balance associated with cancer tests? Why?</p>
+</div>
+</div>
+<p>It’s worth re-emphasizing: means and medians are the <em>exact</em> right answer for certain loss functions and we’re not claiming to beat (conditional) means for MSE loss; that would be impossible. Instead, by using a loss function that is more tailored to the actual human impact of a problem, we might get a better overall outcome. (“Better an approximate answer to the right question …” and all that.)</p>
+<p>Building a custom loss function <em>can</em> be effective for important problems, but it requires some effort and often a bit of custom software. For more low-stakes problems, the quadratic or absolute losses are ‘good enough’ to get started with a problem.</p>
+</section><section id="metrical-determinism" class="level3"><h3 class="anchored" data-anchor-id="metrical-determinism">Metrical Determinism</h3>
+<p>In many ways, the choice of <em>loss</em> function drives the behavior of ML systems - a phenomenon called <em>metrical determinism</em> - and some of the most interesting debates in ML relate to properly building a loss function. A good loss function for numerical prediction or binary classification isn’t that hard to come by, but what is the right performance measure for an agentic AI system?</p>
+<p>The news is currently full of debates around ‘reward hacking’ and agents. A few years ago, an AI system was designed to play the classic video game Tetris. In Tetris, you never win or beat the game; you just survive longer than any other player. So when the AI system was set loose on Tetris, it tried a bunch of strategies and quickly found that the optimal strategy had nothing to do with <code>T</code> and <code>L</code> blocks, but was simply to hit <code>Pause</code>. As long as the game was paused, the player never lost and the survival time kept going up and up.</p>
+<p>In this case, the system clearly found an aspect of the loss function that didn’t quite align with actual human intent. Here, this was pretty easy to fix: either disallow the pause button or change the loss function to capture ‘blocks destroyed’ rather than ‘time survived’. Either way, the problem arose because the original loss function given to the machine didn’t capture the whole set of human preferences implicit in the task.</p>
+<p>While the Tetris experience is cute, this behavior can be quite worrying at scale. To pick an example from the news: an agent is told that its goal is to do well on some sort of numerical score as evaluated by a third-party website; the agent can try to do well on the task, but isn’t it easier to hack into the ‘grader’ and change the scores?</p>
+<p>Think through this sort of reward hacking for other problems: what happens if an AI agent is asked to help minimize power consumption at a data center? SciFi is full of all sorts of takes on this fundamental problem.</p>
+</section><section id="empirical-risk-minimization" class="level3"><h3 class="anchored" data-anchor-id="empirical-risk-minimization">Empirical Risk Minimization</h3>
+<p>Bringing things back to Earth, what does this imply about our task building ‘simple’ predictive models? Our goal is simple, we want to find the best predictor <span class="math inline">\(f^*\)</span> that minimizes our expected loss, <em>aka</em>, the ‘risk’ of that predictor:</p>
+<p><span class="math display">\[R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]\]</span></p>
+<p>Conceptually, this should be a relatively simple problem. We just try an enormous number of <span class="math inline">\(f\)</span>s and pick the one that minimizes <span class="math inline">\(R(\cdot)\)</span>. This is a bit impractical, but smart algorithms exist, so let’s put the computational concerns aside for a moment.</p>
+<p>Can we ever actually know <span class="math inline">\(R(\cdot)\)</span>? Knowing <span class="math inline">\(R(\cdot)\)</span> exactly requires knowing the full distribution <span class="math inline">\(\Dcal\)</span> relating <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. If we really knew this, we wouldn’t need ML in the first place. So now our task is to minimize a risk we can’t compute.</p>
+<p>But we have something else in our toolbox: our <em>training set</em> of samples. We don’t know <span class="math inline">\(R(f)\)</span>, but we can <em>approximate</em> it with</p>
+<p><span class="math display">\[R_n(f) = \frac{1}{n} \sum_{i=1}^n L(f(X_i), Y_i)\]</span></p>
+<p>This is known as the <em>empirical</em> risk since it captures the risk we observe on our training set. It’s not a perfect estimate of the true (population) risk, but hopefully with enough data, it’s good enough. Specifically, we hope that the <span class="math inline">\(f\)</span> that minimizes <span class="math inline">\(R_n(\cdot)\)</span> is ‘close enough’ to the one that minimizes <span class="math inline">\(R(\cdot)\)</span>. This can give us a ‘nearly optimal’ predictor, even if true optimality is beyond our grasp. This strategy is known as <em>empirical risk minimization</em> (ERM).</p>
+<p>To recap: ERM gives us a ‘meta-formula’ for finding a predictor. Given some training data and a loss function, we pick the predictor that minimizes the empirical risk, in hopes that it almost-minimizes the population risk. In symbols:</p>
+<ul>
+<li>
+<p>Let <span class="math inline">\(f_*\)</span> be the <em>true</em> (Platonic) best predictor:</p>
+<p><span class="math display">\[ f_* = \argmin_f R(f) = \argmin_f \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]\]</span></p>
+<p>We can’t know <span class="math inline">\(f_*\)</span>, but we hope to at least get close.</p>
+</li>
+<li>
+<p>Let <span class="math inline">\(\hat{f}\)</span> be the <em>empirical</em> (ERM) best predictor:</p>
+<p><span class="math display">\[ \hat{f} = \argmin_f R_n(f) = \argmin_f \frac{1}{n} \sum_{i=1}^n L(f(X_i), Y_i)\]</span></p>
+</li>
+<li>
+<p>ML ‘works’ if these quantities are close:</p>
+<p><span class="math display">\[R(\hat{f}) \approx R_n(\hat{f})\]</span></p>
+<p>The difference between these two quantities is known as the <em>generalization gap</em>. When it is small, our model performs about as well on the training set as it does on the test set. When the gap is large, past performance tells us nothing about future performance, so it’s hard to trust a system to work well.</p>
+</li>
+</ul>
+<p><em>Notation Note</em>: Above, I used the notation <span class="math inline">\(\hat{x} = \argmin_x h(x)\)</span>. This means that <span class="math inline">\(\hat{x}\)</span> is the <em>minimizer</em> of some function <span class="math inline">\(h(\cdot)\)</span>. You will also see <span class="math inline">\(\hat{h} = \min_x h(x)\)</span>, where <span class="math inline">\(\hat{h}\)</span> is the <em>minimum</em>. In brief, <span class="math inline">\(\argmin\)</span> is the minimizing input to <span class="math inline">\(h\)</span> and <span class="math inline">\(\min\)</span> is the minimum output of <span class="math inline">\(h\)</span> and these will be related by <span class="math inline">\(\hat{h} = h(\hat{x})\)</span>. For example, if <span class="math inline">\(h(x) = (x - 3)^2 + 2\)</span>, we will have <span class="math inline">\(3 = \argmin h\)</span> and <span class="math inline">\(2 = \min h\)</span>. Can you see why?</p>
+</section></section><section id="ols-within-ml-taxonomy" class="level2"><h2 class="anchored" data-anchor-id="ols-within-ml-taxonomy">OLS within ML Taxonomy</h2>
+<section id="linear-regression" class="level3"><h3 class="anchored" data-anchor-id="linear-regression">Linear Regression</h3>
+<p>Ok, with all that said, let’s see how ERM plays out for our beloved OLS. Before we can do so, let’s review how it fits into our taxonomy. Recall that linear regression is a method that makes predictions using a linear combination of inputs:</p>
+<p><span class="math display">\[\hat{Y} = \beta_0 + \beta_1 * X_1 + \beta_2 * X_2 + \dots + \beta_p X_p\]</span></p>
+<p>Here, we assume we have <span class="math inline">\(p\)</span> inputs – <span class="math inline">\(X_1\)</span> to <span class="math inline">\(X_p\)</span> – each of which get their own weights (‘coefficients’) <span class="math inline">\(\beta_1\)</span> to <span class="math inline">\(\beta_p\)</span>. The ‘inputs’ are often called ‘features’, because they record some aspect of the instance we want to make a prediction about, or ‘covariates’, because they (hopefully) co-vary (go up or down together with) the response.</p>
+<p>We also assume that we have a constant <em>intercept</em> term <span class="math inline">\(\beta_0\)</span> which gets added directly to all predictions, regardless of the specific values of <span class="math inline">\(X_1, \dots, X_p\)</span>. The intercept is sometimes ‘hidden’ by instead creating a ‘constant feature’ of all <span class="math inline">\(1\)</span>’s and using that instead.</p>
+<p><span class="math display">\[\hat{Y} = \beta_0 X_0 + \beta_1 * X_1 + \beta_2 * X_2 + \dots + \beta_p X_p \text{ where } X_0 \text{ is always } 1\]</span></p>
+<p>This is a bit more mathematically convenient - since <span class="math inline">\(\beta_0\)</span> is now not ‘special’ in any way - but can be a bit confusing if you’re not used to it. You should assume that linear regression essentially is always fit with an intercept term unless specifically stated otherwise.</p>
+</section><section id="linear-regression-taxonomy" class="level3"><h3 class="anchored" data-anchor-id="linear-regression-taxonomy">Linear Regression Taxonomy</h3>
+<p>So how does linear regression fit into our taxonomy from last time?</p>
+<p>Clearly, it is a <em>supervised</em> method: we have a specific outcome, traditionally called <span class="math inline">\(Y\)</span>, that we want to predict. Additionally it is a <em>regression</em> model (as the name suggests), since our outcome is numeric, not categorical. Finally, OLS requires <em>numerical, tabular</em> input data for the <span class="math inline">\(X\)</span>s as well. If some of the input features are categorical, we have to transform them into numerical quantities before building a model; this process is known as <em>embedding</em> and you will explore it more in teh first problem set.</p>
+</section><section id="ols-vs-linear-regression" class="level3"><h3 class="anchored" data-anchor-id="ols-vs-linear-regression">OLS vs Linear Regression</h3>
+<p>So what is the difference between linear regression and ordinary least squares? So far, we’ve set up an arbitrary linear model defined by some coefficients <span class="math inline">\(\bbeta\)</span>. But how do we ever pick which one? There are (infinitely!) many possible linear regressions. This is where our ‘meta-rule’ of ERM can provide guidance.</p>
+<p>ERM tells us that we should pick the line that minimizes our loss. But what loss does OLS use? The hint is in the name: least <em>squares</em>. OLS uses - and is defined by - MSE loss.</p>
+<p>So to fit OLS we pick the <span class="math inline">\(\bbeta\)</span> that minimizes our squared error loss <em>on the training set</em>:</p>
+<p><span class="math display">\[\hat{f}_{\text{OLS}} = \argmin_f \frac{1}{n}\sum_{i=1}^n (Y_i - f(X_i))^2\]</span></p>
+<p>Well - not quite! In the problem above, we actually don’t have any guarantee that the <span class="math inline">\(\argmin\)</span> will actually be a linear model. To ensure that, we add a <em>constraint</em>:</p>
+<p><span class="math display">\[\hat{f}_{\text{OLS}} = \argmin_{f: f \text{ is a linear model}} \frac{1}{n}\sum_{i=1}^n (Y_i - f(X_i))^2\]</span></p>
+<p>Here, we now saying that we’re not picking the best <span class="math inline">\(f\)</span> of <em>all possible functions</em>; we’re just picking the best <span class="math inline">\(f\)</span> of <em>all linear models</em>. So “linear models” defines our acceptable <em>model class</em> or <em>model family</em> for this problem.</p>
+<p>We’ve waited a little while to introduce it, but picking an acceptable model family is <em>extremely</em> important. (If you just pick the ‘best possible function’ over all functions, solving any ERM is basically impossible.) The choice of model family is a huge point of leverage / control in building an ML system. If we look at bigger / more complex families, we can do better, but there’s also more potential for things to go poorly; if we use smaller / simpler families, the worst case is less bad, but the best case is less good.</p>
+<p>We often talk about model classes in terms of <em>size</em>, which is roughly the number of parameters in the model. Linear regression has relatively few parameters (only one per input), while giant LLMs are chosen from a very <em>large</em> family and have a huge number of parameters.</p>
+<p>Consider two model classes <span class="math inline">\(\Fcal_1, \Fcal_2\)</span> where <span class="math inline">\(\Fcal_1\)</span> is a subset of <span class="math inline">\(\Fcal_2\)</span> (<span class="math inline">\(\Fcal_1 \subset \Fcal_2\)</span>): that is, everything in <span class="math inline">\(\Fcal_1\)</span> is also in <span class="math inline">\(\Fcal_2\)</span>, but some things in <span class="math inline">\(\Fcal_2\)</span> might not appear in <span class="math inline">\(\Fcal_1\)</span>. You should be able to convince yourself of the following:</p>
+<p><span class="math display">\[\min_{f \in \Fcal_2} R(f) \leq \min_{f \in \Fcal_1} R(f) \leq \max_{f \in \Fcal_1} R(f) \leq \max_{f \in \Fcal_2} R(f)\]</span></p>
+<p>Why is this true? (<em>Hint:</em> Who is taller? The tallest person on Columbia’s campus or the tallest person in all of NYC? How do you know this?)</p>
+<p>This formalizes what we said before: “If we look at bigger / more complex families, we can do better, but there’s also more potential for things to go poorly; if we use smaller / simpler families, the worst case is less bad, but the best case is less good.”</p>
+<p>Next week, we’ll talk about factors that lead to us getting a good <span class="math inline">\(\hat{f}\)</span> <em>vs</em> a bad <span class="math inline">\(\hat{f}\)</span> and how we can hopefully keep the generalization gap small, but first (next class), we’ll look at OLS in practice and examine how things like test error, training error, generalization gap, <em>etc</em> can be computed.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>To see this, define <span class="math inline">\(f(a) = \E[(Z - a)^2]\)</span> and take a derivative to get <span class="math inline">\(f'(a) = \E[2(Z-a)] = 2\E[Z] - 2a\)</span>. If we set this to zero, we clearly get <span class="math inline">\(a = \E[Z]\)</span> as the critical point for our predictions.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>This is an instance of a more general point of view, where we can consider the act of picking one point from our data set at random as distribution, known as the <em>empirical</em> distribution associated with that data set.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +863,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes02.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes02.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes02.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes02.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

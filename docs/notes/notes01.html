@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-09">
+<meta name="dcterms.date" content="2026-09-14">
 <title>Notes for Lecture #01: Course Introduction – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -154,7 +154,15 @@ window.Quarto = {
   <li><a href="#types-of-data" id="toc-types-of-data" class="nav-link" data-scroll-target="#types-of-data">Types of Data</a></li>
   </ul>
 </li>
-  <li><a href="#overture" id="toc-overture" class="nav-link" data-scroll-target="#overture">Overture</a></li>
+  <li>
+<a href="#overture" id="toc-overture" class="nav-link" data-scroll-target="#overture">Overture</a>
+  <ul class="collapse">
+<li><a href="#unit-i.-ml-basics" id="toc-unit-i.-ml-basics" class="nav-link" data-scroll-target="#unit-i.-ml-basics">Unit I. ML Basics</a></li>
+  <li><a href="#unit-ii.-regression" id="toc-unit-ii.-regression" class="nav-link" data-scroll-target="#unit-ii.-regression">Unit II. Regression</a></li>
+  <li><a href="#unit-iii.-classification-ensemble-methods" id="toc-unit-iii.-classification-ensemble-methods" class="nav-link" data-scroll-target="#unit-iii.-classification-ensemble-methods">Unit III. Classification &amp; Ensemble Methods</a></li>
+  <li><a href="#unit-iv.-neural-methods" id="toc-unit-iv.-neural-methods" class="nav-link" data-scroll-target="#unit-iv.-neural-methods">Unit IV. Neural Methods</a></li>
+  </ul>
+</li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
@@ -173,7 +181,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 9, 2026</p>
+      <p class="date">September 14, 2026</p>
     </div>
   </div>
   
@@ -200,7 +208,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>A search of the literature suggests several different definitions of machine learning<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:</p>
 <ul>
 <li>“The field of study that gives computers the ability to learn without being explicitly programmed.” Arthur Samuel (1959)</li>
-<li>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the expected risk <span class="math inline">\(R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</li>
+<li>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the risk <span class="math inline">\(R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</li>
 <li>“A computer program is said to learn from experience <span class="math inline">\(E\)</span> with respect to some class of tasks <span class="math inline">\(T\)</span> and performance measure <span class="math inline">\(P\)</span>, if its performance at tasks in <span class="math inline">\(T\)</span>, as measured by <span class="math inline">\(P\)</span>, improves with experience <span class="math inline">\(E\)</span>”. (Mitchell, 1997)</li>
 </ul>
 <p>Clearly, none of these are fully comprehensive, but they each add some useful flavor.</p>
@@ -216,7 +224,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>The Samuels lineage assumed that the ML system could be built off the programmer’s pre-existing understanding of the problem space. For ML to have its next leap forward, tools were needed that could attempt to learn about the world directly, instead of piggybacking off human intuition.</p>
 </section><section id="risk-minimization-definition" class="level3"><h3 class="anchored" data-anchor-id="risk-minimization-definition">Risk Minimization Definition</h3>
 <blockquote class="blockquote">
-<p>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the expected risk <span class="math inline">\(R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</p>
+<p>“The goal of machine learning is to find a function <span class="math inline">\(f: \Xcal \to \Ycal\)</span> that minimizes the risk <span class="math inline">\(R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]\)</span> given only a sample <span class="math inline">\(\{(X_i, Y_i)\}_{i=1}^n\)</span> of observations from an unknown joint distribution <span class="math inline">\(\Dcal\)</span>”</p>
 </blockquote>
 <p>Our next definition of ML focuses on learning <em>from noisy data</em>, an inherently <em>statistical</em> task. In this paradigm, we have some data, typically with inputs we call <span class="math inline">\(X\)</span> and outputs we call <span class="math inline">\(Y\)</span> and we want to learn the relationship between the two. In particular, we emphasize the <em>prediction</em> task: given a new, never-before-seen <span class="math inline">\(\tilde{X}\)</span>, what do we <em>expect</em> <span class="math inline">\(\tilde{Y}\)</span> to be?</p>
 <p>In this framework, our aim is to find a <em>predictor</em> function <span class="math inline">\(f(\cdot)\)</span> such that <span class="math inline">\(f(\tilde{X})\)</span> will typically be ‘close to’ <span class="math inline">\(\tilde{Y}\)</span>. To make this mathematically rigorous, we use a loss function <span class="math inline">\(L(\text{guess}, \text{truth})\)</span> that puts a number on how good our guess was.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> Of course, we want to be (nearly) correct regularly, ideally all of the time, so we don’t just look at a single <span class="math inline">\(\tilde{X}\)</span>, but we instead take an <em>average</em> over many <span class="math inline">\((\tilde{X}, \tilde{Y})\)</span> pairs to smooth out any randomness.</p>
@@ -303,10 +311,30 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>Within these organizational patterns, we can also categorize data by the <em>modality</em> of each datum. We spoke a bit about continuous and binary data above (in the context of regression and classification), but you may also see ordinal data (rankings, not corresponding to specific values, like survey responses to “do you strongly agree, agree, slightly agree, <em>etc.</em>-type questions) and categorical data (where there is a finite set of possible unranked answers). Within categorical data, it is often useful to further distinguish low-cardinality and high-cardinality problems: low-cardinality refer to situations where there are relatively few possible categories (”summer/fall/winter/spring”); high-cardinality problems are those where the set of values is so impractically large that you can’t handle each value separately. It is typical to model text data, such as LLMs, as a high-cardinality problem because, while there is technically a finite set of possible output words from an LLM, the problem of guessing the next LLM output doesn’t bear too much practical resemblance to a standard yes/no classification.</p>
 <p>In this course, we focus on tabular real-valued data, but we will discuss extensions to other data where appropriate, particularly in Unit IV when we discuss neural approaches.</p>
 </section></section><section id="overture" class="level2"><h2 class="anchored" data-anchor-id="overture">Overture</h2>
-<p>TODO</p>
+<p>The remainder of this course is broken into four units, each <em>(very) roughly</em> corresponding to one problem set:</p>
+<ol type="1">
+<li>ML Basics</li>
+<li>Regression</li>
+<li>Classification &amp; Ensemble Methods</li>
+<li>Neural Methods</li>
+</ol>
+<section id="unit-i.-ml-basics" class="level3"><h3 class="anchored" data-anchor-id="unit-i.-ml-basics">Unit I. ML Basics</h3>
+<p>In the first portion of this course, we will cover some fundamentals of machine learning, focusing on the basics tools and technologies that ‘make the world go round’:</p>
+<ul>
+<li>
+<p>The prototypical predictive method, linear regression or OLS. You’ve almost certainly seen OLS before, but we’ll consider it from an “ML” perspective and use it as a running example of the ideas that we’ll use to characterize more advanced methods methods.</p>
+<p>We’ll also spend a day on OLS in practice, using it to demonstrate the role of training and test sets in model development, and critically evaluating what OLS does well, what it fails to do well, and why some of the critiques you may have heard elsewhere (<em>cough, cough</em> <strong>collinearity</strong>) aren’t always something to actually worry about.</p>
+</li>
+<li><p>We’ll then step back and talk about <em>loss</em> in machine learning. As discussed earlier, the <em>loss</em> - the way we measure how good a prediction is - plays a central role in ML and often shapes what our predictions look like and what features of the data our model will work hard (or not) to capture.</p></li>
+<li><p>We’ll then talk about <em>resampling</em>, techniques that we use to ‘fake’ having a test set. These are essential to accurately estimating model performance.</p></li>
+<li><p>We’ll talk about <em>how</em> models are actually fit, typically using so-called ‘first order’ methods like <em>stochastic gradient descent</em>. You won’t need to do any calculus yourself, but if you have a bit of time to remind yourself of the basics, this lecture will be a bit more helpful.</p></li>
+<li><p>Finally, we’ll talk about the challenges associated with huge data sets. We’ll discuss why having many rows is typically a good thing, while having many columns can provide some interesting and unexpected challenges.</p></li>
+</ul></section><section id="unit-ii.-regression" class="level3"><h3 class="anchored" data-anchor-id="unit-ii.-regression">Unit II. Regression</h3>
+</section><section id="unit-iii.-classification-ensemble-methods" class="level3"><h3 class="anchored" data-anchor-id="unit-iii.-classification-ensemble-methods">Unit III. Classification &amp; Ensemble Methods</h3>
+</section><section id="unit-iv.-neural-methods" class="level3"><h3 class="anchored" data-anchor-id="unit-iv.-neural-methods">Unit IV. Neural Methods</h3>
 
 
-</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+</section></section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 <ol>
 <li id="fn1"><p>As of last update, I used Gemini to get the wording and citations for these quotes, but I have not verified them myself, so these may not be 100% accurate. Regardless, the broader characterizations of ML remain accurate.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Over 500 <em>quadrillion</em> by one estimate. See <a href="https://doi.org/10.1126/science.1144079" class="uri">https://doi.org/10.1126/science.1144079</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>

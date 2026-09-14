@@ -27,7 +27,8 @@ learning[^gemini]:
 - "The field of study that gives computers the ability to learn without being
    explicitly programmed." Arthur Samuel (1959)
 - "The goal of machine learning is to find a function $f: \Xcal \to \Ycal$
-   that minimizes the expected risk $R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]$
+   that minimizes the risk 
+   $R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]$
    given only a sample $\{(X_i, Y_i)\}_{i=1}^n$ of observations from an
    unknown joint distribution $\Dcal$" 
 - "A computer program is said to learn from experience $E$ with respect to some
@@ -106,7 +107,8 @@ something similar.
 ### Risk Minimization Definition
 
 > "The goal of machine learning is to find a function $f: \Xcal \to \Ycal$
-  that minimizes the expected risk $R(f) = \E_{(X, Y) ~ \Dcal}[L(f(X), Y)]$
+  that minimizes the risk 
+  $R(f) = \E_{(\tilde{X}, \tilde{Y}) \sim \Dcal}[L(f(\tilde{X}), \tilde{Y})]$
   given only a sample $\{(X_i, Y_i)\}_{i=1}^n$ of observations from an
   unknown joint distribution $\Dcal$" 
   
@@ -377,4 +379,47 @@ discuss neural approaches.
 
 ## Overture
 
-TODO
+The remainder of this course is broken into four units, each _(very) roughly_
+corresponding to one problem set: 
+
+1. ML Basics
+2. Regression
+3. Classification & Ensemble Methods
+4. Neural Methods
+
+### Unit I. ML Basics
+
+In the first portion of this course, we will cover some fundamentals of
+machine learning, focusing on the basics tools and technologies that 'make the
+world go round': 
+
+- The prototypical predictive method, linear regression or OLS. You've almost
+  certainly seen OLS before, but we'll consider it from an "ML" perspective and
+  use it as a running example of the ideas that we'll use to characterize 
+  more advanced methods methods.
+  
+  We'll also spend a day on OLS in practice, using it to demonstrate the
+  role of training and test sets in model development, and critically evaluating
+  what OLS does well, what it fails to do well, and why some of the critiques
+  you may have heard elsewhere (*cough, cough* **collinearity**) aren't always
+  something to actually worry about.
+- We'll then step back and talk about _loss_ in machine learning. As discussed
+  earlier, the _loss_ - the way we measure how good a prediction is - plays a 
+  central role in ML and often shapes what our predictions look like and what
+  features of the data our model will work hard (or not) to capture. 
+- We'll then talk about _resampling_, techniques that we use to 'fake' having
+  a test set. These are essential to accurately estimating model performance.
+- We'll talk about _how_ models are actually fit, typically using so-called
+  'first order' methods like _stochastic gradient descent_. You won't need to do
+  any calculus yourself, but if you have a bit of time to remind yourself of the
+  basics, this lecture will be a bit more helpful. 
+- Finally, we'll talk about the challenges associated with huge data sets. We'll 
+  discuss why having many rows is typically a good thing, while having many 
+  columns can provide some interesting and unexpected challenges. 
+
+### Unit II. Regression
+
+### Unit III. Classification & Ensemble Methods
+
+### Unit IV. Neural Methods
+
