@@ -19,7 +19,7 @@ get_ps_due <- function(N=ps){
                Number == N, 
                str_detect(Details, "Due")) |>
         pull(Date) |>
-        format("%A %B %d at 5:00PM on Gradescope")
+        format("%A %B %d at 5:00PM on Canvas/Courseworks")
 }
 ```
 

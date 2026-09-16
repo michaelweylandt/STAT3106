@@ -2,17 +2,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>STAT 3106 - Course Prediction Competition – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -35,10 +38,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-d0ae9245876894da5ac7e18953ecc5cc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-cc609553b3b15c4dcd446814cf488934.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-d0bce4a04b23f422c7b30105ccc472a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -89,10 +92,6 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Lecture Notes</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="././labs.html"> 
-<span class="menu-text">Labs</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="././problem_sets.html"> 
 <span class="menu-text">Problem Sets</span></a>
   </li>  
@@ -120,7 +119,7 @@ ul.task-list li input[type="checkbox"] {
   <li>
 <a href="#grading" id="toc-grading" class="nav-link" data-scroll-target="#grading">Grading</a>
   <ul class="collapse">
-<li><a href="#prediction-accuracy-300-points" id="toc-prediction-accuracy-300-points" class="nav-link" data-scroll-target="#prediction-accuracy-300-points">Prediction Accuracy (300 Points)</a></li>
+<li><a href="#prediction-accuracy-200-points" id="toc-prediction-accuracy-200-points" class="nav-link" data-scroll-target="#prediction-accuracy-200-points">Prediction Accuracy (200 Points)</a></li>
   <li><a href="#final-report-100-points" id="toc-final-report-100-points" class="nav-link" data-scroll-target="#final-report-100-points">Final Report (100 Points)</a></li>
   </ul>
 </li>
@@ -166,21 +165,21 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <section id="background" class="level2"><h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>Relevant background for the competition will be posted by Monday October 26, 2026.</p>
+<p>Relevant background for the competition will be posted by Wednesday October 21, 2026.</p>
 </section><section id="data" class="level2"><h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>Data files for the competition will be posted by Monday October 26, 2026.</p>
+<p>Data files for the competition will be posted by Wednesday October 21, 2026.</p>
 </section><section id="example_submission" class="level2"><h2 class="anchored" data-anchor-id="example_submission">Example Predictions</h2>
-<p>Example scripts illustrating the use of the training data to create predictions and suitable formatting for Kaggle submission will be posted by Monday October 26, 2026.</p>
+<p>Example scripts illustrating the use of the training data to create predictions and suitable formatting for Kaggle submission will be posted by Wednesday October 21, 2026.</p>
 </section><section id="grading" class="level2"><h2 class="anchored" data-anchor-id="grading">Grading</h2>
-<section id="prediction-accuracy-300-points" class="level3"><h3 class="anchored" data-anchor-id="prediction-accuracy-300-points">Prediction Accuracy (300 Points)</h3>
+<section id="prediction-accuracy-200-points" class="level3"><h3 class="anchored" data-anchor-id="prediction-accuracy-200-points">Prediction Accuracy (200 Points)</h3>
 <p>Prediction accuracy will be assessed using <em>Kaggle Competitions</em>. I will provided Kaggle with a private test set on which your predictions will be evaluated. Kaggle will further divide the test set into a <em>public leaderboard</em> and a <em>private leaderboard</em>. You will be able to see your accuracy on the public leaderboard but final scores will be based on <em>private leaderboard</em> accuracy so <em>don’t overfit</em>.</p>
 <p>You will be allowed to submit only <em>two</em> sets of predictions to Kaggle per day so use them wisely. At the end of the competition, you will be able to select <strong>two</strong> sets of predictions to be used for your final evaluation (taking the better of the two) so track your submissions carefully.</p>
-<p><strong>Kaggle will close for submissions at 11:55pm on Tuesday December 15, 2026 for this class. Make sure your final submissions have been made in time.</strong></p>
+<p><strong>Kaggle will close for submissions at 11:55pm on Sunday December 06, 2026 for this class. Make sure your final submissions have been made in time.</strong></p>
 <section id="grading-1" class="level4"><h4 class="anchored" data-anchor-id="grading-1">Grading</h4>
-<p>Grades for this portion will be assigned based on your performance relative to both the instructor provided baselines (above) and the best score obtained by your fellow students.</p>
-<p>In particular, the top score in the class will get a score of 300 automatically. More details about the scoring formula will be provided when the competition opens on Monday October 26, 2026.</p>
+<p>Grades for this portion will be assigned based on your performance relative to both the instructor provided baselines and the best score obtained by your fellow students.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>In particular, the top score in the class will get a score of 200 automatically. More details about the scoring formula will be provided when the competition opens on Wednesday October 21, 2026.</p>
 </section></section><section id="final-report-100-points" class="level3"><h3 class="anchored" data-anchor-id="final-report-100-points">Final Report (100 Points)</h3>
-<p>By Tuesday December 22, 2026 at 23:59 PM, each competition unit (either an individual or a team) will submit a final report of no more than 10 pages (10-12 point, one-and-a-half or double-spaced) providing an <em>After-Action Report</em> of their competition performance. This report should focus on three topics:</p>
+<p>By Wednesday December 23, 2026 at 23:59 PM, each competition unit (either an individual or a team) will submit a final report of no more than 10 pages (10-12 point, one-and-a-half or double-spaced) providing an <em>After-Action Report</em> of their competition performance. This report should focus on three topics:</p>
 <ul>
 <li><ol type="1">
 <li>Are there any systematic errors in model predictions that need to be addressed before this model could be applied broadly. (<em>E.g.</em>, is it systmatically low or high in a particular subgroup; does it under-predict for especially high outcome samples; etc?)</li>
@@ -189,7 +188,7 @@ ul.task-list li input[type="checkbox"] {
 <li>What insights into the underlying data can be gleaned from the model? <em>E.g.</em>, are certain features especially important for making predictions? Or are certain features which you would expect to be important not actually particularly important?</li>
 </ol></li>
 <li><ol start="3" type="1">
-<li>What steps did your team take that were particularly helpful to maximizing predictive performance? Or, what parts of your model development cycle were weak and could be the most improved?<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+<li>What steps did your team take that were particularly helpful to maximizing predictive performance? Or, what parts of your model development cycle were weak and could be the most improved?<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>
 </li>
 </ol></li>
 </ul>
@@ -281,7 +280,8 @@ ul.task-list li input[type="checkbox"] {
 
 </section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 <ol>
-<li id="fn1"><p>In this ‘self-evaluation’ section, you are encouraged to be truthful and honest in your reflections. I already know how well you did and you won’t be able to convince me otherwise, so if you made fundamental errors that hindered your performance, I would rather see them discussed honestly (indicating understanding of how you could improve) rather than minimized.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Note that this is essentially the same as ‘curving’ the scores so that the top-performing student automatically gets a perfect score and other grades are raised accordingly. By judging against the best student score, rather than an absolute benchmark like ‘0 error’, all students’ grades are implicitly raised.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In this ‘self-evaluation’ section, you are encouraged to be truthful and honest in your reflections. I already know how well you did and you won’t be able to convince me otherwise, so if you made fundamental errors that hindered your performance, I would rather see them discussed honestly (indicating understanding of how you could improve) rather than minimized.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

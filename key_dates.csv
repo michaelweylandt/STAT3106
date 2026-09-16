@@ -6,18 +6,18 @@ Date,Day of Week,Item,Number,Details,Suggested Reading
 2026-09-23,Wednesday,Class Session,5,Unit I. ML Fundamentals: Resampling Methods for Machine Learning,ISL §5.3
 2026-09-28,Monday,Class Session,6,Unit I. ML Fundamentals: A Friendly Foray into First Order Optimization: SGD and Friends,
 2026-09-30,Wednesday,Class Session,7,Unit I. ML Fundamentals: A Funny Thing Happened on the Way to the nth Dimension – Challenges of High-Dimensional Statistics,ISL §13.1-13.4
-2026-10-02,Friday,Homework,1,Problem Set #1 Due,
-2026-09-14,Monday,Homework,1,Problem Set #1 Released,
 2026-10-05,Monday,Class Session,8,Unit II. Regression: Regression in High Dimensions & the Role of Regularization,"ISL §6.2.1,6.4"
 2026-10-07,Wednesday,Class Session,9,Unit II. Regression: Regularization Methods for Model Selection,"ISL §6.1, 6.2.2"
+2026-10-09,Friday,Homework,1,Problem Set #1 Due,
+2026-09-21,Monday,Homework,1,Problem Set #1 Released,
 2026-10-12,Monday,Class Session,10,Unit II. Regression: Stability Approaches in Applied Machine Learning,ISL §6.5
 2026-10-14,Wednesday,Class Session,11,Unit II. Regression: Higher and Higher – Feature Expansion Methods for Non-Linear Regression,"ISL §7.1-7.3,7.7"
 2026-10-19,Monday,Class Session,12,Unit II. Regression: Applied High-Dimensional Regression,ISL §7.8
 2026-10-21,Wednesday,Class Session,13,Introduction to Course Competition & Unit III. Classification: Introduction to Classification,
-2026-10-23,Friday,Homework,2,Problem Set #2 Due,
-2026-10-05,Monday,Homework,2,Problem Set #2 Released,
 2026-10-26,Monday,Class Session,14,Unit III. Classification & Ensemble Methods: Review of Logistic Regression,ISL §4.1-4.7
 2026-10-28,Wednesday,Class Session,15,Unit III. Classification & Ensemble Methods: Other Linear Classifiers,ISL §9.1-9.6
+2026-10-30,Friday,Homework,2,Problem Set #2 Due,
+2026-10-12,Monday,Homework,2,Problem Set #2 Released,
 2026-11-02,Monday,No Class,1,University Holiday: Day Before Elections,
 2026-11-04,Wednesday,Class Session,16,Unit III. Classification & Ensemble Methods: Tree Based Methods,"ISL §8.1, 8.3.1-8.3.2"
 2026-11-09,Monday,Class Session,17,Unit III. Classification & Ensemble Methods: Stacking and Bagging,"ISL §8.2.1-8.2.2, 8.3.3"

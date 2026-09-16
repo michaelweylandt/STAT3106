@@ -1,25 +1,25 @@
 Subject,Start Date,Start Time,End Date,End Time,All Day Event,Location
 STAT 3106Lecture1: Course Introduction,2026-09-09,10:10 AM,2026-09-09,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture2: Unit I. ML Fundamentals: Review of Linear Regression,2026-09-14,10:10 AM,2026-09-14,11:25 AM,False,Hamilton Hall 602
-STAT 3106: Problem Set #1 Released,2026-09-14,NA,2026-09-14,NA,True,NA
 STAT 3106Lecture3: Unit I. ML Fundamentals: Applied Linear Regression,2026-09-16,10:10 AM,2026-09-16,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture4: Unit I. ML Fundamentals: Loss & Error in Machine Learning,2026-09-21,10:10 AM,2026-09-21,11:25 AM,False,Hamilton Hall 602
+STAT 3106: Problem Set #1 Released,2026-09-21,NA,2026-09-21,NA,True,NA
 STAT 3106Lecture5: Unit I. ML Fundamentals: Resampling Methods for Machine Learning,2026-09-23,10:10 AM,2026-09-23,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture6: Unit I. ML Fundamentals: A Friendly Foray into First Order Optimization: SGD and Friends,2026-09-28,10:10 AM,2026-09-28,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture7: Unit I. ML Fundamentals: A Funny Thing Happened on the Way to the nth Dimension – Challenges of High-Dimensional Statistics,2026-09-30,10:10 AM,2026-09-30,11:25 AM,False,Hamilton Hall 602
-STAT 3106: Problem Set #1 Due,2026-10-02,4:45 PM,2026-10-02,5:00 PM,False,Gradescope
 STAT 3106Lecture8: Unit II. Regression: Regression in High Dimensions & the Role of Regularization,2026-10-05,10:10 AM,2026-10-05,11:25 AM,False,Hamilton Hall 602
-STAT 3106: Problem Set #2 Released,2026-10-05,NA,2026-10-05,NA,True,NA
 STAT 3106Lecture9: Unit II. Regression: Regularization Methods for Model Selection,2026-10-07,10:10 AM,2026-10-07,11:25 AM,False,Hamilton Hall 602
+STAT 3106: Problem Set #1 Due,2026-10-09,4:45 PM,2026-10-09,5:00 PM,False,Gradescope
 STAT 3106Lecture10: Unit II. Regression: Stability Approaches in Applied Machine Learning,2026-10-12,10:10 AM,2026-10-12,11:25 AM,False,Hamilton Hall 602
+STAT 3106: Problem Set #2 Released,2026-10-12,NA,2026-10-12,NA,True,NA
 STAT 3106Lecture11: Unit II. Regression: Higher and Higher – Feature Expansion Methods for Non-Linear Regression,2026-10-14,10:10 AM,2026-10-14,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture12: Unit II. Regression: Applied High-Dimensional Regression,2026-10-19,10:10 AM,2026-10-19,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture13: Introduction to Course Competition & Unit III. Classification: Introduction to Classification,2026-10-21,10:10 AM,2026-10-21,11:25 AM,False,Hamilton Hall 602
 STAT 3106: Competition Opened,2026-10-21,NA,2026-10-21,NA,True,NA
-STAT 3106: Problem Set #2 Due,2026-10-23,4:45 PM,2026-10-23,5:00 PM,False,Gradescope
 STAT 3106Lecture14: Unit III. Classification & Ensemble Methods: Review of Logistic Regression,2026-10-26,10:10 AM,2026-10-26,11:25 AM,False,Hamilton Hall 602
 STAT 3106: Problem Set #3 Released,2026-10-26,NA,2026-10-26,NA,True,NA
 STAT 3106Lecture15: Unit III. Classification & Ensemble Methods: Other Linear Classifiers,2026-10-28,10:10 AM,2026-10-28,11:25 AM,False,Hamilton Hall 602
+STAT 3106: Problem Set #2 Due,2026-10-30,4:45 PM,2026-10-30,5:00 PM,False,Gradescope
 STAT 3106Lecture16: Unit III. Classification & Ensemble Methods: Tree Based Methods,2026-11-04,10:10 AM,2026-11-04,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture17: Unit III. Classification & Ensemble Methods: Stacking and Bagging,2026-11-09,10:10 AM,2026-11-09,11:25 AM,False,Hamilton Hall 602
 STAT 3106Lecture18: Unit III. Classification & Ensemble Methods: Boosting,2026-11-11,10:10 AM,2026-11-11,11:25 AM,False,Hamilton Hall 602

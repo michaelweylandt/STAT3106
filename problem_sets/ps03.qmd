@@ -1,0 +1,6 @@
+---
+lab_num: "`r ps <- 3; ps`"
+---
+
+{{< include _setup.qmd >}}
+
