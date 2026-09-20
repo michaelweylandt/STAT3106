@@ -1,4 +1,5 @@
-title: "{{< var course.short >}} Problem Set #{{< meta lab_num >}}"
+title: "{{< var course.short >}} Problem Set #{{< meta ps_num >}}: {{< meta ps_title >}}"
 format:
   html:
     code-link: true
+    number-sections: true

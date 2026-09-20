@@ -25,3 +25,27 @@ get_ps_due <- function(N=ps){
 
 - Problem Set Assigned: `r get_ps_assigned(ps)`
 - **Due Date: `r get_ps_due(ps)`**
+
+::: {.callout-important title="Submission Instructions"}
+
+Submit your assignment as a PDF on Canvas/Courseworks. 
+
+Please observe the following guidelines when submitting an assignment: 
+
+1) Use 10-12 point font, 1.25 or 1.5-spaced. 
+2) Each problem should start on a new page. It is allowed, but not required,
+   for subparts to start a new page, *e.g.*, you do not need a page break before
+   starting 2(b), but you do need a page break before starting 2(a).
+3) When including code alongside a submission, run it through a code
+   formatting tool and keep lines to no more than 80 characters so they don't 
+   run off the end of the page.  Unintelligible code is presumtively incorrect.
+4) Figures and tables should have proper titles, axis labels, units, *etc.*
+
+You can use any formatting engine you prefer (`jupyter`, `R Markdown`, *etc*), 
+but I recommend [`Quarto`](https://quarto.org/). 
+
+Examples: [`R`-focused](./ps_example_r.qmd) and [`python`-focused](./ps_example_py.qmd)
+
+:::
+
+$$\newcommand{\bx}{\mathbf{x}}$$

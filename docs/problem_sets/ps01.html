@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>STAT 3106 Problem Set #1 – STAT 3106</title>
+<title>STAT 3106 Problem Set #1: ML Fundamentals – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -22,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -67,7 +102,32 @@ ul.task-list li input[type="checkbox"] {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script>
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="floating nav-fixed quarto-light">
 
@@ -110,18 +170,36 @@ ul.task-list li input[type="checkbox"] {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#data-files" id="toc-data-files" class="nav-link" data-scroll-target="#data-files">Data Files</a></li>
+  <li>
+<a href="#qualitative-questions-15-points" id="toc-qualitative-questions-15-points" class="nav-link" data-scroll-target="#qualitative-questions-15-points"><span class="header-section-number">1</span> <strong>Qualitative Questions</strong> (15 points)</a>
+  <ul class="collapse">
+<li><a href="#definitions-5-points" id="toc-definitions-5-points" class="nav-link" data-scroll-target="#definitions-5-points"><span class="header-section-number">1.1</span> Definitions (5 points)</a></li>
+  <li><a href="#short-answer-10-points" id="toc-short-answer-10-points" class="nav-link" data-scroll-target="#short-answer-10-points"><span class="header-section-number">1.2</span> Short Answer (10 points)</a></li>
+  </ul>
+</li>
+  <li><a href="#k-nearest-neighbor-methods-5-points" id="toc-k-nearest-neighbor-methods-5-points" class="nav-link" data-scroll-target="#k-nearest-neighbor-methods-5-points"><span class="header-section-number">2</span> <strong><span class="math inline">\(K\)</span>-Nearest Neighbor Methods</strong> (5 points)</a></li>
+  <li><a href="#encodings-and-tabular-representations-5-points" id="toc-encodings-and-tabular-representations-5-points" class="nav-link" data-scroll-target="#encodings-and-tabular-representations-5-points"><span class="header-section-number">3</span> <strong>Encodings and Tabular Representations</strong> (5 points)</a></li>
+  <li><a href="#estimating-out-of-sample-performance-with-cross-validation-20-points" id="toc-estimating-out-of-sample-performance-with-cross-validation-20-points" class="nav-link" data-scroll-target="#estimating-out-of-sample-performance-with-cross-validation-20-points"><span class="header-section-number">4</span> Estimating Out of Sample Performance with Cross-Validation (20 points)</a></li>
+  <li><a href="#using-cross-validation-for-model-selection-15-points" id="toc-using-cross-validation-for-model-selection-15-points" class="nav-link" data-scroll-target="#using-cross-validation-for-model-selection-15-points"><span class="header-section-number">5</span> Using Cross-Validation for Model Selection (15 points)</a></li>
+  <li><a href="#estimating-loco-feature-importance-15-points" id="toc-estimating-loco-feature-importance-15-points" class="nav-link" data-scroll-target="#estimating-loco-feature-importance-15-points"><span class="header-section-number">6</span> Estimating LOCO Feature Importance (15 points)</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">STAT 3106 Problem Set #1</h1>
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">STAT 3106 Problem Set #1: ML Fundamentals</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
   
@@ -134,10 +212,1979 @@ ul.task-list li input[type="checkbox"] {
 <li>Problem Set Assigned: Monday September 21</li>
 <li><strong>Due Date: Friday October 09 at 5:00PM on Canvas/Courseworks</strong></li>
 </ul>
+<div class="callout callout-style-default callout-important callout-titled" title="Submission Instructions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Submission Instructions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Submit your assignment as a PDF on Canvas/Courseworks.</p>
+<p>Please observe the following guidelines when submitting an assignment:</p>
+<ol type="1">
+<li>Use 10-12 point font, double-spaced.</li>
+<li>Each problem should start on a new page. It is allowed, but not required, for subparts to start a new page, <em>e.g.</em>, you do not need a page break before starting 2(b), but you do need a page break before starting 2(a).</li>
+<li>When including code alongside a submission, run it through a code formatting tool and keep lines to no more than 80 characters so they don’t run off the end of the page. Unintelligible code is presumtively incorrect.</li>
+<li>Figures and tables should have proper titles, axis labels, units, <em>etc.</em>
+</li>
+</ol>
+<p>You can use any formatting engine you prefer (<code>jupyter</code>, <code>R Markdown</code>, <em>etc</em>), but I recommend <a href="https://quarto.org/"><code>Quarto</code></a>.</p>
+<p>Examples: <a href="./ps_example_r.qmd"><code>R</code>-focused</a> and <a href="./ps_example_py.qmd"><code>python</code>-focused</a></p>
+</div>
+</div>
+<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}}\]</span></p>
+<section id="introduction" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this problem set, you will apply machine learning (ML) methods to the problem of predicting school-wide test scores on NYS standardized mathematics exams, given geographic and socioeconomic information about the student population.</p>
+<p>Along the way, we will review some basic ML terminology, take a closer look at how qualitative features like school district can be transformed for use in quantiative contexts, compare a variety of linear regression methods under different loss functions, benchmark against a basic non-linear model, and estimate the out-of-sample performance of different models for the same data.</p>
+</section><section id="data-files" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="data-files">Data Files</h2>
+<p>For this problem set, you will make use of the NYSED Math Scores data posted <a href="./data/ps01_nysed.csv">here</a>. This data set is extracted from standardized math test scores from (essentially) all public schools in New York State.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> For each school, I have reported the percent of students who achieve passing (‘proficient’) status for that exam, as well as a variety of other pieces of aggregate demographic data about the student body of that school. The full data set looks like this:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 9721 Columns: 34
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (6): ASSESSMENT_NAME, SCHOOL_NAME, DISTRICT_NAME, COUNTY_NAME, DISTRICT...
+dbl (28): PERCENT_PROFICIENT, NUMBER_TOOK_EXAM, ATTENDANCE_RATE, PERCENT_FRE...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 9,721
+Columns: 34
+$ PERCENT_PROFICIENT                 &lt;dbl&gt; 96, 28, 46, 70, 25, 28, 21, 7, 58, …
+$ NUMBER_TOOK_EXAM                   &lt;dbl&gt; 75, 193, 190, 67, 167, 165, 175, 12…
+$ ATTENDANCE_RATE                    &lt;dbl&gt; 90, 90, 90, 90, 90, 90, 90, 90, 90,…
+$ PERCENT_FREE_LUNCH                 &lt;dbl&gt; 69, 69, 69, 72, 72, 72, 80, 80, 80,…
+$ PERCENT_REDUCED_LUNCH              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3,…
+$ NUMBER_OF_TEACHERS                 &lt;dbl&gt; 96, 96, 96, 99, 99, 99, 86, 86, 86,…
+$ NUMBER_OF_COUNSELORS               &lt;dbl&gt; 2, 2, 2, 3, 3, 3, 2, 2, 2, 3, 3, 3,…
+$ NUMBER_OF_SOCIAL_WORKERS           &lt;dbl&gt; 3, 3, 3, 4, 4, 4, 2, 2, 2, 0, 0, 0,…
+$ PERCENT_OF_STUDENTS_SUSPENDED      &lt;dbl&gt; 27, 27, 27, 19, 19, 19, 20, 20, 20,…
+$ NUMBER_TOTAL_STUDENTS_IN_SCHOOL    &lt;dbl&gt; 630, 630, 630, 573, 573, 573, 488, …
+$ FEDERAL_FUNDING_PER_PUPIL          &lt;dbl&gt; 4104, 4104, 4104, 5043, 5043, 5043,…
+$ LOCAL_FUNDING_PER_PUPIL            &lt;dbl&gt; 33867, 33867, 33867, 35815, 35815, …
+$ PERCENT_MALE                       &lt;dbl&gt; 50, 50, 50, 57, 57, 57, 51, 51, 51,…
+$ PERCENT_FEMALE                     &lt;dbl&gt; 49, 49, 49, 43, 43, 43, 49, 49, 49,…
+$ PERCENT_ENGLISH_LANGUAGE_LEANERS   &lt;dbl&gt; 13, 13, 13, 12, 12, 12, 18, 18, 18,…
+$ PERCENT_AMERICAN_INDIAN            &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,…
+$ PERCENT_BLACK                      &lt;dbl&gt; 39, 39, 39, 45, 45, 45, 47, 47, 47,…
+$ PERCENT_ASIAN                      &lt;dbl&gt; 10, 10, 10, 14, 14, 14, 13, 13, 13,…
+$ PERCENT_HISPANIC                   &lt;dbl&gt; 25, 25, 25, 18, 18, 18, 21, 21, 21,…
+$ PERCENT_WHITE                      &lt;dbl&gt; 20, 20, 20, 15, 15, 15, 11, 11, 11,…
+$ PERCENT_MULTIRACIAL                &lt;dbl&gt; 6, 6, 6, 8, 8, 8, 7, 7, 7, 2, 2, 2,…
+$ PERCENT_WITH_DISABILITIES          &lt;dbl&gt; 20, 20, 20, 19, 19, 19, 18, 18, 18,…
+$ PERCENT_ECONOMICALLY_DISADVANTAGED &lt;dbl&gt; 69, 69, 69, 73, 73, 73, 80, 80, 80,…
+$ PERCENT_MIGRANT                    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ PERCENT_HOMELESS                   &lt;dbl&gt; 6, 6, 6, 4, 4, 4, 8, 8, 8, 0, 0, 0,…
+$ PERCENT_IN_FOSTER_CARE             &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,…
+$ PERCENT_PARENT_ARMED_FORCES        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ MATHEMATICS_AVERAGE_CLASS_SIZE     &lt;dbl&gt; 15.25, 15.25, 15.25, 13.75, 13.75, …
+$ ASSESSMENT_NAME                    &lt;chr&gt; "RegentsMath8", "Combined6Math", "C…
+$ SCHOOL_NAME                        &lt;chr&gt; "WILLIAM S HACKETT MIDDLE SCHOOL", …
+$ DISTRICT_NAME                      &lt;chr&gt; "ALBANY CITY SD", "ALBANY CITY SD",…
+$ COUNTY_NAME                        &lt;chr&gt; "ALBANY", "ALBANY", "ALBANY", "ALBA…
+$ DISTRICT_TYPE                      &lt;chr&gt; "High-Need Urban/Suburban", "High-N…
+$ REGION                             &lt;chr&gt; "Capital District, New York", "Capi…</code></pre>
+</div>
+</div>
+<p>Our goal will be to use all of these variables to predict the pass rate <code>PERCENT_PROFICIENT</code>. Note that some of the variables are <em>quantitative</em> while others are <em>qualitative</em>, <em>e.g.</em>, the school name and district name. Finally, note that I have rescaled percentages so that quantities like <code>PERCENT_PROFICIENT</code> or <code>PERCENT_ENGLISH_LANGUAGE_LEARNERS</code> are shown as “75”, “13”, “50”, “0” instead of “0.75”, “0.13”, “0.5”, “0”.</p>
+<p>You can read this data set directly off this website. In <code>R</code>, simply run:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"https://michael-weylandt.com/STAT3106/problem_sets/data/ps01_nysed.csv"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In <code>python</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pd.read_csv(<span class="st">"https://michael-weylandt.com/STAT3106/problem_sets/data/ps01_nysed.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section><section id="qualitative-questions-15-points" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="qualitative-questions-15-points">
+<span class="header-section-number">1</span> <strong>Qualitative Questions</strong> (15 points)</h2>
+<section id="definitions-5-points" class="level3" data-number="1.1"><h3 data-number="1.1" class="anchored" data-anchor-id="definitions-5-points">
+<span class="header-section-number">1.1</span> Definitions (5 points)</h3>
+<p>One point each: give a short (one sentence) definition.</p>
+<ol type="a">
+<li>What is <em>tabular</em> data?</li>
+<li>What is <em>supervised</em> learning?</li>
+<li>What is the <em>empirical risk minimization</em> strategy?</li>
+<li>What is <em>batch</em> learning?</li>
+<li>What is <em>test error</em>?</li>
+</ol></section><section id="short-answer-10-points" class="level3" data-number="1.2"><h3 data-number="1.2" class="anchored" data-anchor-id="short-answer-10-points">
+<span class="header-section-number">1.2</span> Short Answer (10 points)</h3>
+<p>Two points each.</p>
+<ol type="a">
+<li>Given an example of an <em>ordinal classification</em> task.</li>
+<li>Is the NYSED Math Proficiency Prediction task a classification problem or a regression problem? Why?</li>
+<li>If the NYSED task is a regression problem, how could it instead be reformulated as a classification problem? Alternatively, if it is a classification problem, would would a regression formulation look like instead?</li>
+<li>What is a real-world example of an <em>active learning</em> system you have encountered? What makes it <em>active</em>?</li>
+<li>Give a real-world example of a regression problem with an <em>asymmetric</em> loss function. What aspect of the response should an ML system try to capture (<em>e.g.</em>, mean, median, <em>etc.</em>)?</li>
+</ol></section></section><section id="k-nearest-neighbor-methods-5-points" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="k-nearest-neighbor-methods-5-points">
+<span class="header-section-number">2</span> <strong><span class="math inline">\(K\)</span>-Nearest Neighbor Methods</strong> (5 points)</h2>
+<p>In class, we introduced most of our ML concepts through one foundational method (OLS). In this assignment, we are going to compare OLS with a very different, but no less foundational, method called <span class="math inline">\(K\)</span>-Nearest Neighbors (K-NN).</p>
+<p>K-NN formalizes a simple idea: to make a prediction, remember what happened at the most similar point in the past. Specifically, when given a new point <span class="math inline">\(\tilde{\bx}\)</span>, we can search our training data for the ‘most similar’ point <span class="math inline">\(\bx_{\text{NN}}\)</span> and use its label as our prediction for <span class="math inline">\(\tilde{\bx}\)</span>: <span class="math inline">\(\hat{y} = y_{\text{NN}}\)</span>. This is <em>one</em> nearest-neighbor prediction (1-NN) because we found the <em>one</em> most similar point from our training data. In practice, we usually find several similar points (3, 5, or 7) and take their <em>average</em> to make our predictions. This is a bit less messy (random) than using a single point, while still being nearly as flexible as 1-NN.</p>
+<p>The <span class="math inline">\(K\)</span>-NN family of methods is opposite to OLS in many ways:</p>
+<ul>
+<li>While OLS reduces the (potentially) large training data down to a few coefficients, <span class="math inline">\(K\)</span>-NN has no coefficients</li>
+<li>Making predictions with OLS is easy (just a few multiplications and additions) while making predictions with <span class="math inline">\(K\)</span>-NN can be slow if we have to review the entire training set every time we want to use it</li>
+<li>When fit to non-linear relationships, OLS necessarily loses some information (by forcing things into a single plane) while <span class="math inline">\(K\)</span>-NN can fit any shape with enough data.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>
+</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="Question 2">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Question 2
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Fit <span class="math inline">\(K\)</span>-NN to the NYSED Prediction Task</strong></p>
+<ul>
+<li><p>Fit <span class="math inline">\(1\)</span>-NN to the NYSED Prediction Task (using only the numeric features). What is the training error? Why?</p></li>
+<li><p>Fit 9721-NN to the NYSED Prediction Task (again using only numeric features) and look at the predictions on the training data? What do you see? Why?</p></li>
+<li>
+<p>When faced with many features, <span class="math inline">\(K\)</span>-NN can be slow to implement so many approximate algorithms have been developed.</p>
+<p>Find an <em>approximate</em> <span class="math inline">\(K\)</span>-NN algorithm and compare it to ‘actual’ <span class="math inline">\(K\)</span>-NN for several values of <span class="math inline">\(K\)</span> (1, 3, 5, and 7 are reasonable choices). Make sure to compare predictions, training error, and the time it takes to make predictions.</p>
+</li>
+</ul>
+<p>For this problem, you may use pre-written <span class="math inline">\(K\)</span>-NN methods. You do not need to implement <span class="math inline">\(K\)</span>-NN from scratch.</p>
+</div>
+</div>
+</section><section id="encodings-and-tabular-representations-5-points" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="encodings-and-tabular-representations-5-points">
+<span class="header-section-number">3</span> <strong>Encodings and Tabular Representations</strong> (5 points)</h2>
+<p>The majority of methods discussed in this course require <em>tabular</em> data output. That is, data arranged in a two-dimensional grid where one axis (typically row) indexes observations and the other (typically column) indexes different features of the data. In each cell of the resulting table, a single (scalar) value reflects the value of a specific feature for a specific observation. <em>E.g.</em>,</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl_iris1" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tbl_iris1 table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#tbl_iris1 thead, #tbl_iris1 tbody, #tbl_iris1 tfoot, #tbl_iris1 tr, #tbl_iris1 td, #tbl_iris1 th {
+  border-style: none;
+}
+
+#tbl_iris1 p {
+  margin: 0;
+  padding: 0;
+}
+
+#tbl_iris1 .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#tbl_iris1 .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tbl_iris1 .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tbl_iris1 .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tbl_iris1 .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tbl_iris1 .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tbl_iris1 .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tbl_iris1 .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tbl_iris1 .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#tbl_iris1 .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#tbl_iris1 .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tbl_iris1 .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tbl_iris1 .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tbl_iris1 .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tbl_iris1 .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_iris1 .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#tbl_iris1 .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#tbl_iris1 .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#tbl_iris1 .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_iris1 .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#tbl_iris1 .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_iris1 .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tbl_iris1 .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_iris1 .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_iris1 .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_iris1 .gt_left {
+  text-align: left;
+}
+
+#tbl_iris1 .gt_center {
+  text-align: center;
+}
+
+#tbl_iris1 .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tbl_iris1 .gt_font_normal {
+  font-weight: normal;
+}
+
+#tbl_iris1 .gt_font_bold {
+  font-weight: bold;
+}
+
+#tbl_iris1 .gt_font_italic {
+  font-style: italic;
+}
+
+#tbl_iris1 .gt_super {
+  font-size: 65%;
+}
+
+#tbl_iris1 .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#tbl_iris1 .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#tbl_iris1 .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#tbl_iris1 .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#tbl_iris1 .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#tbl_iris1 .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#tbl_iris1 .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#tbl_iris1 .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#tbl_iris1 div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="5" class="gt_heading gt_title gt_font_normal gt_bottom_border"><strong>Iris Flower Morphometrics</strong></td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="Sepal.Length" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sepal Length (mm)</th>
+<th id="Sepal.Width" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sepal Width (mm)</th>
+<th id="Petal.Length" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Petal Length (mm)</th>
+<th id="Petal.Width" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Petal Width (mm)</th>
+<th id="Species" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Species</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">5.1</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.5</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.3</td>
+<td class="gt_row gt_left" headers="Species">Setosa</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.4</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.4</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.7</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_left" headers="Species">Setosa</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">4.6</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_left" headers="Species">Setosa</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.8</td>
+<td class="gt_row gt_right" headers="Sepal.Width">4.0</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.2</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_left" headers="Species">Setosa</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">5.8</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.7</td>
+<td class="gt_row gt_right" headers="Petal.Length">3.9</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.2</td>
+<td class="gt_row gt_left" headers="Species">Versicolor</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">6.3</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.3</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.3</td>
+<td class="gt_row gt_left" headers="Species">Versicolor</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">6.4</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.5</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.5</td>
+<td class="gt_row gt_left" headers="Species">Versicolor</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">6.5</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.6</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.5</td>
+<td class="gt_row gt_left" headers="Species">Versicolor</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">7.2</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">6.0</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.8</td>
+<td class="gt_row gt_left" headers="Species">Virginica</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.6</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.9</td>
+<td class="gt_row gt_right" headers="Petal.Width">2.0</td>
+<td class="gt_row gt_left" headers="Species">Virginica</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">6.0</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.0</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.8</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.8</td>
+<td class="gt_row gt_left" headers="Species">Virginica</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">7.7</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">6.7</td>
+<td class="gt_row gt_right" headers="Petal.Width">2.2</td>
+<td class="gt_row gt_left" headers="Species">Virginica</td>
+</tr>
+</tbody>
+<tfoot>
+<tr class="gt_footnotes odd">
+<td colspan="5" class="gt_footnote">(Species-stratified sample of 12 rows)</td>
+</tr>
+<tr class="gt_sourcenotes even">
+<td colspan="5" class="gt_sourcenote">Fisher, R.A. (1936) ‘The Use of Multiple Measurements in Taxonomic Problems’, <em>Annals of Human Genetics</em> 7(2), pp.179-188. 1936. DOI:<a href="https://dx.doi.org/10.1111/j.1469-1809.1936.tb02137.x">10.1111/j.1469-1809.1936.tb02137.x</a>
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+</div>
+</div>
+<p>While this format is sufficient for most data manipulation tasks, a little more pre-processing is required before fitting mathematical models. Specifically, <em>qualitative</em> features need to be transformed into <em>quantitative</em> values through a process called <em>encoding</em>.</p>
+<p>The most common type of encoding is “one-hot encoding” in which a column is created for <em>each</em> possible value of <em>each</em> qualitative feature. <em>E.g.</em>, in the table above, we might process the data into a format like:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="iris_tbl2" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#iris_tbl2 table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#iris_tbl2 thead, #iris_tbl2 tbody, #iris_tbl2 tfoot, #iris_tbl2 tr, #iris_tbl2 td, #iris_tbl2 th {
+  border-style: none;
+}
+
+#iris_tbl2 p {
+  margin: 0;
+  padding: 0;
+}
+
+#iris_tbl2 .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#iris_tbl2 .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#iris_tbl2 .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#iris_tbl2 .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#iris_tbl2 .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#iris_tbl2 .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#iris_tbl2 .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#iris_tbl2 .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#iris_tbl2 .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#iris_tbl2 .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#iris_tbl2 .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iris_tbl2 .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#iris_tbl2 .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#iris_tbl2 .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#iris_tbl2 .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl2 .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#iris_tbl2 .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#iris_tbl2 .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#iris_tbl2 .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl2 .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#iris_tbl2 .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl2 .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#iris_tbl2 .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl2 .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl2 .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl2 .gt_left {
+  text-align: left;
+}
+
+#iris_tbl2 .gt_center {
+  text-align: center;
+}
+
+#iris_tbl2 .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#iris_tbl2 .gt_font_normal {
+  font-weight: normal;
+}
+
+#iris_tbl2 .gt_font_bold {
+  font-weight: bold;
+}
+
+#iris_tbl2 .gt_font_italic {
+  font-style: italic;
+}
+
+#iris_tbl2 .gt_super {
+  font-size: 65%;
+}
+
+#iris_tbl2 .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#iris_tbl2 .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#iris_tbl2 .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#iris_tbl2 .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#iris_tbl2 .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#iris_tbl2 .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#iris_tbl2 .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#iris_tbl2 .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#iris_tbl2 div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings header">
+<th id="Sepal.Length" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sepal Length (mm)</th>
+<th id="Sepal.Width" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sepal Width (mm)</th>
+<th id="Petal.Length" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Petal Length (mm)</th>
+<th id="Petal.Width" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Petal Width (mm)</th>
+<th id="Species_Setosa" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Species_Setosa</th>
+<th id="Species_Versicolor" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Species_Versicolor</th>
+<th id="Species_Virginica" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Species_Virginica</th>
+</tr></thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">5.1</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.5</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.3</td>
+<td class="gt_row gt_right" headers="Species_Setosa">1</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.4</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.4</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.7</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_right" headers="Species_Setosa">1</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">4.6</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_right" headers="Species_Setosa">1</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.8</td>
+<td class="gt_row gt_right" headers="Sepal.Width">4.0</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.2</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_right" headers="Species_Setosa">1</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">5.8</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.7</td>
+<td class="gt_row gt_right" headers="Petal.Length">3.9</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.2</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">1</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">6.3</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.3</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.3</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">1</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">6.4</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.5</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.5</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">1</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">6.5</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.6</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.5</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">1</td>
+<td class="gt_row gt_right" headers="Species_Virginica">0</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">7.2</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">6.0</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.8</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.6</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.9</td>
+<td class="gt_row gt_right" headers="Petal.Width">2.0</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">1</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">6.0</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.0</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.8</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.8</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">7.7</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">6.7</td>
+<td class="gt_row gt_right" headers="Petal.Width">2.2</td>
+<td class="gt_row gt_right" headers="Species_Setosa">0</td>
+<td class="gt_row gt_right" headers="Species_Versicolor">0</td>
+<td class="gt_row gt_right" headers="Species_Virginica">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>One-hot encoding is useful, but it can quickly make problems <em>explode</em> in size. (If you have 20 categorical features, each of which takes on 15 different values, you now have 300 numerical features! Since many ML methods are quadratic in run-time, this means your algorithm just became about 225 times slower!) This may not be the end of the world-computers are quite fast after all-but it suggests that there may be a role for other approaches that avoid creating quite so many features.</p>
+<p>One popular choice is <em>target</em> encoding, in which the categorical variable is replaced by the average value of the response for that ‘subgroup’ of the data. For instance, if we were trying to predict the Petal Length of the <code>iris</code> data above, <em>target</em> encoding would give us this data set instead:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">iris_sub</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">group_by</span><span class="op">(</span><span class="va">Species</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>Species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">Petal.Length</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">gt</span><span class="op">(</span>id<span class="op">=</span><span class="st">"iris_tbl3"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">cols_label</span><span class="op">(</span>Sepal.Length <span class="op">=</span> <span class="st">"Sepal Length (mm)"</span>, </span>
+<span>               Sepal.Width <span class="op">=</span> <span class="st">"Sepal Width (mm)"</span>, </span>
+<span>               Petal.Length <span class="op">=</span> <span class="st">"Petal Length (mm)"</span>, </span>
+<span>               Petal.Width<span class="op">=</span><span class="st">"Petal Width (mm)"</span>, </span>
+<span>               Species<span class="op">=</span><span class="st">"Species (Target Encoded on Petal Length)"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="iris_tbl3" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#iris_tbl3 table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#iris_tbl3 thead, #iris_tbl3 tbody, #iris_tbl3 tfoot, #iris_tbl3 tr, #iris_tbl3 td, #iris_tbl3 th {
+  border-style: none;
+}
+
+#iris_tbl3 p {
+  margin: 0;
+  padding: 0;
+}
+
+#iris_tbl3 .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#iris_tbl3 .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#iris_tbl3 .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#iris_tbl3 .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#iris_tbl3 .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#iris_tbl3 .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#iris_tbl3 .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#iris_tbl3 .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#iris_tbl3 .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#iris_tbl3 .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#iris_tbl3 .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iris_tbl3 .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#iris_tbl3 .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#iris_tbl3 .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#iris_tbl3 .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl3 .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#iris_tbl3 .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#iris_tbl3 .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#iris_tbl3 .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl3 .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#iris_tbl3 .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl3 .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#iris_tbl3 .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl3 .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iris_tbl3 .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iris_tbl3 .gt_left {
+  text-align: left;
+}
+
+#iris_tbl3 .gt_center {
+  text-align: center;
+}
+
+#iris_tbl3 .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#iris_tbl3 .gt_font_normal {
+  font-weight: normal;
+}
+
+#iris_tbl3 .gt_font_bold {
+  font-weight: bold;
+}
+
+#iris_tbl3 .gt_font_italic {
+  font-style: italic;
+}
+
+#iris_tbl3 .gt_super {
+  font-size: 65%;
+}
+
+#iris_tbl3 .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#iris_tbl3 .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#iris_tbl3 .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#iris_tbl3 .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#iris_tbl3 .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#iris_tbl3 .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#iris_tbl3 .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#iris_tbl3 .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#iris_tbl3 div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings header">
+<th id="Sepal.Length" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sepal Length (mm)</th>
+<th id="Sepal.Width" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sepal Width (mm)</th>
+<th id="Petal.Length" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Petal Length (mm)</th>
+<th id="Petal.Width" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Petal Width (mm)</th>
+<th id="Species" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Species (Target Encoded on Petal Length)</th>
+</tr></thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">5.1</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.5</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.3</td>
+<td class="gt_row gt_right" headers="Species">1.425</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.4</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.4</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.7</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_right" headers="Species">1.425</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">4.6</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_right" headers="Species">1.425</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.8</td>
+<td class="gt_row gt_right" headers="Sepal.Width">4.0</td>
+<td class="gt_row gt_right" headers="Petal.Length">1.2</td>
+<td class="gt_row gt_right" headers="Petal.Width">0.2</td>
+<td class="gt_row gt_right" headers="Species">1.425</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">5.8</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.7</td>
+<td class="gt_row gt_right" headers="Petal.Length">3.9</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.2</td>
+<td class="gt_row gt_right" headers="Species">4.350</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">6.3</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.3</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.4</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.3</td>
+<td class="gt_row gt_right" headers="Species">4.350</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">6.4</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.5</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.5</td>
+<td class="gt_row gt_right" headers="Species">4.350</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">6.5</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.6</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.5</td>
+<td class="gt_row gt_right" headers="Species">4.350</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">7.2</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.2</td>
+<td class="gt_row gt_right" headers="Petal.Length">6.0</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.8</td>
+<td class="gt_row gt_right" headers="Species">5.600</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">5.6</td>
+<td class="gt_row gt_right" headers="Sepal.Width">2.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.9</td>
+<td class="gt_row gt_right" headers="Petal.Width">2.0</td>
+<td class="gt_row gt_right" headers="Species">5.600</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Sepal.Length">6.0</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.0</td>
+<td class="gt_row gt_right" headers="Petal.Length">4.8</td>
+<td class="gt_row gt_right" headers="Petal.Width">1.8</td>
+<td class="gt_row gt_right" headers="Species">5.600</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Sepal.Length">7.7</td>
+<td class="gt_row gt_right" headers="Sepal.Width">3.8</td>
+<td class="gt_row gt_right" headers="Petal.Length">6.7</td>
+<td class="gt_row gt_right" headers="Petal.Width">2.2</td>
+<td class="gt_row gt_right" headers="Species">5.600</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Question 3">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Question 3
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Compare Encoding Methods on the NYSED Task</strong></p>
+<ul>
+<li>Fit OLS to the NYSED Data using One-Hot Encoding for all qualitative features. How long does it take to fit? How many features does the encoded data have? What is the in-sample (training) error?</li>
+<li>Fit OLS to the NYSED Data using Target Encoding for all qualitative features. How long does it take to fit? How many features does the encoded data have? What is the in-sample (training) error?</li>
+<li>Fit 5-NN to the NYSED Data using One-Hot Encoding for all qualitative features. How long does it take to predict? How many features does the encoded data have? What is the in-sample (training) error?</li>
+<li>Fit 5-NN to the NYSED Data using Target Encoding for all qualitative features. How long does it take to predict? How many features does the encoded data have? What is the in-sample (training) error?</li>
+<li>Text Answer: In the context of NYSED, what does using Target Encoding effectively do to the <code>DISTRICT_NAME</code> variable? Is this reasonable? Is there any danger using Target Encoding for future predictions? (<em>Hint</em>: What happens to very small districts?)</li>
+</ul>
+</div>
+</div>
+</section><section id="estimating-out-of-sample-performance-with-cross-validation-20-points" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="estimating-out-of-sample-performance-with-cross-validation-20-points">
+<span class="header-section-number">4</span> Estimating Out of Sample Performance with Cross-Validation (20 points)</h2>
+<p>Recall that our primary focus in this course is on developing models that perform well <em>out-of-sample</em>, <em>i.e.</em>, on new ‘test’ data. Unfortunately, we do not always have an unlimited supply of ‘new’ data we can use for model evaluation and instead have to find a way to use our existing data for both model fitting and model evaluation. Doing this correctly can be a bit tricky: we want to avoid testing the model on data it has already seen so we don’t give it credit for ‘teaching to the test.’</p>
+<p>But the fix is not too hard! We can split our data into two parts and use one for model fitting and the other for model evaluation in lieu of ‘true’ test data. The ‘golden rule’ here is simple: what is used to fit a model <em>cannot</em> be used to evaluate it and <em>vice versa</em>. In general, fitting a model is harder than simply estimating its out-of-sample accuracy, so we don’t use a straight 50/50 split, but it’s hard to give a universal guideline.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> This is known as the <strong>hold-out</strong> method.</p>
+<p>One criticism of the <strong>hold-out</strong> method is that it can be a bit wasteful and a bit random. If we set 40% of our data aside for the holdout set, we are fitting our model on only 60% as much data as we would hope to and this can make our predictions <em>much</em> worse.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> With ‘large enough’ data, this may not be a problem, but ‘large enough’ is always relative to the model being fit and we would rather use a large data set to fit a flexible and powerful model; in other problems, data is scarce and spending 25-40% on model testing can significantly impair our ability to fit models at all.</p>
+<p>The method of [<em>cross-validation</em>](https://en.wikipedia.org/wiki/Cross-validation_(statistics) (CV) attempts to address some of these limitations. Rather than performing a single split, we first:</p>
+<ul>
+<li>Split the entire data set into <span class="math inline">\(K\)</span> chunks of (roughly) equal size;</li>
+<li>For <span class="math inline">\(k = 1, \dots, K\)</span>:
+<ul>
+<li>Set one chunk aside for model evaluation</li>
+<li>Use the other <span class="math inline">\(K-1\)</span> chunks to fit the model</li>
+<li>Evaluate the model on the ‘set aside’ chunk and record the prediction error</li>
+</ul>
+</li>
+<li>Average the prediction errors to get the <em>cross-validation</em> estimate of prediction error. (It is also a good idea to put an error bar on this average.)</li>
+</ul>
+<p>Visually,</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="https://scikit-learn.org/1.5/_images/grid_search_cross_validation.png" class="img-fluid figure-img"></p>
+<figcaption>From the <code>sklearn</code> Documentation</figcaption></figure>
+</div>
+<p>Note that because the model being evaluated is a bit different each of the <span class="math inline">\(K\)</span> times, it’s best to think of cross-validation as estimating the accuracy of a class of models rather than a single model. (‘How well does <em>linear regression</em> do on this problem?’ rather than ‘How well will this specific line do?’)</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Question 4">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Question 4
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Implement 10-Fold Cross Validation to Estimate Prediction Performance on the NYSED Math Proficiency Task</strong></p>
+<ul>
+<li>Read <a href="https://www.mlbenchmarks.org/04-holdout-method.html">Chapter 4 of MLB</a> for additional background on the holdout method</li>
+<li>Implement 10-fold cross validation to estimate the prediction error of OLS and 5-NN on the full NYSED data set (all 9721 rows) using only the <code>NUMBER_*</code> features. How does the CV error compare to the in-sample error?</li>
+<li>Repeat your analysis using <em>all</em> numeric features. How does the CV error compare to the in-sample error? Does this make sense? Why or why not?</li>
+<li>Repeat your analysis using <em>all</em> features, except <code>SCHOOL_NAME</code> and <code>DISTRICT_NAME</code>, using <strong>one-hot</strong> encoding. How does the CV error compare to the in-sample error? Does this make sense? Why or why not?</li>
+<li>Repeat your analysis using <em>all</em> features, except <code>SCHOOL_NAME</code> and <code>DISTRICT_NAME</code>, using <strong>target</strong> encoding. (<strong>NB</strong> Do the encoding <em>within</em> each cross-validation fold, not <em>before</em> splitting the data.) How does the CV error compare to the in-sample error? Does this make sense? Why or why not?</li>
+<li>Text Answer: Why is it important to do target encoding <em>within</em> each CV fold? What would happen if we did target encoding before implementing CV? What would happen to our CV error and what would happen to our eventual test error?</li>
+</ul>
+<p>For this whole assignment, you must implement CV ‘by hand’ and cannot use a built-in cross-validation function like <code>sklearn</code>’s <code>sklearn.model_selection.cross_validation</code>.</p>
+</div>
+</div>
+<p><em>Important</em>: When fitting CV for all features, make sure to avoid any “data leakage” during the encoding steps. You may need to look into concepts like <em>stratified sampling</em>. If a feature has too many values you can drop it from your analysis, but just be sure to note that you did.</p>
+</section><section id="using-cross-validation-for-model-selection-15-points" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="using-cross-validation-for-model-selection-15-points">
+<span class="header-section-number">5</span> Using Cross-Validation for Model Selection (15 points)</h2>
+<p>Another use of cross-validation is selecting certain ‘hyperparameters’. <em>Hyperparameters</em> in this context refers to decisions that are made before the model encounters data: <em>e.g.</em>, we might pre-select which features to include in a linear model before we actually use our data to estimate the regression coefficients.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> Recalling our ‘north star’ of optimizing predictions, we can try a reasonable range of values for a hyperparameter and pick the one that gives the most accurate cross-validation predictions.</p>
+<p>There is, however, a slight risk here as the CV error we get is not an unbiased estimate of the true prediction error. Remember: if we pick the values of the model parameters to minimize our loss, we expect our future loss to be a bit worse; the same logic applies to selecting <em>hyperparameters</em>. To avoid this, we should use a combination of CV + holdout.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Question 5">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Question 5
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Use 5-Fold CV to Select the Predictively Optimal <span class="math inline">\(K\)</span> for <span class="math inline">\(K\)</span>-Nearest Neighbors</strong></p>
+<ul>
+<li>Set aside 10% of your data for final model evaluation.</li>
+<li>Using the remaining 90%, implement 5-fold cross-validation to estimate the prediction error of <span class="math inline">\(1\)</span>-nearest neighbors using only the numeric features of the NYSED data. Make sure to record the average prediction error and the standard deviation.</li>
+<li>Repeat your analysis for <span class="math inline">\(K=2, 3, \dots, 25\)</span>
+</li>
+<li>Visualize your results. Based on these, what do you think the best value of <span class="math inline">\(K\)</span> will be? What is its cross-validation error?</li>
+<li>Now, compute the performance of <span class="math inline">\(K_{\text{best}}\)</span>-NN on the 10% hold out data. How does its error compare to the CV error? Does this make sense? Why?</li>
+</ul>
+</div>
+</div>
+<p>You may use the fast (approximate) <span class="math inline">\(K\)</span>-nearest neighbors from the previous question.</p>
+</section><section id="estimating-loco-feature-importance-15-points" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="estimating-loco-feature-importance-15-points">
+<span class="header-section-number">6</span> Estimating LOCO Feature Importance (15 points)</h2>
+<p>In certain applications, it may be important to <em>interpret</em> or <em>explain</em> the output of an ML model. Because different models work differently and different users require different types of interpretations, this is a challenging task for which a variety of methods have been proposed.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> In this sub-problem, you will explore a basic strategy sometimes called <strong>LOCO</strong> (Leave-One-Covariate-Out) feature importance.</p>
+<p>The idea of LOCO is simple: a model is fit with and without a given feature and compare its performance. If the performance of the model falls when a feature is omitted, it is important; if the performance doesn’t significantly change, the feature is probably not too important to the model (or can be ‘replaced’ by other features in the data). Since, as always, we are interested in out-of-sample performance, the LOCO score is typically computed within a cross-validation scheme, rather than simply comparing in-sample error.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Question 6">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Question 6
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Use LOCO to Determine the Relative Feature Importance of 5 Features in this Data Set</strong></p>
+<ul>
+<li>Select 5 features that you intuitively think would be the most important for this data set and state your <em>a priori</em> ranking as to which will be the most important. (You can do more, but LOCO can become quite slow rather quickly so 5 is enough.)</li>
+<li>Using LOCO with a five-fold cross-validation step, compute the importance of each feature and create a figure to visualize your results. Your figure must include ‘error bars’ to capture the randomness in your CV error estimates.</li>
+<li>Compare your LOCO results with your initial guess about feature importance. Are they consistent? If no, why not?</li>
+<li>Finally, compare your OLS-LOCO scores to KNN-LOCO on the same data. (You can fix <span class="math inline">\(K\)</span> to the value you determined previously and do not need to re-estimate it.) Do your results change? Does this make sense?</li>
+</ul>
+</div>
+</div>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>I have restricted the data set to only those schools that choose to report the full set of demographic variables in the data set, so there are no missing values to deal with.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>For this reason, we say <span class="math inline">\(K\)</span>-NN is <em>universally consistent</em>. As we will discuss, this is a double-edged sword: it can fit <em>any</em> pattern, but it can also fit <em>any</em> noise.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>In general, you want to use as much data as needed to get a good estimate of model performance, but no more; without having some <em>a priori</em> knowledge of the inherent difficulty (variance) of a problem, this is a bit easier said than done.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Think of estimating the mean of a distribution. With 100 samples, the standard error in our estimation of the mean is <span class="math inline">\(\hat{\sigma}/\sqrt{100}\)</span> from the full data, but only <span class="math inline">\(\hat{\sigma}/\sqrt{60}\)</span> from the ‘fitting’ portion of the data. This could increase our error by a factor of around <span class="math inline">\(1.3 \approx \sqrt{100}/\sqrt{60}\)</span> - that’s the difference between success and failure in many problems!<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>If you think that this line can be a bit fuzzy in practice, you are not wrong. Still, the idea of ‘structural’ vs ‘ERM-driven’ choices is an important one.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>G.I. Allen, L. Gan, and L. Zheng. “Interpretable Machine Learning for Discovery: Statistical Challenges and Opportunities.” <em>Annual Review of Statistics and Its Application</em> <strong>11</strong>, p.97-121 (2024). DOI:<a href="https://doi.org/10.1146/annurev-statistics-040120-030919">10.1146/annurev-statistics-040120-030919</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -541,4 +2588,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

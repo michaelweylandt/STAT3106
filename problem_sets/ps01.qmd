@@ -1,5 +1,426 @@
 ---
-lab_num: "`r ps <- 1; ps`"
+ps_num: "`r ps <- 1; ps`"
+ps_title: "ML Fundamentals"
 ---
 
 {{< include _setup.qmd >}}
+
+## Introduction {.unnumbered}
+
+In this problem set, you will apply machine learning (ML) methods to the problem
+of predicting school-wide test scores on NYS standardized mathematics exams, 
+given geographic and socioeconomic information about the student population. 
+
+Along the way, we will review some basic ML terminology, take a closer look
+at how qualitative features like school district can be transformed for use in
+quantiative contexts, compare a variety of linear regression methods under 
+different loss functions, benchmark against a basic non-linear model, and 
+estimate the out-of-sample performance of different models for the same data.
+
+## Data Files {.unnumbered}
+
+For this problem set, you will make use of the NYSED Math Scores data posted
+[here](./data/ps01_nysed.csv). This data set is extracted from standardized
+math test scores from (essentially) all public schools in New York 
+State.[^complete] For each school, I have reported the percent of students who 
+achieve passing ('proficient') status for that exam, as well as a variety of 
+other pieces of aggregate demographic data about the student body of that 
+school. The full data set looks like this: 
+
+[^complete]: I have restricted the data set to only those schools that choose
+to report the full set of demographic variables in the data set, so there are no
+missing values to deal with. 
+
+```{r}
+#| echo: false
+NYSED <- read_csv("problem_sets/data/ps01_nysed.csv")
+glimpse(NYSED)
+```
+
+Our goal will be to use all of these variables to predict the pass rate
+`PERCENT_PROFICIENT`. Note that some of the variables are _quantitative_
+while others are _qualitative_, *e.g.*, the school name and district name. Finally, 
+note that I have rescaled percentages so that quantities like `PERCENT_PROFICIENT`
+or `PERCENT_ENGLISH_LANGUAGE_LEARNERS` are shown as "75", "13", "50", "0" instead
+of "0.75", "0.13", "0.5", "0". 
+
+You can read this data set directly off this website. In `R`, simply run: 
+
+```{r}
+#| eval: false
+library(readr)
+read_csv("https://michael-weylandt.com/STAT3106/problem_sets/data/ps01_nysed.csv")
+```
+
+In `python`: 
+
+```{python}
+#| eval: false
+import pandas as pd
+pd.read_csv("https://michael-weylandt.com/STAT3106/problem_sets/data/ps01_nysed.csv")
+```
+
+## **Qualitative Questions** (15 points)
+
+### Definitions (5 points)
+
+One point each: give a short (one sentence) definition. 
+
+a. What is *tabular* data? 
+b. What is *supervised* learning? 
+c. What is the *empirical risk minimization* strategy? 
+d. What is *batch* learning? 
+e. What is *test error*?
+   
+### Short Answer (10 points)
+
+Two points each.
+
+a. Given an example of an _ordinal classification_ task.
+b. Is the NYSED Math Proficiency Prediction task a classification problem or
+   a regression problem? Why? 
+c. If the NYSED task is a regression problem, how could it instead be 
+   reformulated as a classification problem? Alternatively, if it is a 
+   classification problem, would would a regression formulation look like instead?
+d. What is a real-world example of an *active learning* system you have 
+   encountered? What makes it *active*?
+e. Give a real-world example of a regression problem with an _asymmetric_ loss 
+   function. What aspect of the response should an ML system try to capture 
+   (*e.g.*, mean, median, *etc.*)?
+   
+## **$K$-Nearest Neighbor Methods** (5 points)
+
+In class, we introduced most of our ML concepts through one foundational method
+(OLS). In this assignment, we are going to compare OLS with a very different,
+but no less foundational, method called $K$-Nearest Neighbors (K-NN). 
+
+K-NN formalizes a simple idea: to make a prediction, remember what happened at
+the most similar point in the past. Specifically, when given a new point 
+$\tilde{\bx}$, we can search our training data for the 'most similar' 
+point $\bx_{\text{NN}}$ and use its label as our prediction for $\tilde{\bx}$: 
+$\hat{y} = y_{\text{NN}}$. This is _one_ nearest-neighbor prediction (1-NN) 
+because we found the _one_ most similar point from our training data. In practice,
+we usually find several similar points (3, 5, or 7) and take their _average_ to
+make our predictions. This is a bit less messy (random) than using a single point, 
+while still being nearly as flexible as 1-NN. 
+
+The $K$-NN family of methods is opposite to OLS in many ways: 
+
+- While OLS reduces the (potentially) large training data down to a few 
+  coefficients, $K$-NN has no coefficients
+- Making predictions with OLS is easy (just a few multiplications and additions)
+  while making predictions with $K$-NN can be slow if we have to review the
+  entire training set every time we want to use it
+- When fit to non-linear relationships, OLS necessarily loses some information
+  (by forcing things into a single plane) while $K$-NN can fit any shape with
+  enough data.[^universal]
+  
+
+::: {.callout-tip title="Question 2"}
+
+**Fit $K$-NN to the NYSED Prediction Task**
+
+- Fit $1$-NN to the NYSED Prediction Task (using only the numeric features).
+  What is the training error? Why?
+- Fit `r NROW(NYSED)`-NN to the NYSED Prediction Task (again using only numeric
+  features) and look at the predictions on the training data? What do you see?
+  Why?
+- When faced with many features, $K$-NN can be slow to implement so many 
+  approximate algorithms have been developed. 
+  
+  Find an _approximate_ $K$-NN algorithm and compare it to 'actual' $K$-NN for
+  several values of $K$ (1, 3, 5, and 7 are reasonable choices). Make sure to
+  compare predictions, training error, and the time it takes to make predictions.
+  
+
+For this problem, you may use pre-written $K$-NN methods. You do not need to
+implement $K$-NN from scratch. 
+
+:::
+  
+[^universal]: For this reason, we say $K$-NN is _universally consistent_. As we
+will discuss, this is a double-edged sword: it can fit _any_ pattern, but it can
+also fit _any_ noise. 
+
+## **Encodings and Tabular Representations** (5 points)
+
+The majority of methods discussed in this course require *tabular* data output. 
+That is, data arranged in a two-dimensional grid where one axis (typically row) 
+indexes observations and the other (typically column) indexes different
+features of the data. In each cell of the resulting table, a single (scalar)
+value reflects the value of a specific feature for a specific observation. 
+*E.g.*, 
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(gt)
+
+set.seed(3106)
+iris_sub <- iris |> 
+    mutate(Species = str_to_title(Species)) |> 
+    group_by(Species) |> 
+    slice_sample(n=4) |>
+    ungroup()
+
+iris_sub |> 
+    gt(id="tbl_iris1") |>
+    cols_label(Sepal.Length = "Sepal Length (mm)", 
+               Sepal.Width = "Sepal Width (mm)", 
+               Petal.Length = "Petal Length (mm)", 
+               Petal.Width="Petal Width (mm)") |> 
+    tab_header(md("**Iris Flower Morphometrics**")) |> 
+    tab_source_note(md("Fisher, R.A. (1936) 'The Use of Multiple Measurements in Taxonomic Problems', *Annals of Human Genetics* 7(2), pp.179-188. 1936. DOI:[10.1111/j.1469-1809.1936.tb02137.x](https://dx.doi.org/10.1111/j.1469-1809.1936.tb02137.x)")) |>
+    tab_footnote("(Species-stratified sample of 12 rows)")
+```
+
+While this format is sufficient for most data manipulation tasks, a little
+more pre-processing is required before fitting mathematical models. 
+Specifically, *qualitative* features need to be transformed into *quantitative*
+values through a process called _encoding_. 
+
+The most common type of encoding is "one-hot encoding" in which a column
+is created for _each_ possible value of _each_ qualitative feature. *E.g.*,
+in the table above, we might process the data into a format like: 
+
+```{r}
+#| echo: false
+#| message: false
+library(recipes)
+
+recipe(~ ., data=iris_sub) |> 
+    step_dummy(all_nominal_predictors(), one_hot=TRUE) |>
+    prep() |> 
+    bake(new_data=NULL) |>
+    gt(id="iris_tbl2") |>
+    cols_label(Sepal.Length = "Sepal Length (mm)", 
+               Sepal.Width = "Sepal Width (mm)", 
+               Petal.Length = "Petal Length (mm)", 
+               Petal.Width="Petal Width (mm)")
+```
+
+One-hot encoding is useful, but it can quickly make problems _explode_ in size.
+(If you have 20 categorical features, each of which takes on 15 different values,
+you now have 300 numerical features! Since many ML methods are quadratic in
+run-time, this means your algorithm just became about 225 times slower!) 
+This may not be the end of the world-computers are quite fast after all-but it
+suggests that there may be a role for other approaches that avoid creating quite
+so many features. 
+
+One popular choice is _target_ encoding, in which the categorical variable 
+is replaced by the average value of the response for that 'subgroup' of the data.
+For instance, if we were trying to predict the Petal Length of the `iris` data
+above, _target_ encoding would give us this data set instead: 
+
+```{r}
+iris_sub |> 
+    group_by(Species) |> 
+    mutate(Species = mean(Petal.Length)) |> 
+    ungroup() |>
+    gt(id="iris_tbl3") |>
+    cols_label(Sepal.Length = "Sepal Length (mm)", 
+               Sepal.Width = "Sepal Width (mm)", 
+               Petal.Length = "Petal Length (mm)", 
+               Petal.Width="Petal Width (mm)", 
+               Species="Species (Target Encoded on Petal Length)")
+```
+
+::: {.callout-tip title="Question 3"}
+
+**Compare Encoding Methods on the NYSED Task**
+
+- Fit OLS to the NYSED Data using One-Hot Encoding for all qualitative features.
+  How long does it take to fit? How many features does the encoded data have?
+  What is the in-sample (training) error?
+- Fit OLS to the NYSED Data using Target Encoding for all qualitative features.
+  How long does it take to fit? How many features does the encoded data have?
+  What is the in-sample (training) error?
+- Fit 5-NN to the NYSED Data using One-Hot Encoding for all qualitative features.
+  How long does it take to predict? How many features does the encoded data have?
+  What is the in-sample (training) error?
+- Fit 5-NN to the NYSED Data using Target Encoding for all qualitative features.
+  How long does it take to predict? How many features does the encoded data have?
+  What is the in-sample (training) error?
+- Text Answer: In the context of NYSED, what does using Target Encoding 
+  effectively do to the `DISTRICT_NAME` variable? Is this reasonable?
+  Is there any danger using Target Encoding for future predictions? 
+  (*Hint*: What happens to very small districts?)
+  
+:::
+
+## Estimating Out of Sample Performance with Cross-Validation (20 points)
+
+Recall that our primary focus in this course is on developing models that perform
+well _out-of-sample_, *i.e.*, on new 'test' data. Unfortunately, we do not 
+always have an unlimited supply of 'new' data we can use for model evaluation
+and instead have to find a way to use our existing data for both model fitting
+and model evaluation. Doing this correctly can be a bit tricky: we want to avoid
+testing the model on data it has already seen so we don't give it credit for
+'teaching to the test.' 
+
+But the fix is not too hard! We can split our data into two parts and use one 
+for model fitting and the other for model evaluation in lieu of 'true' test 
+data. The 'golden rule' here is simple: what is used to fit a model _cannot_ be
+used to evaluate it and _vice versa_. In general, fitting a model is harder than
+simply estimating its out-of-sample accuracy, so we don't use a straight
+50/50 split, but it's hard to give a universal guideline.[^as_much] This is
+known as the **hold-out** method. 
+
+[^as_much]: In general, you want to use as much data as needed to get a good 
+estimate of model performance, but no more; without having some *a priori* 
+knowledge of the inherent difficulty (variance) of a problem, this is a bit
+easier said than done. 
+
+One criticism of the **hold-out** method is that it can be a bit wasteful and
+a bit random. If we set 40% of our data aside for the holdout set, we are fitting
+our model on only 60% as much data as we would hope to and this can make our 
+predictions _much_ worse.[^pct] With 'large enough' data, this may not be a
+problem, but 'large enough' is always relative to the model being fit and we 
+would rather use a large data set to fit a flexible and powerful model; in 
+other problems, data is scarce and spending 25-40% on model testing can 
+significantly impair our ability to fit models at all. 
+
+The method of [*cross-validation*](https://en.wikipedia.org/wiki/Cross-validation_(statistics) (CV)
+attempts to address some of these limitations. Rather than performing a single 
+split, we first: 
+
+- Split the entire data set into $K$ chunks of (roughly) equal size; 
+- For $k = 1, \dots, K$:
+  - Set one chunk aside for model evaluation
+  - Use the other $K-1$ chunks to fit the model
+  - Evaluate the model on the 'set aside' chunk and record the prediction error
+- Average the prediction errors to get the *cross-validation* estimate of 
+  prediction error. (It is also a good idea to put an error bar on this average.)
+  
+Visually, 
+
+![From the `sklearn` Documentation](https://scikit-learn.org/1.5/_images/grid_search_cross_validation.png)
+
+Note that because the model being evaluated is a bit different each of the $K$
+times, it's best to think of cross-validation as estimating the accuracy of
+a class of models rather than a single model. ('How well does _linear regression_
+do on this problem?' rather than 'How well will this specific line do?')
+
+::: {.callout-tip title="Question 4"}
+
+**Implement 10-Fold Cross Validation to Estimate Prediction Performance on the NYSED Math Proficiency Task**
+
+- Read [Chapter 4 of MLB](https://www.mlbenchmarks.org/04-holdout-method.html)
+  for additional background on the holdout method
+- Implement 10-fold cross validation to estimate the prediction error of OLS
+  and 5-NN on the full NYSED data set 
+  (all 9721 rows) using only the `NUMBER_*` features. How does the CV error 
+  compare to the in-sample error? 
+- Repeat your analysis using _all_ numeric features. How does the CV error 
+  compare to the in-sample error? Does this make sense? Why or why not? 
+- Repeat your analysis using _all_ features, except `SCHOOL_NAME` and 
+  `DISTRICT_NAME`, using **one-hot** encoding. How does the
+  CV error compare to the in-sample error? Does this make sense? Why or why not? 
+- Repeat your analysis using _all_ features, except `SCHOOL_NAME` and 
+  `DISTRICT_NAME`, using **target** encoding. (**NB** Do the encoding _within_ 
+  each cross-validation fold, not _before_ splitting the data.) How does the
+  CV error compare to the in-sample error? Does this make sense? Why or why not? 
+- Text Answer: Why is it important to do target encoding _within_ each CV fold? 
+  What would happen if we did target encoding before implementing CV? What would
+  happen to our CV error and what would happen to our eventual test error?
+  
+For this whole assignment, you must implement CV 'by hand' and cannot use a 
+built-in cross-validation function like `sklearn`'s `sklearn.model_selection.cross_validation`. 
+  
+:::
+  
+*Important*: When fitting CV for all features, make sure to avoid any 
+"data leakage" during the encoding steps. You may need to look into concepts 
+like _stratified sampling_. If a feature has too many values you can drop it
+from your analysis, but just be sure to note that you did. 
+
+[^pct]: Think of estimating the mean of a distribution. With 100 samples, the
+standard error in our estimation of the mean is $\hat{\sigma}/\sqrt{100}$ from
+the full data, but only $\hat{\sigma}/\sqrt{60}$ from the 'fitting' portion
+of the data. This could increase our error by a factor of around 
+$1.3 \approx \sqrt{100}/\sqrt{60}$ - that's the difference between success and
+failure in many problems!
+
+## Using Cross-Validation for Model Selection (15 points)
+
+Another use of cross-validation is selecting certain 'hyperparameters'. 
+_Hyperparameters_ in this context refers to decisions that are made before
+the model encounters data: *e.g.*, we might pre-select which features to
+include in a linear model before we actually use our data to estimate the
+regression coefficients.[^fuzzy] Recalling our 'north star' of optimizing
+predictions, we can try a reasonable range of values for a hyperparameter and
+pick the one that gives the most accurate cross-validation predictions. 
+
+There is, however, a slight risk here as the CV error we get is not an unbiased
+estimate of the true prediction error. Remember: if we pick the values of the
+model parameters to minimize our loss, we expect our future loss to be a bit 
+worse; the same logic applies to selecting _hyperparameters_. To avoid this, we
+should use a combination of CV + holdout. 
+
+[^fuzzy]: If you think that this line can be a bit fuzzy in practice, you are
+not wrong. Still, the idea of 'structural' vs 'ERM-driven' choices is an 
+important one. 
+
+
+::: {.callout-tip title="Question 5"}
+
+**Use 5-Fold CV to Select the Predictively Optimal $K$ for $K$-Nearest Neighbors**
+
+- Set aside 10% of your data for final model evaluation. 
+- Using the remaining 90%, implement 5-fold cross-validation to estimate the 
+  prediction error of $1$-nearest neighbors using only the numeric features of 
+  the NYSED data. Make sure to record the average prediction error and the 
+  standard deviation.
+- Repeat your analysis for $K=2, 3, \dots, 25$
+- Visualize your results. Based on these, what do you think the best value of
+  $K$ will be? What is its cross-validation error? 
+- Now, compute the performance of $K_{\text{best}}$-NN on the 10% hold out data.
+  How does its error compare to the CV error? Does this make sense? Why?
+
+:::
+
+You may use the fast (approximate) $K$-nearest neighbors from the previous
+question. 
+
+
+
+## Estimating LOCO Feature Importance (15 points)
+
+In certain applications, it may be important to _interpret_ or _explain_
+the output of an ML model. Because different models work differently and different
+users require different types of interpretations, this is a challenging task for
+which a variety of methods have been proposed.[^ga_iml] In this sub-problem, you
+will explore a basic strategy sometimes called **LOCO** (Leave-One-Covariate-Out)
+feature importance. 
+
+The idea of LOCO is simple: a model is fit with and without a given feature and
+compare its performance. If the performance of the model falls when a feature
+is omitted, it is important; if the performance doesn't significantly change,
+the feature is probably not too important to the model (or can be 'replaced' by
+other features in the data). Since, as always, we are interested in 
+out-of-sample performance, the LOCO score is typically computed within a 
+cross-validation scheme, rather than simply comparing in-sample error. 
+
+::: {.callout-tip title="Question 6"}
+
+**Use LOCO to Determine the Relative Feature Importance of 5 Features in this Data Set**
+
+- Select 5 features that you intuitively think would be the most important for
+  this data set and state your _a priori_ ranking as to which will be the most
+  important. (You can do more, but LOCO can become quite slow rather quickly
+  so 5 is enough.)
+- Using LOCO with a five-fold cross-validation step, compute the importance of
+  each feature and create a figure to visualize your results. Your figure must
+  include 'error bars' to capture the randomness in your CV error estimates. 
+- Compare your LOCO results with your initial guess about feature importance. 
+  Are they consistent? If no, why not? 
+- Finally, compare your OLS-LOCO scores to KNN-LOCO on the same data. (You can
+  fix $K$ to the value you determined previously and do not need to re-estimate 
+  it.) Do your results change? Does this make sense?
+  
+:::
+
+[^ga_iml]: G.I. Allen, L. Gan, and L. Zheng. "Interpretable Machine Learning for
+Discovery: Statistical Challenges and Opportunities." *Annual Review of 
+Statistics and Its Application* **11**, p.97-121 (2024).
+DOI:[10.1146/annurev-statistics-040120-030919](https://doi.org/10.1146/annurev-statistics-040120-030919)
