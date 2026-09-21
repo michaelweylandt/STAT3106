@@ -9,3 +9,246 @@ notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Clas
 Outline: 
 
 --- 
+
+Today we're going to look a bit more closely at the _reasons_ why an ML system
+can fail. Before we do so, let's review our basic framework of ML: 
+
+$$\begin{align*}
+\hat{f} &= \argmin_{f \in \Fcal} \frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \tag{ERM} \\
+f_* = \argmin_{f \in \Fcal} \E[L(f(\bX), Y)] \tag{Optimal $f_*$ Minimizes Test Error} \\
+\frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \approx \E[L(f(\bX), Y)] \text{LLN}
+\end{align*}$$
+
+Reviewing our pieces: 
+
+- In the supervised context, we measure success on a _loss_ function $L$, where
+  smaller is better
+- The best possible prediction function (within the category $\Fcal$), $f_*$, 
+  is the one that minimizes our test error, *i.e.*, our error on _new_ data
+- Because we can't actually ever know our true test error, we instead typically
+  pick our guess $\hat{f}$ as the best predictor (within the category $\Fcal$)
+  on our _training_ data, *i.e.*, the one with the smallest empirical (training)
+  risk
+- Hopefully, the empirical risk (training error) is a good proxy for the 
+  population risk (test error) and $f_* \approx \hat{f}$
+  
+This story seems coherent, but there are lots of places it can break! 
+
+- Is the _loss_ function $L$ a true measure of what we actually want to happen? 
+  (Think of reward hacking / alignment issues, though these are less common in
+  the purely numerical context.)
+- Is $R_n(f)$ actually a good proxy for $R(f)$? Any time we are estimating 
+  something from data, we have to worry about sampling problems: 
+  - Is our training data _representative_ of the (future) population we actually
+    care about or is it biased in some way?
+  - Is our training sample _large enough_ that the LLN actually 'kicks in'?
+    If $R_n(f)$ is super noisy, minimizing it might not actually get us very 
+    close to the minimum of $R(f)$. 
+- In the ERM context, picking a large $\Fcal$ gives us a lower minimizer. How
+  big is big enough? 
+  
+  $$\Fcal_1 \subseteq \Fcal_2 \implies \min_{f \in \Fcal_2} \hat{R}_n(f) \leq \min_{f \in \Fcal_1} \hat{R}_n(f)$$ 
+  
+  and 
+  
+  $$\Fcal_1 \subseteq \Fcal_2 \implies \min_{f \in \Fcal_2} R(f) \leq \min_{f \in \Fcal_1} R(f)$$ 
+  
+  (Confirm for yourself why these two statements are true.)
+- Does _risk minimization_ actually mean we're doing what we want? Under 
+  what conditions does $R(f_1) \approx R(f_2)$ imply $f_1 \approx f_2$? 
+- How well can we _actually_ find $\hat{f}$? If $L$ is complicated, our data
+  set is large, or $\Fcal$ is large, solving the ERM problem might not be 
+  easy. 
+  
+Our goal over the next few classes is to look at several of these problems in
+turn. Some of them are things we can get a handle on mathematically, while others
+require more qualitative / problem-specific analysis. 
+
+## Bounding the Generalization Gap
+
+Suppose we have the _right_ (best) predictor $f_*$ and our ERM-estimated predictor
+$\hat{f}$. We know that
+
+$$\hat{R}_n(\hat{f}) \leq \hat{R}_n(f_*)$$ 
+
+and 
+
+$$R(\hat{f}) \geq R(f_*)$$ 
+
+The first is true by ERM - $\hat{f}$ minimizes the training error $\hat{R}_n$ -
+while the second is true by definition - the best predictor $f_*$ is defined
+as the minimizer of $R(\cdot)$. While this seems like a nice tidy story, this
+actually isn't quite enough to give us what we want: 
+
+$$ R(\hat{f}) \leq R(f_*) + \text{A Little Bit} $$
+
+That is, we hope that _in the future_ / _on the test set_, $\hat{f}$ will be
+_nearly optimal_. To ensure something like this holds, we need to start unpacking
+the sources of error. Let's start with the simplest: 
+
+- $\Fcal$ might not actually contain the _true_ relationship. For example
+  $\Fcal$ might be the set of all lines (as in OLS), but the _real_ relationship
+  might be quadratic. In this case, even if we get the _best possible_ line, 
+  the misfit between $\Fcal$ and the real world is an unavoidable source of 
+  error. Let's call $f_{**}$ the _true_ best possible predictor - from all of
+  math, not just $\Fcal$. We then have
+  
+  $$R(\hat{f}) - R(f_{**}) = \left(R(\hat{f}) - R(f_*)\right) + \underbrace{\left(R(f_*) - R(f_{**})\right)}_{\text{Systematic / Approximation Error}}$$
+  
+  We can't say much about this systematic error yet, other than to note that 
+  a bigger $\Fcal$ will hopefully get $f_*$ closer to $f_{**}$. 
+  
+- Turning to the first term, we have
+
+  $$ R(\hat{f}) - R(f_*) = \underbrace{\left(R(\hat{f}) - \hat{R}_n(\hat{f}) \right)}_{V_1} + \underbrace{\left(\hat{R}_n(\hat{f}) - \hat{R}_n(f_*)\right)}_B + \underbrace{\left(\hat{R}_n(f_*) - R(f_*)\right)}_{V_2}$$
+  
+  We know that $B \leq 0$ - why? So we can change this to an inequality like
+  
+  $$ R(\hat{f}) - R(f_*) \leq \underbrace{\left(R(\hat{f}) - \hat{R}_n(\hat{f}) \right)}_{V_1}  + \underbrace{\left(\hat{R}_n(f_*) - R(f_*)\right)}_{V_2}$$
+  
+  But what can we do with these two $V$ terms? Well, if we look closely at them
+  both, they measure 'how far can $\hat{R}_n$ be from $R$ for a given $f$'. It's
+  quite hard to say how much the empirical risk of a specific function can vary
+  from its mean (Why is $\E[\hat{R}_n] = R?$) but we can generally get an upper
+  bound on this quantity, so let's just look at the _maximum_ it can be: 
+  
+  $$ \begin{align*}
+  R(\hat{f}) - R(f_*) &\leq \underbrace{\left(R(\hat{f}) - \hat{R}_n(\hat{f}) \right)}_{V_1}  + \underbrace{\left(\hat{R}_n(f_*) - R(f_*)\right)}_{V_2} \\
+  &\leq \left|R(\hat{f}) - \hat{R}_n(\hat{f}) \right|  + \left|\hat{R}_n(f_*) - R(f_*)\right| \\
+  &\leq 2 \max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right| 
+  \end{align*}$$
+
+So if we put this all together, we get
+
+$$ \begin{align*}
+R(\hat{f}) &\leq R(f_{**}) + \left|R(f_*) - R(f_{**})\right| + 2  \max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right| \\
+           &= R(f_{**}) + \min_{f \in \Fcal} \left|R(f) - R(f_{**})\right| + 2  \max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right| \\
+\end{align*}$$
+
+This is a key relationship, so let's look very closely at it: 
+
+- On the left hand side, we have the _test error_ we want to control. All
+  of our eventual choices should be made to try to make this as small as possible,
+  but we can't really know it exactly, so we will make do by making our upper
+  bound (on the right hand side) as small as possible. 
+- The first term on the right-hand side, $R(f_{**})$ is the risk associated with
+  the Platonic ideal of prediction; this _irreducible_ error is just a fact of
+  nature and so we just take it as is. Sometimes, we can't do well on a task 
+  because it's just hard. (*E.g.*, predicting social behavior from genetics, 
+  there's definitely a little signal there, but even the best possible genetic
+  model can't account for all the social factors that make us who we are.)
+- The second term on the right-hand side, $R(f_*) - R(f_{**})$, is a 
+  _systematic_ or _approximation_ error term. Even if we got the very best
+  element of $\Fcal$, it can't be a perfect fit. Here, _we_ are the source of
+  the problem. If we could use a 'better' (bigger) $\Fcal$, our error would be
+  smaller. But, as we will soon see, this isn't a painless choice. 
+  
+  Because this term measures 'misfit', it is also often called 'bias' 
+  in statistical lingo. (This isn't usually bias in the sense of prejudice, but
+  it can be in some problems; it's closer to _bias_ in the sense of being 
+  a little off center / slanted that you might hear in engineering or cooking.)
+- The third term on the right hand side, 
+  $\max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right|$, is a measure of 
+  _sampling_ or _estimation_ variability and it attempts to capture how far
+  our _estimate_ of performance will be from true performance. If this is small,
+  then picking $\hat{f}$ with good training performance should guarantee good
+  out-of-sample performance. But if it is large, we don't have any such guarantee. 
+  
+  Note that sampling variability is not bad _per se_: we could (theoretically) 
+  hope to do _better_ than we saw in the training data, but since we picked 
+  $\hat{f}$ to be optimal on the training data, it seems pretty unlikely that 
+  we'll beat it 'by chance.'
+  
+How then can we control
+
+$$ 2\max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right|$$
+
+? Obviously, in a perfect world, we would just have lots of samples fo
+$\hat{R}_n \approx R$ for all $f$ (LLN) and we'd be happy. In practice, we
+don't just have a 'give me more data' option, so we have to look elsewhere. 
+If $\Fcal$ were smaller, this quantity would be smaller; and larger $\Fcal$
+will *ceteris paribus* give us a larger value. So minimizing this term makes
+us want to pick as small an $\Fcal$ as possible. 
+
+So here we have our dilemma: we want $\Fcal$ to be as large as possible to make
+the approximation error small, but at the same tiem we want $\Fcal$ to be
+as small as possible to make the sampling error small. Sadly, we can't have
+both... More data is the only 'free win', but that's typically easier said
+than done. 
+
+### Aside: Is $R(f_{**})$ real? 
+
+You might ask whether $R(f_{**})$ is actually real or whether it's just a
+different type of approximation error. This is a bit philosophical (does true
+randomness exist or do we just need ever more complex models?) so we won't get
+into it here. It's not a term that will drive our decision making, so arguing 
+whether it is exactly 0 or some other unknown, unknowable, and uncontrollable
+number doesn't matter too much at the end of the day. 
+
+## Visual Representation
+
+Draw the 'two circles' picture here. 
+
+Key point: $$\Var(\hat{f}) \lesssim \frac{1}{2} |\mathcal{F}|$$
+
+Argue by analogy with a simple random variable $Z \in [a, b]$: $\Var(Z) \leq \frac{1}{2}(b-a)^2$. 
+
+Q: What is variance for non-numeric quantities? Consistency / repeatability. 
+
+## Exact Decomposition
+
+The above decomposition works for _any_ loss function, but it turns out the
+math is especially nice if we use an MSE loss. 
+
+Specifically, let's look at several quantities here: 
+
+- $Y$: the _true_ label we want to predict
+- $\E[Y|X]$: the _optimal_ predictor under MSE loss ($f_{**}$ above)
+- $f_*$: the best $\mathcal{F}$-class predictor
+- $\hat{f}$: the element of $\mathcal{F}$ we wind up using. 
+
+In this case, we get the exact relationship: 
+
+$$\begin{align*}
+\E[(Y - \hat{f}(X))^2|X] &= \E[(Y - \E[Y|X])^2|X] + \E[(\E[Y|X] - f_*(X))^2|X] + \E[( f_*(X) - \hat{f}(X))^2|X] \\
+&= \sigma_Y^2 + \text{Bias}^2 + \text{Variance}
+\end{align*}$$
+
+So here our terms are perfectly additive in a "Pythagorean" kind of way. We see
+that we have three terms: 
+
+- Irreducible Error: doesn't depend on anything we have any control over
+- Approximation Error / Bias: depends only on our choice of $\mathcal{F}$ (which
+  determines $f_*$)
+- Sampling Error / Variance: driven the the randomness in our data leading to 
+  different $\hat{f}$ on different data sets. 
+  
+Other loss functions will follow this relationship _approximately_ and it's good
+for your intuition, even if it's only _exactly_ true (as equality, rather than
+some inequalities) for MSE. 
+
+
+
+## Tradeoff? 
+
+The above is a _bias-variance_ decomposition. It is a fundamental law of how we
+do the accounting for these types of problems. We haven't 'created or destroyed'
+error, we've simply put it into buckets that we hope to better understand. 
+
+Later in the course, we will see that sometimes (but not always), we can adjust
+the size of $\Fcal$ so that $\text{Bias}^2$ goes up by 4 while Variance goes
+down by 9. This is a clear win! But we don't always have this option. 
+
+One of the most open and active questions in modern ML theory is why sometimes
+picking a bigger $\Fcal$ seems to help on both bias and variance (or at least 
+not hurt). Answers to this are many--we might not actually be measuring things
+correctly, this is 'worst case' theory that doesn't apply to real life, there
+are some other factors at play that drive results here--and all true to one 
+degree or another. 
+
+For us, in the simple scalar supervised context: it's sufficient to say that we
+are conservative 'worst case'-minded in theory, but to hope that theory will 
+still provide some practical advice for real problems. 
+
+Finally, note that essnetially none of these quantities can be known _in practice_. 
+Next time, we will look at practical approaches for actually measuring performance.

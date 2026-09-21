@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-09-21">
 <title>Notes for Lecture #03: Unit I. ML Fundamentals: Applied Linear Regression – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,30 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#review" id="toc-review" class="nav-link active" data-scroll-target="#review">Review</a></li>
+  <li><a href="#fitting-ols" id="toc-fitting-ols" class="nav-link" data-scroll-target="#fitting-ols">Fitting OLS</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes03.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #03: Unit I. ML Fundamentals: Applied Linear Regression</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">September 21, 2026</p>
     </div>
   </div>
   
@@ -164,15 +205,139 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
 \]</span></p>
 </div>
+<p><strong>TODO: Add more examples here</strong></p>
 <p>Outline:</p>
+<ul>
+<li>Fitting OLS with Standard Software</li>
+<li>Computing Training and Test Error</li>
+<li>Beating The Best: Overfitting</li>
+<li>Using and Abusing Simulation Studies</li>
+<li>Real Data Example</li>
+<li>Other Loss Functions</li>
+</ul>
 <hr>
+<section id="review" class="level2"><h2 class="anchored" data-anchor-id="review">Review</h2>
+<p>Last time, we built up to the following ‘meta-rule’ for machine learning:</p>
+<p><span class="math display">\[\hat{f} = \argmin_{f \in \Fcal} \frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i)\]</span></p>
+<p>Make sure you can identify what each of these terms mean! Specifically, you should be able to identify the <em>loss function</em>, the <em>predictor</em>, the <em>empirical risk</em>, the <em>model class</em>, and the <em>minimizer</em>.</p>
+<p>Recall that our overall strategy for machine learning is this:</p>
+<ul>
+<li>Consider a class / family of models</li>
+<li>Try to have enough data, and sufficiently representative data, that past performance (training error) is a reasonable proxy for future performance (test error) within that model class</li>
+<li>In the absence of other information, pick the model that has the best past performance (empirical risk minimization) and hope that it will do well going forward</li>
+<li>
+<em>Ceteris paribus</em>, a larger model class has more upside (best case better) and more downside (worse case worse) than a simpler model class. With enough data, we hope to consistently find the ‘good’ parts of the bigger model family and to avoid the ‘bad’ parts.</li>
+</ul></section><section id="fitting-ols" class="level2"><h2 class="anchored" data-anchor-id="fitting-ols">Fitting OLS</h2>
+<p>Recall that Ordinary Least Squares (OLS) is the intersection of empirical risk minimization (ERM), the class of linear models, and the squared error loss. Formally:</p>
+<p><span class="math display">\[\hat{f}_{\text{OLS}} = \argmin_{f \in \Fcal_{\text{Linear Regression Models}}} \frac{1}{n}\sum_{i=1}^N (y_i - f(\bx_i))^2\]</span></p>
+<p>where <span class="math inline">\(\{(\bx_i, y_i)\}_{i=1}^n\)</span> are the training data. If we recall that all linear regression models (<span class="math inline">\(\Fcal_{\text{Linear Regression Models}}\)</span>) can be identified with the set of feature weights (coefficients), this is equivalent to solving the problem:</p>
+<p><span class="math display">\[\hat{\bbeta} = \argmin_{\bbeta \in \R^p} \frac{1}{n}\sum_{i=1}^N (y_i - \bx_i^{\top}\bbeta)^2\]</span></p>
+<p>where <span class="math inline">\(\bbeta = (\beta_1, \beta_2, \dots, \beta_p)\)</span> is a <em>vector</em> of regression weights and <span class="math inline">\(\bbeta^{\top}\bx = \beta_1x_1 + \beta_2x_2 + \dots + \beta_px_p\)</span>.</p>
+<p>Computers don’t work so well with the first format - a function is a bit of a mathematical abstraction - but the second format (solving for a set of specific numbers) is very easy for computers, so this is what gets used in practice, but it is functionally just a different way of expressing the same problem.</p>
+<p>In fact, solving this problem - the <em>least squares</em> problem - is ubiquitous in mathematics, so <em>lots</em> of work has been done on the best way to solve this and we can benefit from this. In <code>R</code>, we use the <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> built-in, while <code>Python</code> gives us <code>np.linalg.solve()</code> among others. <code>R</code>‘s <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> provides several ’quality-of-life’ improvements that <code>np.linalg.solve()</code> lacks, so we’ll start with some <code>R</code> examples before coming back to <code>Python</code>.</p>
+<p>To demonstrate this, I’ve uploaded a <a href="./data/tx_power_bills.csv">small <code>csv</code> file</a> with two columns:</p>
+<ul>
+<li>Usage, the amount of electricity (measured in kWh) used by a single family home over time periods lasting (roughly) one month each</li>
+<li>Bill, the bill (in US dollars) for that same time period</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="va">TX_POWER</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"notes/data/tx_power_bills.csv"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 50 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+dbl (2): Usage, Bill
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">TX_POWER</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Usage</span>, y<span class="op">=</span><span class="va">Bill</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">"Power Usage (kWh)"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Monthly Bill ($)"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span>labels<span class="op">=</span><span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/dollar_format.html">dollar</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes03_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From background knowledge, you might expect this to be linear (roughly $ = * ) and indeed it is <em>roughly</em> linear, but not perfectly so.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Despite this, we can fit a line using the <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> function:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tx_power_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">Bill</span> <span class="op">~</span> <span class="va">Usage</span>, data<span class="op">=</span><span class="va">TX_POWER</span><span class="op">)</span></span>
+<span><span class="va">tx_power_model</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Bill ~ Usage, data = TX_POWER)
+
+Coefficients:
+(Intercept)        Usage  
+    -3.9066       0.1112  </code></pre>
+</div>
+</div>
+<p>As an economic matter, this model is immediately a bit implausible: the negative intercept, if taken too literally, would imply that if we used no power, the utility company would pay us $3.90. Why is this happening?</p>
+<p>Statisticians would usually say something like “This data is a bit ‘noisy’ / random” and that causes error in the model. It is true that there are many factors that impact billing beyond just plain usage. Here we have noise (or error) that arises not because the underlying process is inherently stochastic, but because there are aspects we don’t include in our model. Whether we should think about about this as pure ‘noise’ or as something a bit more systematic is a question we will return to later in the course.</p>
+<p>For now, let’s start by making predictions from this model. Our model was designed to have minimal training error, which we can compute directly:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">MSE</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">y_hat</span>, <span class="va">y</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">y_hat</span> <span class="op">-</span> <span class="va">y</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">y_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">tx_power_model</span>, data<span class="op">=</span><span class="va">TX_POWER</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">MSE</span><span class="op">(</span><span class="va">y_hat</span>, <span class="va">TX_POWER</span><span class="op">$</span><span class="va">Bill</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 217.1663</code></pre>
+</div>
+</div>
+<p>So our <em>average</em> squared prediction error is 217.17! This is not great, but recall that the units here are “squared dollars”, so it’s a bit unnatural. We get a better intuition by computing the <em>root mean squared error</em> instead:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">RMSE</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">y_hat</span>, <span class="va">y</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu">MSE</span><span class="op">(</span><span class="va">y_hat</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">RMSE</span><span class="op">(</span><span class="va">y_hat</span>, <span class="va">TX_POWER</span><span class="op">$</span><span class="va">Bill</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 14.73656</code></pre>
+</div>
+</div>
+<p>Ok - so we’re off by about $14.74 each month. Certainly not perfect, but given that the ‘baseline’ standard deviation of power bills is $61.69, we’ve certainly achieved some predictive power.</p>
+<p>OLS is supposed to give us the predictions with the <em>best training error</em>, but how can we verify this? If we don’t trust the math, we can try out a wide range of coefficients and see what actually gives the best performance. To do this, we need a bit of brute force calculations:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="va">compute_rmse</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">intercept</span>, <span class="va">slope</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">y_hat</span> <span class="op">&lt;-</span> <span class="va">intercept</span> <span class="op">+</span> <span class="va">slope</span> <span class="op">*</span> <span class="va">TX_POWER</span><span class="op">$</span><span class="va">Usage</span></span>
+<span>  <span class="fu">RMSE</span><span class="op">(</span><span class="va">y_hat</span>, <span class="va">TX_POWER</span><span class="op">$</span><span class="va">Bill</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Create a 'grid' of many potential coefficients</span></span>
+<span><span class="va">potential_coefficients</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/expand_grid.html">expand_grid</a></span><span class="op">(</span>intercept<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span>, length.out<span class="op">=</span><span class="fl">401</span><span class="op">)</span>, </span>
+<span>                                      slope<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">401</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compute RMSEs for all coefficient combinations and plot results</span></span>
+<span><span class="va">potential_coefficients</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>training_rmse <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">map2_dbl</a></span><span class="op">(</span><span class="va">intercept</span>, <span class="va">slope</span>, <span class="va">compute_rmse</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">intercept</span>, y<span class="op">=</span><span class="va">slope</span>, fill<span class="op">=</span><span class="va">training_rmse</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_tile</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes03_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>}</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>Several reasons: inputs to the power grid change in price, aggregate demand changes over time and prices balance out supply and demand, ‘base rate’ charges increase over time to maintain the grid, <em>etc.</em><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +741,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes03.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes03.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-09-21">
 <title>Notes for Lecture #04: Unit I. ML Fundamentals: Loss &amp; Error in Machine Learning – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -136,24 +136,37 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li>
+<a href="#bounding-the-generalization-gap" id="toc-bounding-the-generalization-gap" class="nav-link active" data-scroll-target="#bounding-the-generalization-gap">Bounding the Generalization Gap</a>
+  <ul class="collapse">
+<li><a href="#aside-is-rf_-real" id="toc-aside-is-rf_-real" class="nav-link" data-scroll-target="#aside-is-rf_-real">Aside: Is <span class="math inline">\(R(f_{**})\)</span> real?</a></li>
+  </ul>
+</li>
+  <li><a href="#visual-representation" id="toc-visual-representation" class="nav-link" data-scroll-target="#visual-representation">Visual Representation</a></li>
+  <li><a href="#exact-decomposition" id="toc-exact-decomposition" class="nav-link" data-scroll-target="#exact-decomposition">Exact Decomposition</a></li>
+  <li><a href="#tradeoff" id="toc-tradeoff" class="nav-link" data-scroll-target="#tradeoff">Tradeoff?</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes04.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes04.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #04: Unit I. ML Fundamentals: Loss &amp; Error in Machine Learning</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">September 21, 2026</p>
     </div>
   </div>
   
@@ -164,15 +177,136 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<p>Today we’re going to look a bit more closely at the <em>reasons</em> why an ML system can fail. Before we do so, let’s review our basic framework of ML:</p>
+<p><span class="math display">\[\begin{align*}
+\hat{f} &amp;= \argmin_{f \in \Fcal} \frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \tag{ERM} \\
+f_* = \argmin_{f \in \Fcal} \E[L(f(\bX), Y)] \tag{Optimal $f_*$ Minimizes Test Error} \\
+\frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \approx \E[L(f(\bX), Y)] \text{LLN}
+\end{align*}\]</span></p>
+<p>Reviewing our pieces:</p>
+<ul>
+<li>In the supervised context, we measure success on a <em>loss</em> function <span class="math inline">\(L\)</span>, where smaller is better</li>
+<li>The best possible prediction function (within the category <span class="math inline">\(\Fcal\)</span>), <span class="math inline">\(f_*\)</span>, is the one that minimizes our test error, <em>i.e.</em>, our error on <em>new</em> data</li>
+<li>Because we can’t actually ever know our true test error, we instead typically pick our guess <span class="math inline">\(\hat{f}\)</span> as the best predictor (within the category <span class="math inline">\(\Fcal\)</span>) on our <em>training</em> data, <em>i.e.</em>, the one with the smallest empirical (training) risk</li>
+<li>Hopefully, the empirical risk (training error) is a good proxy for the population risk (test error) and <span class="math inline">\(f_* \approx \hat{f}\)</span>
+</li>
+</ul>
+<p>This story seems coherent, but there are lots of places it can break!</p>
+<ul>
+<li><p>Is the <em>loss</em> function <span class="math inline">\(L\)</span> a true measure of what we actually want to happen? (Think of reward hacking / alignment issues, though these are less common in the purely numerical context.)</p></li>
+<li>
+<p>Is <span class="math inline">\(R_n(f)\)</span> actually a good proxy for <span class="math inline">\(R(f)\)</span>? Any time we are estimating something from data, we have to worry about sampling problems:</p>
+<ul>
+<li>Is our training data <em>representative</em> of the (future) population we actually care about or is it biased in some way?</li>
+<li>Is our training sample <em>large enough</em> that the LLN actually ‘kicks in’? If <span class="math inline">\(R_n(f)\)</span> is super noisy, minimizing it might not actually get us very close to the minimum of <span class="math inline">\(R(f)\)</span>.</li>
+</ul>
+</li>
+<li>
+<p>In the ERM context, picking a large <span class="math inline">\(\Fcal\)</span> gives us a lower minimizer. How big is big enough?</p>
+<p><span class="math display">\[\Fcal_1 \subseteq \Fcal_2 \implies \min_{f \in \Fcal_2} \hat{R}_n(f) \leq \min_{f \in \Fcal_1} \hat{R}_n(f)\]</span></p>
+<p>and</p>
+<p><span class="math display">\[\Fcal_1 \subseteq \Fcal_2 \implies \min_{f \in \Fcal_2} R(f) \leq \min_{f \in \Fcal_1} R(f)\]</span></p>
+<p>(Confirm for yourself why these two statements are true.)</p>
+</li>
+<li><p>Does <em>risk minimization</em> actually mean we’re doing what we want? Under what conditions does <span class="math inline">\(R(f_1) \approx R(f_2)\)</span> imply <span class="math inline">\(f_1 \approx f_2\)</span>?</p></li>
+<li><p>How well can we <em>actually</em> find <span class="math inline">\(\hat{f}\)</span>? If <span class="math inline">\(L\)</span> is complicated, our data set is large, or <span class="math inline">\(\Fcal\)</span> is large, solving the ERM problem might not be easy.</p></li>
+</ul>
+<p>Our goal over the next few classes is to look at several of these problems in turn. Some of them are things we can get a handle on mathematically, while others require more qualitative / problem-specific analysis.</p>
+<section id="bounding-the-generalization-gap" class="level2"><h2 class="anchored" data-anchor-id="bounding-the-generalization-gap">Bounding the Generalization Gap</h2>
+<p>Suppose we have the <em>right</em> (best) predictor <span class="math inline">\(f_*\)</span> and our ERM-estimated predictor <span class="math inline">\(\hat{f}\)</span>. We know that</p>
+<p><span class="math display">\[\hat{R}_n(\hat{f}) \leq \hat{R}_n(f_*)\]</span></p>
+<p>and</p>
+<p><span class="math display">\[R(\hat{f}) \geq R(f_*)\]</span></p>
+<p>The first is true by ERM - <span class="math inline">\(\hat{f}\)</span> minimizes the training error <span class="math inline">\(\hat{R}_n\)</span> - while the second is true by definition - the best predictor <span class="math inline">\(f_*\)</span> is defined as the minimizer of <span class="math inline">\(R(\cdot)\)</span>. While this seems like a nice tidy story, this actually isn’t quite enough to give us what we want:</p>
+<p><span class="math display">\[ R(\hat{f}) \leq R(f_*) + \text{A Little Bit} \]</span></p>
+<p>That is, we hope that <em>in the future</em> / <em>on the test set</em>, <span class="math inline">\(\hat{f}\)</span> will be <em>nearly optimal</em>. To ensure something like this holds, we need to start unpacking the sources of error. Let’s start with the simplest:</p>
+<ul>
+<li>
+<p><span class="math inline">\(\Fcal\)</span> might not actually contain the <em>true</em> relationship. For example <span class="math inline">\(\Fcal\)</span> might be the set of all lines (as in OLS), but the <em>real</em> relationship might be quadratic. In this case, even if we get the <em>best possible</em> line, the misfit between <span class="math inline">\(\Fcal\)</span> and the real world is an unavoidable source of error. Let’s call <span class="math inline">\(f_{**}\)</span> the <em>true</em> best possible predictor - from all of math, not just <span class="math inline">\(\Fcal\)</span>. We then have</p>
+<p><span class="math display">\[R(\hat{f}) - R(f_{**}) = \left(R(\hat{f}) - R(f_*)\right) + \underbrace{\left(R(f_*) - R(f_{**})\right)}_{\text{Systematic / Approximation Error}}\]</span></p>
+<p>We can’t say much about this systematic error yet, other than to note that a bigger <span class="math inline">\(\Fcal\)</span> will hopefully get <span class="math inline">\(f_*\)</span> closer to <span class="math inline">\(f_{**}\)</span>.</p>
+</li>
+<li>
+<p>Turning to the first term, we have</p>
+<p><span class="math display">\[ R(\hat{f}) - R(f_*) = \underbrace{\left(R(\hat{f}) - \hat{R}_n(\hat{f}) \right)}_{V_1} + \underbrace{\left(\hat{R}_n(\hat{f}) - \hat{R}_n(f_*)\right)}_B + \underbrace{\left(\hat{R}_n(f_*) - R(f_*)\right)}_{V_2}\]</span></p>
+<p>We know that <span class="math inline">\(B \leq 0\)</span> - why? So we can change this to an inequality like</p>
+<p><span class="math display">\[ R(\hat{f}) - R(f_*) \leq \underbrace{\left(R(\hat{f}) - \hat{R}_n(\hat{f}) \right)}_{V_1}  + \underbrace{\left(\hat{R}_n(f_*) - R(f_*)\right)}_{V_2}\]</span></p>
+<p>But what can we do with these two <span class="math inline">\(V\)</span> terms? Well, if we look closely at them both, they measure ‘how far can <span class="math inline">\(\hat{R}_n\)</span> be from <span class="math inline">\(R\)</span> for a given <span class="math inline">\(f\)</span>’. It’s quite hard to say how much the empirical risk of a specific function can vary from its mean (Why is <span class="math inline">\(\E[\hat{R}_n] = R?\)</span>) but we can generally get an upper bound on this quantity, so let’s just look at the <em>maximum</em> it can be:</p>
+<p><span class="math display">\[ \begin{align*}
+R(\hat{f}) - R(f_*) &amp;\leq \underbrace{\left(R(\hat{f}) - \hat{R}_n(\hat{f}) \right)}_{V_1}  + \underbrace{\left(\hat{R}_n(f_*) - R(f_*)\right)}_{V_2} \\
+&amp;\leq \left|R(\hat{f}) - \hat{R}_n(\hat{f}) \right|  + \left|\hat{R}_n(f_*) - R(f_*)\right| \\
+&amp;\leq 2 \max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right|
+\end{align*}\]</span></p>
+</li>
+</ul>
+<p>So if we put this all together, we get</p>
+<p><span class="math display">\[ \begin{align*}
+R(\hat{f}) &amp;\leq R(f_{**}) + \left|R(f_*) - R(f_{**})\right| + 2  \max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right| \\
+           &amp;= R(f_{**}) + \min_{f \in \Fcal} \left|R(f) - R(f_{**})\right| + 2  \max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right| \\
+\end{align*}\]</span></p>
+<p>This is a key relationship, so let’s look very closely at it:</p>
+<ul>
+<li><p>On the left hand side, we have the <em>test error</em> we want to control. All of our eventual choices should be made to try to make this as small as possible, but we can’t really know it exactly, so we will make do by making our upper bound (on the right hand side) as small as possible.</p></li>
+<li><p>The first term on the right-hand side, <span class="math inline">\(R(f_{**})\)</span> is the risk associated with the Platonic ideal of prediction; this <em>irreducible</em> error is just a fact of nature and so we just take it as is. Sometimes, we can’t do well on a task because it’s just hard. (<em>E.g.</em>, predicting social behavior from genetics, there’s definitely a little signal there, but even the best possible genetic model can’t account for all the social factors that make us who we are.)</p></li>
+<li>
+<p>The second term on the right-hand side, <span class="math inline">\(R(f_*) - R(f_{**})\)</span>, is a <em>systematic</em> or <em>approximation</em> error term. Even if we got the very best element of <span class="math inline">\(\Fcal\)</span>, it can’t be a perfect fit. Here, <em>we</em> are the source of the problem. If we could use a ‘better’ (bigger) <span class="math inline">\(\Fcal\)</span>, our error would be smaller. But, as we will soon see, this isn’t a painless choice.</p>
+<p>Because this term measures ‘misfit’, it is also often called ‘bias’ in statistical lingo. (This isn’t usually bias in the sense of prejudice, but it can be in some problems; it’s closer to <em>bias</em> in the sense of being a little off center / slanted that you might hear in engineering or cooking.)</p>
+</li>
+<li>
+<p>The third term on the right hand side, <span class="math inline">\(\max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right|\)</span>, is a measure of <em>sampling</em> or <em>estimation</em> variability and it attempts to capture how far our <em>estimate</em> of performance will be from true performance. If this is small, then picking <span class="math inline">\(\hat{f}\)</span> with good training performance should guarantee good out-of-sample performance. But if it is large, we don’t have any such guarantee.</p>
+<p>Note that sampling variability is not bad <em>per se</em>: we could (theoretically) hope to do <em>better</em> than we saw in the training data, but since we picked <span class="math inline">\(\hat{f}\)</span> to be optimal on the training data, it seems pretty unlikely that we’ll beat it ‘by chance.’</p>
+</li>
+</ul>
+<p>How then can we control</p>
+<p><span class="math display">\[ 2\max_{f' \in \Fcal} \left|R(f') - \hat{R}_n(f') \right|\]</span></p>
+<p>? Obviously, in a perfect world, we would just have lots of samples fo <span class="math inline">\(\hat{R}_n \approx R\)</span> for all <span class="math inline">\(f\)</span> (LLN) and we’d be happy. In practice, we don’t just have a ‘give me more data’ option, so we have to look elsewhere. If <span class="math inline">\(\Fcal\)</span> were smaller, this quantity would be smaller; and larger <span class="math inline">\(\Fcal\)</span> will <em>ceteris paribus</em> give us a larger value. So minimizing this term makes us want to pick as small an <span class="math inline">\(\Fcal\)</span> as possible.</p>
+<p>So here we have our dilemma: we want <span class="math inline">\(\Fcal\)</span> to be as large as possible to make the approximation error small, but at the same tiem we want <span class="math inline">\(\Fcal\)</span> to be as small as possible to make the sampling error small. Sadly, we can’t have both… More data is the only ‘free win’, but that’s typically easier said than done.</p>
+<section id="aside-is-rf_-real" class="level3"><h3 class="anchored" data-anchor-id="aside-is-rf_-real">Aside: Is <span class="math inline">\(R(f_{**})\)</span> real?</h3>
+<p>You might ask whether <span class="math inline">\(R(f_{**})\)</span> is actually real or whether it’s just a different type of approximation error. This is a bit philosophical (does true randomness exist or do we just need ever more complex models?) so we won’t get into it here. It’s not a term that will drive our decision making, so arguing whether it is exactly 0 or some other unknown, unknowable, and uncontrollable number doesn’t matter too much at the end of the day.</p>
+</section></section><section id="visual-representation" class="level2"><h2 class="anchored" data-anchor-id="visual-representation">Visual Representation</h2>
+<p>Draw the ‘two circles’ picture here.</p>
+<p>Key point: <span class="math display">\[\Var(\hat{f}) \lesssim \frac{1}{2} |\mathcal{F}|\]</span></p>
+<p>Argue by analogy with a simple random variable <span class="math inline">\(Z \in [a, b]\)</span>: <span class="math inline">\(\Var(Z) \leq \frac{1}{2}(b-a)^2\)</span>.</p>
+<p>Q: What is variance for non-numeric quantities? Consistency / repeatability.</p>
+</section><section id="exact-decomposition" class="level2"><h2 class="anchored" data-anchor-id="exact-decomposition">Exact Decomposition</h2>
+<p>The above decomposition works for <em>any</em> loss function, but it turns out the math is especially nice if we use an MSE loss.</p>
+<p>Specifically, let’s look at several quantities here:</p>
+<ul>
+<li>
+<span class="math inline">\(Y\)</span>: the <em>true</em> label we want to predict</li>
+<li>
+<span class="math inline">\(\E[Y|X]\)</span>: the <em>optimal</em> predictor under MSE loss (<span class="math inline">\(f_{**}\)</span> above)</li>
+<li>
+<span class="math inline">\(f_*\)</span>: the best <span class="math inline">\(\mathcal{F}\)</span>-class predictor</li>
+<li>
+<span class="math inline">\(\hat{f}\)</span>: the element of <span class="math inline">\(\mathcal{F}\)</span> we wind up using.</li>
+</ul>
+<p>In this case, we get the exact relationship:</p>
+<p><span class="math display">\[\begin{align*}
+\E[(Y - \hat{f}(X))^2|X] &amp;= \E[(Y - \E[Y|X])^2|X] + \E[(\E[Y|X] - f_*(X))^2|X] + \E[( f_*(X) - \hat{f}(X))^2|X] \\
+&amp;= \sigma_Y^2 + \text{Bias}^2 + \text{Variance}
+\end{align*}\]</span></p>
+<p>So here our terms are perfectly additive in a “Pythagorean” kind of way. We see that we have three terms:</p>
+<ul>
+<li>Irreducible Error: doesn’t depend on anything we have any control over</li>
+<li>Approximation Error / Bias: depends only on our choice of <span class="math inline">\(\mathcal{F}\)</span> (which determines <span class="math inline">\(f_*\)</span>)</li>
+<li>Sampling Error / Variance: driven the the randomness in our data leading to different <span class="math inline">\(\hat{f}\)</span> on different data sets.</li>
+</ul>
+<p>Other loss functions will follow this relationship <em>approximately</em> and it’s good for your intuition, even if it’s only <em>exactly</em> true (as equality, rather than some inequalities) for MSE.</p>
+</section><section id="tradeoff" class="level2"><h2 class="anchored" data-anchor-id="tradeoff">Tradeoff?</h2>
+<p>The above is a <em>bias-variance</em> decomposition. It is a fundamental law of how we do the accounting for these types of problems. We haven’t ‘created or destroyed’ error, we’ve simply put it into buckets that we hope to better understand.</p>
+<p>Later in the course, we will see that sometimes (but not always), we can adjust the size of <span class="math inline">\(\Fcal\)</span> so that <span class="math inline">\(\text{Bias}^2\)</span> goes up by 4 while Variance goes down by 9. This is a clear win! But we don’t always have this option.</p>
+<p>One of the most open and active questions in modern ML theory is why sometimes picking a bigger <span class="math inline">\(\Fcal\)</span> seems to help on both bias and variance (or at least not hurt). Answers to this are many–we might not actually be measuring things correctly, this is ‘worst case’ theory that doesn’t apply to real life, there are some other factors at play that drive results here–and all true to one degree or another.</p>
+<p>For us, in the simple scalar supervised context: it’s sufficient to say that we are conservative ‘worst case’-minded in theory, but to hope that theory will still provide some practical advice for real problems.</p>
+<p>Finally, note that essnetially none of these quantities can be known <em>in practice</em>. Next time, we will look at practical approaches for actually measuring performance.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +710,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes04.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes04.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes04.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes04.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
