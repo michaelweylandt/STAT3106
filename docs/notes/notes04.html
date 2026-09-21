@@ -24,6 +24,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -148,6 +183,7 @@ window.Quarto = {
   <li><a href="#visual-representation" id="toc-visual-representation" class="nav-link" data-scroll-target="#visual-representation">Visual Representation</a></li>
   <li><a href="#exact-decomposition" id="toc-exact-decomposition" class="nav-link" data-scroll-target="#exact-decomposition">Exact Decomposition</a></li>
   <li><a href="#tradeoff" id="toc-tradeoff" class="nav-link" data-scroll-target="#tradeoff">Tradeoff?</a></li>
+  <li><a href="#a-simulation-study" id="toc-a-simulation-study" class="nav-link" data-scroll-target="#a-simulation-study">A Simulation Study</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes04.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes04.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
@@ -185,8 +221,8 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>Today we’re going to look a bit more closely at the <em>reasons</em> why an ML system can fail. Before we do so, let’s review our basic framework of ML:</p>
 <p><span class="math display">\[\begin{align*}
 \hat{f} &amp;= \argmin_{f \in \Fcal} \frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \tag{ERM} \\
-f_* = \argmin_{f \in \Fcal} \E[L(f(\bX), Y)] \tag{Optimal $f_*$ Minimizes Test Error} \\
-\frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \approx \E[L(f(\bX), Y)] \text{LLN}
+f_* &amp;= \argmin_{f \in \Fcal} \E[L(f(\bX), Y)] \tag{Optimal $f_*$ Minimizes Test Error} \\
+\frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) &amp;\approx \E[L(f(\bX), Y)] \text{LLN}
 \end{align*}\]</span></p>
 <p>Reviewing our pieces:</p>
 <ul>
@@ -270,8 +306,8 @@ R(\hat{f}) &amp;\leq R(f_{**}) + \left|R(f_*) - R(f_{**})\right| + 2  \max_{f' \
 <p>You might ask whether <span class="math inline">\(R(f_{**})\)</span> is actually real or whether it’s just a different type of approximation error. This is a bit philosophical (does true randomness exist or do we just need ever more complex models?) so we won’t get into it here. It’s not a term that will drive our decision making, so arguing whether it is exactly 0 or some other unknown, unknowable, and uncontrollable number doesn’t matter too much at the end of the day.</p>
 </section></section><section id="visual-representation" class="level2"><h2 class="anchored" data-anchor-id="visual-representation">Visual Representation</h2>
 <p>Draw the ‘two circles’ picture here.</p>
-<p>Key point: <span class="math display">\[\Var(\hat{f}) \lesssim \frac{1}{2} |\mathcal{F}|\]</span></p>
-<p>Argue by analogy with a simple random variable <span class="math inline">\(Z \in [a, b]\)</span>: <span class="math inline">\(\Var(Z) \leq \frac{1}{2}(b-a)^2\)</span>.</p>
+<p>Key point: <span class="math display">\[\V(\hat{f}) \lesssim \frac{1}{2} |\mathcal{F}|\]</span></p>
+<p>Argue by analogy with a simple random variable <span class="math inline">\(Z \in [a, b]\)</span>: <span class="math inline">\(\V(Z) \leq \frac{1}{2}(b-a)^2\)</span>.</p>
 <p>Q: What is variance for non-numeric quantities? Consistency / repeatability.</p>
 </section><section id="exact-decomposition" class="level2"><h2 class="anchored" data-anchor-id="exact-decomposition">Exact Decomposition</h2>
 <p>The above decomposition works for <em>any</em> loss function, but it turns out the math is especially nice if we use an MSE loss.</p>
@@ -303,10 +339,295 @@ R(\hat{f}) &amp;\leq R(f_{**}) + \left|R(f_*) - R(f_{**})\right| + 2  \max_{f' \
 <p>Later in the course, we will see that sometimes (but not always), we can adjust the size of <span class="math inline">\(\Fcal\)</span> so that <span class="math inline">\(\text{Bias}^2\)</span> goes up by 4 while Variance goes down by 9. This is a clear win! But we don’t always have this option.</p>
 <p>One of the most open and active questions in modern ML theory is why sometimes picking a bigger <span class="math inline">\(\Fcal\)</span> seems to help on both bias and variance (or at least not hurt). Answers to this are many–we might not actually be measuring things correctly, this is ‘worst case’ theory that doesn’t apply to real life, there are some other factors at play that drive results here–and all true to one degree or another.</p>
 <p>For us, in the simple scalar supervised context: it’s sufficient to say that we are conservative ‘worst case’-minded in theory, but to hope that theory will still provide some practical advice for real problems.</p>
-<p>Finally, note that essnetially none of these quantities can be known <em>in practice</em>. Next time, we will look at practical approaches for actually measuring performance.</p>
+<p>Finally, note that essentially none of these quantities can be known <em>in practice</em>. Next time, we will look at practical approaches for actually measuring performance.</p>
+</section><section id="a-simulation-study" class="level2"><h2 class="anchored" data-anchor-id="a-simulation-study">A Simulation Study</h2>
+<p>While this type of decomposition is something we cannot work out <em>in applications</em> because we don’t know the underlying way the world works, but we can see how this works out in a simulation study.</p>
+<p>Here, we’re going to assume that the world works as:</p>
+<p><span class="math display">\[\begin{align*}
+X &amp;\sim \mathcal{U}([-3, 3]) \\
+Y|X &amp;\sim \mathcal{N}(3 + 2x + x^2, 2^2)
+\end{align*}\]</span></p>
+<p>and we will try to fit a line to this non-linear relationship.</p>
+<p>A set of <span class="math inline">\(n=40\)</span> points from this model might look like this:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes04_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Given just this set of observations, it might not actually even be clear that we ‘should’ be fitting a quadratic model. If we were to fit OLS to this data, we’d see the following:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">TRAINING_DATA</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">X</span>, y<span class="op">=</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="st">"X"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Y"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Example Training Data with Linear Fit"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">stat_smooth</span><span class="op">(</span>se<span class="op">=</span><span class="cn">FALSE</span>, method<span class="op">=</span><span class="st">"lm"</span>, color<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes04_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Again - not obviously terrible!</p>
+<p>So how good is this in practice? Let’s start by computing the in-sample (training) error:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/">broom</a></span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">X</span>, data<span class="op">=</span><span class="va">TRAINING_DATA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Return original data along with `.fitted` (in-sample predictions)</span></span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>mse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">Y</span> <span class="op">-</span> <span class="va">.fitted</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>              rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">mse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+    mse  rmse
+  &lt;dbl&gt; &lt;dbl&gt;
+1  6.87  2.62</code></pre>
+</div>
+</div>
+<p>So this is interesting: even using the ‘wrong’ model, we see that we have a respectable RMSE. A bit worse than the ‘true’ of 2 from Nature’s model, but not terrible.</p>
+<p>How would we have done <em>out-of-sample</em> instead? Let’s create some test data from Nature’s model and compare:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">TEST_DATA</span> <span class="op">&lt;-</span> <span class="fu">make_xy</span><span class="op">(</span>n<span class="op">=</span><span class="fl">1e6</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m</span>, newdata<span class="op">=</span><span class="va">TEST_DATA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>mse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">Y</span> <span class="op">-</span> <span class="va">.fitted</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>              rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">mse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+    mse  rmse
+  &lt;dbl&gt; &lt;dbl&gt;
+1  13.1  3.62</code></pre>
+</div>
+</div>
+<p>Ok - so definitely worse, which is what we would expect.</p>
+<p>Now that we’ve done a bit of this in practice, let’s work out the parts of our decompositions. We first need to work out <span class="math inline">\(f_*\)</span> - the <em>best</em> line we could have fit to this data. Rather than figure out <span class="math inline">\(f_*\)</span> analytically, let’s just see what line we fit to an <em>enormous</em> data set, taking advantage of the LLM so that optimizing the fit to the huge data set is essentially fitting to Nature’s model.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m_star</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">X</span>, data<span class="op">=</span><span class="fu">make_xy</span><span class="op">(</span>n<span class="op">=</span><span class="fl">1e7</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">m_star</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ X, data = make_xy(n = 1e+07))
+
+Coefficients:
+(Intercept)            X  
+      6.001        2.000  </code></pre>
+</div>
+</div>
+<p>So the ‘best’ line we could fit to this data is:<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p><span class="math display">\[f_*: \hat{Y} = 2X + 6\]</span></p>
+<p>Visually, this looks something like:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">201</span><span class="op">)</span></span>
+<span><span class="va">EY</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span> <span class="op">+</span> <span class="va">X</span><span class="op">^</span><span class="fl">2</span></span>
+<span><span class="va">F_STAR</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span> <span class="op">+</span> <span class="fl">6</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>, Y<span class="op">=</span><span class="va">EY</span>, F_STAR<span class="op">=</span><span class="va">F_STAR</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">Y</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"blue4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">F_STAR</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="st">"X"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Y"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Fitting the Optimal Linear Approximator (Red) to Non-Linear Reality (Blue)"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes04_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So what would the <em>test</em> error associated with <span class="math inline">\(f_*\)</span> be:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">make_xy</span><span class="op">(</span>n<span class="op">=</span><span class="fl">1e7</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>f_star <span class="op">=</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span> <span class="op">+</span> <span class="fl">6</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>mse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">Y</span> <span class="op">-</span> <span class="va">f_star</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>              rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">mse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       mse     rmse
+1 11.19678 3.346158</code></pre>
+</div>
+</div>
+<p>A bit better than our estimated model above. At this point, we have some of our terms sorted out:</p>
+<ul>
+<li><p>Irreducible Error: <span class="math inline">\(2^2\)</span>. There was nothing to do here <em>in silico</em>; we just know it because we know how the data was generated.</p></li>
+<li>
+<p>Approximation Error: Because:</p>
+<p><span class="math display">\[R(f_*) = \text{Irreducible Error} + \text{Bias}^2\]</span></p>
+<p>we have</p>
+<p><span class="math display">\[\begin{align*}
+\text{Bias}^2 &amp;= R(f_*) - \text{Irreducible Error} \\
+              &amp;= 11.2 - 4 \\
+              &amp;= 7.2
+\end{align*}\]</span></p>
+<p>Alternatively, if we ‘turn off’ the noise in <span class="math inline">\(Y\)</span>, we can just work this out analytically as <span class="math inline">\(\E[(\E[Y] - f_*)^2]\)</span>:</p>
+</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">401</span><span class="op">)</span></span>
+<span><span class="va">EY</span>    <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span> <span class="op">+</span> <span class="va">X</span><span class="op">^</span><span class="fl">2</span></span>
+<span><span class="va">FSTAR</span> <span class="op">&lt;-</span> <span class="fl">6</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span></span>
+<span></span>
+<span><span class="va">APPROXIMATION_ERROR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">EY</span> <span class="op">-</span> <span class="va">FSTAR</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">APPROXIMATION_ERROR</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 7.272269</code></pre>
+</div>
+</div>
+<p>Note that this doesn’t exactly match our simulation since there was a bit of randomness, but it’s close enough.</p>
+<p>Finally, let’s look into the <em>estimation</em> error. This comes down to the fact that our estimated model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ X, data = TRAINING_DATA)
+
+Coefficients:
+(Intercept)            X  
+      4.689        2.244  </code></pre>
+</div>
+</div>
+<p>doesn’t match the <span class="math inline">\(f_*\)</span> (infinite data) model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m_star</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Y ~ X, data = make_xy(n = 1e+07))
+
+Coefficients:
+(Intercept)            X  
+      6.001        2.000  </code></pre>
+</div>
+</div>
+<p>Visually:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">TRAINING_DATA</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>f_hat  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">m</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>           f_star <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">m_star</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">Y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_line</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">f_hat</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"green4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_line</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">f_star</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="st">"X"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Y"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Comparison of Ideal (Red) and Fitted (Green) Linear Models"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes04_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From this photo alone, it’s not actually clear which line is better, so let’s compute the errors on our training set once again to remind ourselves:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Training Error - Fitted Model</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>mse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">Y</span> <span class="op">-</span> <span class="va">.fitted</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>              rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">mse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+    mse  rmse
+  &lt;dbl&gt; &lt;dbl&gt;
+1  6.87  2.62</code></pre>
+</div>
+</div>
+<p>and</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Training Error - Fitted Model</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m_star</span>, newdata<span class="op">=</span><span class="va">TRAINING_DATA</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>mse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">Y</span> <span class="op">-</span> <span class="va">.fitted</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, </span>
+<span>              rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">mse</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+    mse  rmse
+  &lt;dbl&gt; &lt;dbl&gt;
+1  8.79  2.96</code></pre>
+</div>
+</div>
+<p>(Which of these is lower? Why?)</p>
+<p>From the error we computed above, we can back out the estimation error for this particular fit</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">TOTAL_ERROR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m</span>, newdata<span class="op">=</span><span class="va">TEST_DATA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>mse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">Y</span> <span class="op">-</span> <span class="va">.fitted</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">pull</span><span class="op">(</span><span class="va">mse</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">IRREDUCIBLE_ERROR</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span></span>
+<span><span class="va">ESTIMATION_ERROR</span> <span class="op">&lt;-</span> <span class="va">TOTAL_ERROR</span> <span class="op">-</span> <span class="va">IRREDUCIBLE_ERROR</span> <span class="op">-</span> <span class="va">APPROXIMATION_ERROR</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">ESTIMATION_ERROR</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.819763</code></pre>
+</div>
+</div>
+<p>But this isn’t the <em>variance</em> per se. To really get a sense of the variance, we need to see how much this quantity would change if we had <em>different</em> training sets. Let’s code this up:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">201</span><span class="op">)</span></span>
+<span><span class="va">EY</span> <span class="op">&lt;-</span> <span class="fl">3</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span> <span class="op">+</span> <span class="va">X</span><span class="op">^</span><span class="fl">2</span></span>
+<span><span class="va">F_STAR</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">X</span> <span class="op">+</span> <span class="fl">6</span></span>
+<span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>X<span class="op">=</span><span class="va">X</span>, Y<span class="op">=</span><span class="va">EY</span>, F_STAR<span class="op">=</span><span class="va">F_STAR</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">Y</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"blue4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y<span class="op">=</span><span class="va">F_STAR</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="st">"X"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Y"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Variance of OLS Estimation Around the Optimal Approximator (Red) to Non-Linear Reality (Blue)"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_palette</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palette.html">palette.colors</a></span><span class="op">(</span>n<span class="op">=</span><span class="fl">8</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">resample_training</span> <span class="op">&lt;-</span> <span class="fu">make_xy</span><span class="op">(</span>n<span class="op">=</span><span class="fl">40</span><span class="op">)</span></span>
+<span>    <span class="va">m_resample</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">X</span>, data<span class="op">=</span><span class="va">resample_training</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="co"># We have to be a bit manual here with data= and mapping= since we are</span></span>
+<span>    <span class="co"># plotting multiple training sets on a single figure</span></span>
+<span>    <span class="va">G</span> <span class="op">&lt;-</span> <span class="va">G</span> <span class="op">+</span> <span class="fu">geom_point</span><span class="op">(</span>data<span class="op">=</span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m_resample</span><span class="op">)</span>, </span>
+<span>                        mapping<span class="op">=</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">X</span>, y<span class="op">=</span><span class="va">Y</span><span class="op">)</span>, </span>
+<span>                        color<span class="op">=</span><span class="va">my_palette</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, </span>
+<span>                        alpha<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>             <span class="fu">stat_smooth</span><span class="op">(</span>data<span class="op">=</span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">m_resample</span><span class="op">)</span>,</span>
+<span>                         mapping<span class="op">=</span><span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">X</span>, y<span class="op">=</span><span class="va">Y</span><span class="op">)</span>, </span>
+<span>                         method<span class="op">=</span><span class="st">"lm"</span>, </span>
+<span>                         se<span class="op">=</span><span class="cn">FALSE</span>, </span>
+<span>                         color<span class="op">=</span><span class="va">my_palette</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, </span>
+<span>                         alpha<span class="op">=</span><span class="fl">0.2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">G</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'
+`geom_smooth()` using formula = 'y ~ x'
+`geom_smooth()` using formula = 'y ~ x'
+`geom_smooth()` using formula = 'y ~ x'
+`geom_smooth()` using formula = 'y ~ x'
+`geom_smooth()` using formula = 'y ~ x'
+`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes04_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The thinner lines here are different realizations of the OLS estimator if we had different training sets; in this case, we definitely see some variability, but not too much as OLS is a rather stable method.</p>
+<p>TODO: Extend to polynomial regression.</p>
 
 
-</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>If you’re interested in where the <span class="math inline">\(6\)</span> comes from: work through <span class="math inline">\(\E[3 + X^2]\)</span> for <span class="math inline">\(X \sim \mathcal{U}([-3, 3])\)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();

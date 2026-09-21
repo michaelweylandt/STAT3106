@@ -15,8 +15,8 @@ can fail. Before we do so, let's review our basic framework of ML:
 
 $$\begin{align*}
 \hat{f} &= \argmin_{f \in \Fcal} \frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \tag{ERM} \\
-f_* = \argmin_{f \in \Fcal} \E[L(f(\bX), Y)] \tag{Optimal $f_*$ Minimizes Test Error} \\
-\frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \approx \E[L(f(\bX), Y)] \text{LLN}
+f_* &= \argmin_{f \in \Fcal} \E[L(f(\bX), Y)] \tag{Optimal $f_*$ Minimizes Test Error} \\
+\frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) &\approx \E[L(f(\bX), Y)] \text{LLN}
 \end{align*}$$
 
 Reviewing our pieces: 
@@ -189,9 +189,9 @@ number doesn't matter too much at the end of the day.
 
 Draw the 'two circles' picture here. 
 
-Key point: $$\Var(\hat{f}) \lesssim \frac{1}{2} |\mathcal{F}|$$
+Key point: $$\V(\hat{f}) \lesssim \frac{1}{2} |\mathcal{F}|$$
 
-Argue by analogy with a simple random variable $Z \in [a, b]$: $\Var(Z) \leq \frac{1}{2}(b-a)^2$. 
+Argue by analogy with a simple random variable $Z \in [a, b]$: $\V(Z) \leq \frac{1}{2}(b-a)^2$. 
 
 Q: What is variance for non-numeric quantities? Consistency / repeatability. 
 
@@ -250,5 +250,279 @@ For us, in the simple scalar supervised context: it's sufficient to say that we
 are conservative 'worst case'-minded in theory, but to hope that theory will 
 still provide some practical advice for real problems. 
 
-Finally, note that essnetially none of these quantities can be known _in practice_. 
+Finally, note that essentially none of these quantities can be known _in practice_. 
 Next time, we will look at practical approaches for actually measuring performance.
+
+
+## A Simulation Study
+
+While this type of decomposition is something we cannot work
+out _in applications_ because we don't know the underlying
+way the world works, but we can see how this works out in a
+simulation study. 
+
+Here, we're going to assume that the world works as: 
+
+$$\begin{align*}
+X &\sim \mathcal{U}([-3, 3]) \\
+Y|X &\sim \mathcal{N}(3 + 2x + x^2, 2^2)
+\end{align*}$$
+
+and we will try to fit a line to this non-linear relationship. 
+
+A set of $n=40$ points from this model might look like this: 
+
+```{r}
+#| echo: false
+library(tidyverse)
+
+set.seed(3106)
+
+make_xy <- function(n){
+    X <- runif(n, -3, 3)
+    Y <- rnorm(n, 3 + 2 * X + X^2, 2)
+    data.frame(X=X, Y=Y)
+}
+
+TRAINING_DATA <- make_xy(40) 
+
+ggplot(TRAINING_DATA, aes(x=X, y=Y)) + 
+    geom_point() + 
+    xlab("X") + 
+    ylab("Y") + 
+    theme_bw() + 
+    ggtitle("Example Training Data")
+```
+
+
+Given just this set of observations, it might not actually even be clear that
+we 'should' be fitting a quadratic model. If we were to fit OLS to this data,
+we'd see the following: 
+
+```{r}
+ggplot(TRAINING_DATA, aes(x=X, y=Y)) + 
+    geom_point() + 
+    xlab("X") + 
+    ylab("Y") + 
+    theme_bw() + 
+    ggtitle("Example Training Data with Linear Fit") + 
+    stat_smooth(se=FALSE, method="lm", color="red4")
+```
+
+Again - not obviously terrible!
+
+So how good is this in practice? Let's start by computing the in-sample (training)
+error: 
+
+```{r}
+#| message: false
+library(broom)
+m <- lm(Y ~ X, data=TRAINING_DATA)
+
+augment(m) |> # Return original data along with `.fitted` (in-sample predictions)
+    summarize(mse = mean((Y - .fitted)^2), 
+              rmse = sqrt(mse))
+```
+
+So this is interesting: even using the 'wrong' model, we see that we have a
+respectable RMSE. A bit worse than the 'true' of 2 from Nature's model, but not
+terrible. 
+
+How would we have done _out-of-sample_ instead? Let's create some test data from
+Nature's model and compare: 
+
+```{r}
+TEST_DATA <- make_xy(n=1e6)
+
+augment(m, newdata=TEST_DATA) |>
+    summarize(mse = mean((Y - .fitted)^2), 
+              rmse = sqrt(mse))
+```
+
+Ok - so definitely worse, which is what we would expect. 
+
+Now that we've done a bit of this in practice, let's work out the parts of our
+decompositions. We first need to work out $f_*$ - the *best* line we could have
+fit to this data. Rather than figure out $f_*$ analytically, let's just see what
+line we fit to an _enormous_ data set, taking advantage of the LLM so that
+optimizing the fit to the huge data set is essentially fitting to Nature's model. 
+
+```{r}
+m_star <- lm(Y ~ X, data=make_xy(n=1e7))
+m_star
+```
+
+So the 'best' line we could fit to this data is:[^six]
+
+[^six]: If you're interested in where the $6$ comes from: work through 
+$\E[3 + X^2]$ for $X \sim \mathcal{U}([-3, 3])$. 
+
+$$f_*: \hat{Y} = 2X + 6$$
+
+Visually, this looks something like: 
+
+```{r}
+X <- seq(-3, 3, length.out=201)
+EY <- 3 + 2 * X + X^2
+F_STAR <- 2 * X + 6
+data.frame(X=X, Y=EY, F_STAR=F_STAR) |>
+    ggplot(aes(x=X)) + 
+    geom_point(aes(y=Y), color="blue4") + 
+    geom_point(aes(y=F_STAR), color="red4") + 
+    xlab("X") + 
+    ylab("Y") + 
+    ggtitle("Fitting the Optimal Linear Approximator (Red) to Non-Linear Reality (Blue)") + 
+    theme_bw()
+```
+
+So what would the _test_ error associated with $f_*$ be: 
+
+```{r}
+make_xy(n=1e7) |>
+    mutate(f_star = 2 * X + 6) |>
+    summarize(mse = mean((Y - f_star)^2), 
+              rmse = sqrt(mse))
+```
+
+A bit better than our estimated model above. At this point, we have some of our
+terms sorted out: 
+
+- Irreducible Error: $2^2$. There was nothing to do here _in silico_; we just 
+  know it because we know how the data was generated. 
+- Approximation Error: Because: 
+
+  $$R(f_*) = \text{Irreducible Error} + \text{Bias}^2$$
+  
+  we have
+  
+  $$\begin{align*}
+  \text{Bias}^2 &= R(f_*) - \text{Irreducible Error} \\
+                &= 11.2 - 4 \\
+                &= 7.2
+  \end{align*}$$
+  
+  Alternatively, if we 'turn off' the noise in $Y$, we can just work this
+  out analytically as $\E[(\E[Y] - f_*)^2]$: 
+  
+```{r}
+X <- seq(-3, 3, length.out=401)
+EY    <- 3 + 2 * X + X^2
+FSTAR <- 6 + 2 * X
+
+APPROXIMATION_ERROR <- mean((EY - FSTAR)^2)
+APPROXIMATION_ERROR
+```
+
+  Note that this doesn't exactly match our simulation since there was a bit of
+  randomness, but it's close enough. 
+  
+Finally, let's look into the _estimation_ error. This comes down to the fact
+that our estimated model: 
+
+```{r}
+m
+```
+
+doesn't match the $f_*$ (infinite data) model: 
+
+```{r}
+m_star
+```
+
+Visually: 
+
+```{r}
+TRAINING_DATA |> 
+    mutate(f_hat  = predict(m, newdata=data.frame(X)), 
+           f_star = predict(m_star, newdata=data.frame(X))) |>
+    ggplot(aes(x=X)) + 
+    geom_point(aes(y=Y)) + 
+    geom_line(aes(y=f_hat), color="green4") + 
+    geom_line(aes(y=f_star), color="red4") + 
+    theme_bw() + 
+    xlab("X") + 
+    ylab("Y") + 
+    ggtitle("Comparison of Ideal (Red) and Fitted (Green) Linear Models")
+```
+From this photo alone, it's not actually clear which line
+is better, so let's compute the errors on our training
+set once again to remind ourselves: 
+
+```{r}
+# Training Error - Fitted Model
+augment(m) |> 
+    summarize(mse = mean((Y - .fitted)^2), 
+              rmse = sqrt(mse))
+```
+
+and
+
+```{r}
+# Training Error - Fitted Model
+augment(m_star, newdata=TRAINING_DATA) |> 
+    summarize(mse = mean((Y - .fitted)^2), 
+              rmse = sqrt(mse))
+```
+
+(Which of these is lower? Why?)
+
+From the error we computed above, we can back out the estimation error for
+this particular fit
+
+```{r}
+TOTAL_ERROR <- augment(m, newdata=TEST_DATA) |>
+    summarize(mse = mean((Y - .fitted)^2)) |> 
+    pull(mse)
+
+IRREDUCIBLE_ERROR <- 4
+
+ESTIMATION_ERROR <- TOTAL_ERROR - IRREDUCIBLE_ERROR - APPROXIMATION_ERROR
+print(ESTIMATION_ERROR)
+```
+
+But this isn't the _variance_ per se. To really get a sense
+of the variance, we need to see how much this quantity would change if we
+had _different_ training sets. Let's code this up: 
+
+```{r}
+X <- seq(-3, 3, length.out=201)
+EY <- 3 + 2 * X + X^2
+F_STAR <- 2 * X + 6
+G <- data.frame(X=X, Y=EY, F_STAR=F_STAR) |>
+    ggplot(aes(x=X)) + 
+    geom_point(aes(y=Y), color="blue4") + 
+    geom_point(aes(y=F_STAR), color="red4") + 
+    xlab("X") + 
+    ylab("Y") + 
+    ggtitle("Variance of OLS Estimation Around the Optimal Approximator (Red) to Non-Linear Reality (Blue)") + 
+    theme_bw()
+
+my_palette <- palette.colors(n=8)[-1]
+
+for(i in 1:7){
+    resample_training <- make_xy(n=40)
+    m_resample <- lm(Y ~ X, data=resample_training)
+    
+    # We have to be a bit manual here with data= and mapping= since we are
+    # plotting multiple training sets on a single figure
+    G <- G + geom_point(data=augment(m_resample), 
+                        mapping=aes(x=X, y=Y), 
+                        color=my_palette[i], 
+                        alpha=0.2) + 
+             stat_smooth(data=augment(m_resample),
+                         mapping=aes(x=X, y=Y), 
+                         method="lm", 
+                         se=FALSE, 
+                         color=my_palette[i], 
+                         alpha=0.2)
+}
+
+G
+```
+
+The thinner lines here are different realizations of the OLS
+estimator if we had different training sets; in this case, we
+definitely see some variability, but not too much as OLS is a 
+rather stable method. 
+
+TODO: Extend to polynomial regression. 
