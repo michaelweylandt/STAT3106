@@ -1,0 +1,79 @@
+---
+title: "STAT 3106: Problem Set 00 -- Machines and Things"
+author: "YOUR NAME HERE"
+format: 
+    pdf: 
+        documentclass: article
+        papersize: letter
+        pdf-engine: xelatex
+    
+        # Page Layout
+        geometry:
+            - top=1in
+            - bottom=1in
+            - left=1.15in
+            - right=1.15in
+    
+        # Typography
+        fontsize: 10pt
+        linestretch: 1.25
+        mainfont: "Georgia"
+        sansfont: "Helvetica Neue"
+        monofont: "Menlo" 
+        monofontoptions: "Scale=0.85"
+    
+        # Document Structure & Navigation
+        number-sections: true
+        number-depth: 2
+        toc: false 
+    
+        # Color & Styling
+        colorlinks: true
+        linkcolor: "MidnightBlue"
+        urlcolor: "MidnightBlue"
+        citecolor: "MidnightBlue"
+---
+
+## Question 1
+
+Here is an example of some text, including this lovely plot: 
+
+```{r}
+#| label: plot_1
+#| message: false
+library(ggplot2)
+library(dplyr)
+
+txhousing |> 
+    filter(city %in% c("Houston", "Dallas", "Austin")) |> 
+    ggplot(aes(x=date, y=median, color=city)) + 
+    geom_point() + 
+    geom_line() + 
+    theme_bw() + 
+    xlab("Sale Date") + 
+    ylab("Median Home Price") + 
+    scale_y_continuous(label=scales::dollar) + 
+    scale_color_brewer(type="qual", palette=2, name="City") + 
+    theme(legend.position="bottom") + 
+    ggtitle("TX Home Price Trends")
+```
+
+In this figure, we see that things are getting more expensive and that
+Austin is generally more expensive than America's Greatest City, Houston.
+
+Now that we're about to go to the next page, we need a page break. 
+
+{{< pagebreak >}}
+
+## Question 2
+
+The answer to the second question goes here, where it highlights your brilliance
+and insight. 
+
+### Part (a)
+
+An apple alights atop an aardvark. 
+
+### Part (b)
+
+Brilliant beavers boldly build beautiful bluebird-bedecked bastions.

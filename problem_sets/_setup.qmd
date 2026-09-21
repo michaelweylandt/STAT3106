@@ -48,4 +48,13 @@ Examples: [`R`-focused](./ps_example_r.qmd) and [`python`-focused](./ps_example_
 
 :::
 
-$$\newcommand{\bx}{\mathbf{x}}$$
+```{r}
+#| include: false
+fs::file_copy("problem_sets/ps_example_r.qmd", 
+              "docs/problem_sets/ps_example_r.qmd")
+
+fs::file_copy("problem_sets/ps_example_py.qmd", 
+              "docs/problem_sets/ps_example_py.qmd")
+```
+
+$$\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}}$$
