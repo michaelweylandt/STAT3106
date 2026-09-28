@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-09-28">
 <title>Notes for Lecture #06: Unit I. ML Fundamentals: A Friendly Foray into First Order Optimization: SGD and Friends – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,39 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#why-not-grid-search" id="toc-why-not-grid-search" class="nav-link active" data-scroll-target="#why-not-grid-search">Why Not Grid Search?</a></li>
+  <li>
+<a href="#unconstrained-optimization-via-gradient-descent" id="toc-unconstrained-optimization-via-gradient-descent" class="nav-link" data-scroll-target="#unconstrained-optimization-via-gradient-descent">Unconstrained Optimization via Gradient Descent</a>
+  <ul class="collapse">
+<li><a href="#learning-rates" id="toc-learning-rates" class="nav-link" data-scroll-target="#learning-rates">Learning Rates</a></li>
+  <li><a href="#autodiff" id="toc-autodiff" class="nav-link" data-scroll-target="#autodiff">AutoDiff</a></li>
+  <li><a href="#convexity" id="toc-convexity" class="nav-link" data-scroll-target="#convexity">Convexity</a></li>
+  </ul>
+</li>
+  <li><a href="#stochastic-gradient-descent" id="toc-stochastic-gradient-descent" class="nav-link" data-scroll-target="#stochastic-gradient-descent">Stochastic Gradient Descent</a></li>
+  <li><a href="#zeroth-order-optimization" id="toc-zeroth-order-optimization" class="nav-link" data-scroll-target="#zeroth-order-optimization">Zeroth Order Optimization</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes06.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes06.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #06: Unit I. ML Fundamentals: A Friendly Foray into First Order Optimization: SGD and Friends</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">September 28, 2026</p>
     </div>
   </div>
   
@@ -164,15 +214,417 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<p>So far, we have talked mainly talked about models and different aspects of understanding predictive performance (in/out-of-sample, test/train, decomposing error into sources). Throughout all of this, we’ve repeatedly made reference to the empirical risk minimizer:</p>
+<p><span class="math display">\[\hat{f} = \argmin_{f \in \Fcal} \frac{1}{n}\sum_{i=1}^n L(f(\bX_i), Y_i) \tag{ERM}\]</span></p>
+<p>Today, our focus is on actually <em>solving</em> the ERM problem. This can get quite technical, so we’re just going to work on building the intuition for how one could solve this type of problem.</p>
+<p>The first-and most important-thing to note is that the ERM problem essentially never has a simple closed form solution: OLS (and some close cousins) are a notable exception. Even something as simple and familiar as <em>logistic regression</em> requires us to adopt an alternative approach.</p>
+<p>To keep our notation simple, let’s rewrite the ERM problem as a special case of a more general problem:</p>
+<p><span class="math display">\[x_* = \argmin_{x \in \Ccal} f(x)\]</span></p>
+<p>That is, we want to find the value(s) of <span class="math inline">\(x\)</span> that make <span class="math inline">\(f(\cdot)\)</span> as small as possible. Obviously this formulation captures ERM, but it also includes problems in applied math as vast as transportation planning (minimize fuel usage), economic decision making (minimize costs associated with a complex decision), classical statistics (minimize missfit between a model and some observed data) and many others. The function <span class="math inline">\(f\)</span> is called the <em>objective</em>. Note that we’re not loosing anything by focusing on <em>minimizing</em> the objective. It’s easy to see that</p>
+<p><span class="math display">\[\argmin_{x \in \Ccal} f(x) \Leftrightarrow \argmax_{x \in \Ccal} -f(x)\]</span></p>
+<p>The requirement <span class="math inline">\(x \in \Ccal\)</span> is intentionally quite vague: we’re simply requiring <span class="math inline">\(x\)</span> to live in <em>some set</em>, traditionally known as a <em>constraint</em> set. In the simplest problems, <span class="math inline">\(\Ccal\)</span> is all vectors (all possible combinations of real numbers) and we say the problem is <em>unconstrained</em>. In other problems, we might use <span class="math inline">\(\Ccal\)</span> to impose constraints that make a solution workable - we minimize fuel cost <em>subject to actually getting to our destination</em> and we minimize costs associated with a complex decision <em>subject to contracts we have negotiated in the past</em>.</p>
+<p>In ML, we rarely have these types of hard domain-specific constraints, but we will want to use the constraint set to <em>nudge</em> our answers in a particular direction. (We will return to this when we talk about regularization in Unit II.)</p>
+<p>For now, let’s assume we have no constraints, so we are just solving</p>
+<p><span class="math display">\[\argmin_{x \in \R^p} f(x)\]</span></p>
+<section id="why-not-grid-search" class="level2"><h2 class="anchored" data-anchor-id="why-not-grid-search">Why Not Grid Search?</h2>
+</section><section id="unconstrained-optimization-via-gradient-descent" class="level2"><h2 class="anchored" data-anchor-id="unconstrained-optimization-via-gradient-descent">Unconstrained Optimization via Gradient Descent</h2>
+<p>All of modern ML optimization relies on one remarkable fact from elementary calculus: the derivative points the way.</p>
+<p>Let’s go back to basics: essentially all functions in ML take in several inputs (parameters) and produce a single output. Formally,</p>
+<p><span class="math display">\[ f: \R^p \to \R\]</span></p>
+<p>The relevant notion of derivative for this type of ‘scalar-valued’ function <span class="math inline">\(f\)</span> is the <em>gradient</em>: the gradient, which we denote <span class="math inline">\(\nabla f\)</span> is a <em>vector</em> of derivatives. If we think about a two-input function <span class="math inline">\(g(x, y)\)</span>, its gradient is the vector given by</p>
+<p><span class="math display">\[\left(\frac{\partial g}{\partial x}, \frac{\partial g}{\partial y}\right)\]</span></p>
+<p>That is, we take the derivative with respect to <em>each</em> input one at a time and join them into a vector. Why is this useful?</p>
+<p>Remember how a vector works in simple single-variable calculus: it is <em>positive</em> if the function is increasing at a point and negative if the function is decreasing. Another way to say this is: “the derivative is positive if moving in the positive direction (rightwards) makes <span class="math inline">\(f\)</span> go up and the derivative is negative if moving in the negative direction (leftwards) makes <span class="math inline">\(f\)</span> go up.”</p>
+<p>Visually,</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>and</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This suggests an approach we can use to find the minimum of any function:</p>
+<ul>
+<li>Given a starting point <span class="math inline">\(x_0\)</span>:</li>
+<li>Repeat until the minimum is found:
+<ul>
+<li>Compute the derivative <span class="math inline">\(f'(x_k)\)</span>
+</li>
+<li>If positive, shift a bit to the left <span class="math inline">\(x_{k+1} = x_k - \epsilon\)</span> If negative, shift a bit to the right <span class="math inline">\(x_{k+1} = x_k + \epsilon\)</span>
+</li>
+</ul>
+</li>
+</ul>
+<p>We can repeat this simple loop and eventually run into <strong>a</strong> minimum of the function. Visually, suppose we want to find the minimum of this function:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html">curve</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s start at <span class="math inline">\(x = 0\)</span> and see what happens:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># TODO</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This algorithm can be generalized to give us the general strategy of <em>gradient-descent</em>: we repeat the following loop until we reach a minimum:</p>
+<p><span class="math display">\[x^{(k+1)} \leftarrow x^{(k)} - c_k \nabla f(x^{(k)})\]</span></p>
+<p>Notably, when the derivative is zero <span class="math inline">\(\nabla f = \bzero\)</span> we stop. (Check why.)</p>
+<p><em>Aside</em>: If we were <em>maximizing</em>, we would have <span class="math inline">\(x^{(k)} + c_k \nabla f\)</span>. Why?</p>
+<p>This strategy has several very nice properties:</p>
+<ul>
+<li>It gives us a natural stopping rule, at least in theory, of <span class="math inline">\(\nabla f = \bzero\)</span>. In practice, getting an <em>exact</em> zero is very hard, so we typically stop when <span class="math inline">\(\nabla f \approx \bzero\)</span> or when <span class="math inline">\(f(x^{(k+1)}) \approx f(x^{(k)})\)</span>
+</li>
+<li>As long as the step size <span class="math inline">\(c_k\)</span> is chosen small enough, we always are going to go downhill (<span class="math inline">\(f\)</span> decreases).</li>
+<li>We don’t need any <em>global</em> information. We only need the gradient at one point at a time. We sometimes say we only need a first-order <em>oracle</em>. We don’t really need to know the <em>function</em> <span class="math inline">\(\nabla f\)</span>: we only need to be able to evaluate it. For very complex functions, this turns out to be a real practical advantage as we will discuss below.</li>
+</ul>
+<p>This last point is a bit of a double edged sword: gradient descent will help us find a point where <span class="math inline">\(\nabla f \approx \bzero\)</span>, but this only guarantees us a a <em>local</em> minimum (or possibly even just a critical point). There may be a better solution farther away that we don’t see. <em>E.g.</em>,</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here, we see that we have <em>the</em> minimizer, also called the <em>global minimizer</em> at the red dot as well as a <em>local</em> minimizer at the blue dot. If we start GD around the blue dot, we will ‘fall down’ into that valley and converge to the blue dot, but we will never get to the true global minimizer. GD cannot easily escape this sort of trap because it only looks at the derivative around the blue dot and there is no local direction to go downwards.</p>
+<section id="learning-rates" class="level3"><h3 class="anchored" data-anchor-id="learning-rates">Learning Rates</h3>
+<p>In our basic GD update</p>
+<p>[x^{(k+1)} x^{(k)} - c_k f(x^{(k)})]</p>
+<p>what role is played by the value <span class="math inline">\(c_k\)</span>? We haven’t really talked about it so far.</p>
+<p><span class="math inline">\(c_k\)</span> is known as the <em>step-size</em> (in general optimization theory) or the <em>learning rate</em> (in ML). It controls <em>how fast</em> we go in GD. If we pick a larger <span class="math inline">\(c_k\)</span>, we take proportionally larger steps.</p>
+<p>Big steps seem great - they will help us get to our destination (minimizer) more quickly. And sometimes they will. But they pose a bit of a risk. If our step size is <em>too</em> large, we can ‘step over’ the minimum.</p>
+<p>Take a very simple example: minimizing <span class="math inline">\(f(x) = x^2\)</span>, where the answer is clearly <span class="math inline">\(x = 0\)</span> and we have <span class="math inline">\(f'(x) = 2x\)</span>. If we start at <span class="math inline">\(x^{(0)} = -2\)</span> and take a simple step size of <span class="math inline">\(c_k = 1\)</span>, we will just have:</p>
+<p><span class="math display">\[\begin{align*}
+x^{(0)} &amp;= -2
+x^{(1)} &amp;= x^{(0)} - c_k f'(x^{(0)}) \\
+        &amp;= -2 - 1 * (2 * (-2)) \\
+        &amp;= 2 \\
+x^{(2)} &amp;= x^{(1)} - c_k f'(x^{(1)}) \\
+        &amp;= 2 - 1 * (2 * 2) \\
+        &amp;= -2
+x^{(3)} &amp;= x^{(2)} - c_k f'(x^{(2)}) \\
+        &amp;= -2 - 1 * (2 * (-2)) \\
+        &amp;= 2
+\dots &amp;= \dots
+\end{align*}\]</span></p>
+<p>and we will ‘ping-pong’ back and forth forever. This example is a bit contrived and a perfect cycle is pretty rare, but the general phenomenon of bouncing around ‘above’ the valley certainly happens.</p>
+<p>So what can we do? The simplest choice might be to set <span class="math inline">\(c_k\)</span> to some small value, but this comes with its own costs. We can take smaller steps, but we will then need many more to get to our minimizer.</p>
+<p>One simple strategy is to have <span class="math inline">\(c_k\)</span> not be constant, but to instead have it <em>decay</em> in <span class="math inline">\(k\)</span>: that is, to have the step sizes get smaller as we go on. A simple choice might be <span class="math inline">\(c_k = 1/k\)</span>. We start with a bit step <span class="math inline">\(c_1 = 1\)</span>, but our next step is half-sized <span class="math inline">\(c_2 = 1/2\)</span> and so forth. Our hope here is to take an initial few large steps to get us close to the minimizer and then to ‘fine-tune’ our way to the actual minimizer with smaller steps.</p>
+<p>This does work, but it can be a bit finicky. If we have <span class="math inline">\(c_k\)</span> decay too quickly, we get ourselves back to the small-steps / many-steps problem (even more so if <span class="math inline">\(c_k\)</span> gets <em>very</em> small); but if <span class="math inline">\(c_k\)</span> decays too slowly, we can waste a lot of time ping-ponging.</p>
+<p>This motivates a <em>huge</em> variety of different procedures for picking <span class="math inline">\(c_k\)</span> and much of applied ML research revolves around coming up with new variants. This is one of those parts of ML where a 0.01% improvement can be worth <em>billions</em> of dollars because it makes <em>every</em> training step more efficient.</p>
+<p>Generally, rules for picking <span class="math inline">\(c_k\)</span> fall into two camps:</p>
+<ul>
+<li>
+<em>Momentum</em>: if we have taken several steps in the same direction, we should assume we want to keep going in that direction and keep our step size large.</li>
+<li>
+<em>Adaptivity</em>: if the function is changing slowly, we are in a ‘flat region’ and probably want to take big steps; if it is changing quickly, we want to slow down so we don’t over step. This is particularly useful so that we can <em>adapt</em> to the type of function as opposed to having to know up front whether it is a ‘big step’ or ‘small step’ function.</li>
+</ul>
+<p>I like to think of these as how one might descend a mountain. In the flat parts, we can take big steps without any fear; in the steep parts, we take smaller steps so we don’t fall flat on our face.</p>
+<p>Modern ML optimization methods combine these two ideas - and several others - to try to make sure that we are always taking large, but not too large, steps in a useful direction. It’s a bit dated now, but for many years the <code>Adam</code> optimizer dominated this space, as it was one of the first to combine <code>Ada</code>ptivity and <code>M</code>omentum in an easy to use package.</p>
+</section><section id="autodiff" class="level3"><h3 class="anchored" data-anchor-id="autodiff">AutoDiff</h3>
+<p>So we know we can use a learning rate given to use using an Adam-type rule in our GD update:</p>
+<p>[x^{(k+1)} x^{(k)} - c_k f(x^{(k)})]</p>
+<p>We’re still left with one <em>very painful</em> chore: computing the gradient <span class="math inline">\(\nabla f\)</span> at each step. Recall that our goal was to not have to evaluate <span class="math inline">\(f\)</span> too many times and now we’re asking for a derivative.</p>
+<p>We have two obvious ways of doing this, both of which stink:</p>
+<ul>
+<li><p>Actually do the symbolic calculation of computing <span class="math inline">\(\nabla f\)</span>,<br><em>i.e.</em>, do some calculus by hand. This works for toy problems (as shown above), but it’s a huge pain for realistic models. In many circumstances, we don’t even have <span class="math inline">\(f\)</span> as a single formula so differentiating it manually is going to be ludicrously terrible.</p></li>
+<li>
+<p>Using a difference quotient. You might remember from calculus that</p>
+<p><span class="math display">\[f'(x) = \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}\]</span></p>
+<p>So, if we can’t find <span class="math inline">\(f'\)</span> directly, if we compute <span class="math inline">\(f\)</span> twice at slightly different values of <span class="math inline">\(x\)</span>, we can get an approximate (numerical) derivative. This is a reasonable strategy in one-dimension, but it doesn’t scale up to big complex models.</p>
+<p>Recall that <span class="math inline">\(\nabla f\)</span> is the derivative in all <span class="math inline">\(p\)</span>-dimensions, so we would need to evaluate <span class="math inline">\(f\)</span> <span class="math inline">\(p+1\)</span> times to get a single derivative. At this point, we’re starting to get back into the grid search scale of evaluating <span class="math inline">\(f\)</span>.</p>
+</li>
+</ul>
+<p>A remarkable idea lets us get around this: at the end of the day, computers can only do a few very simple operations:</p>
+<ul>
+<li>They can add and subtract</li>
+<li>They can multiply and divide</li>
+<li>They can call other functions</li>
+</ul>
+<p>Everything else is built out of these: if we compute a least squares loss, there’s a bunch of matrix multiplications, squaring, and summing, but these are just the same basic parts. Moving to a more complex loss, say one with a logarithm, might seem tricky, but under the hood, computers just use a power series to compute a logarithm anyways. There is no logarithm-unit in hardware.</p>
+<p>But these are all things where we understand the derivative well. From Calculus I:</p>
+<p><span class="math display">\[\begin{align*}
+(f + g)' = f' + g' \\
+(f*g)' &amp;= f'*g + f * g' \\
+(f \circ g)' &amp;= f'(g) * g'
+\end{align*}\]</span></p>
+<p>If any compute program is built out of these pieces - admittedly at <em>enormous</em> scale - can’t we just use them to compute the derivative? In fact, we can, with lots of book-keeping. But book-keeping is the sort of things computers are great at!</p>
+<p>This gives rise to <em>automatic-differentiation</em> or <em>auto-diff</em>. (Sometimes also called <em>back-propagation</em> or <em>back-prop</em> in reference to the core book-keeping algorithm.) Auto-diff is the backbone of most modern ML toolkits: we simply code up <span class="math inline">\(f\)</span> and through the magic of auto-diff, we get the ability to execute <span class="math inline">\(\nabla f\)</span> ‘for free’.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>To wit: taking</p>
+<p><span class="math display">\[f(x) =  (x - 3) * (x-1) * (x + 1) * (x+4)\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> f(x):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (x <span class="op">-</span> <span class="dv">3</span>) <span class="op">*</span> (x <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> (x <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> (x <span class="op">+</span> <span class="dv">4</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> <span class="fl">2.0</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Using jax.grad:</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires calling f(x) and df(x) separately</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> jax.grad(f)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>val <span class="op">=</span> f(x)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>grad <span class="op">=</span> df(x)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"jax.grad:"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>jax.grad:</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  f(</span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">)  = </span><span class="sc">{</span>val<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  f(2.0)  = -18.0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  f'(</span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">) = </span><span class="sc">{</span>grad<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  f'(2.0) = -9.0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Using jax.value_and_grad:</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Computes both in a single call</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># --------------------------------------------------</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>f_and_df <span class="op">=</span> jax.value_and_grad(f)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>val, grad <span class="op">=</span> f_and_df(x)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"jax.value_and_grad:"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>jax.value_and_grad:</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  f(</span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">)  = </span><span class="sc">{</span>val<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  f(2.0)  = -18.0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  f'(</span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">) = </span><span class="sc">{</span>grad<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  f'(2.0) = -9.0</code></pre>
+</div>
+</div>
+<p>Here, we see that we can either just use <code>jax.grad</code> to automatically create a new derivative function or we can even use <code>jax.value_and_grad</code> to get them both at once. In both cases, <span class="math inline">\(f\)</span> is the input and we get back a <em>new</em> function which is then later evaluated at a point.</p>
+<p>We can use this to create a simple gradient descent loop:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> f(x):</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (x <span class="op">-</span> <span class="dv">3</span>) <span class="op">*</span> (x <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> (x <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> (x <span class="op">+</span> <span class="dv">4</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GradientDescentUpdate:</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, objective, init_x, learning_rate):</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.learning_rate <span class="op">=</span> learning_rate</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.x <span class="op">=</span> jnp.array(init_x, dtype<span class="op">=</span>jnp.float32)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.grad_fn <span class="op">=</span> jax.grad(objective)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>):</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        grad <span class="op">=</span> <span class="va">self</span>.grad_fn(<span class="va">self</span>.x)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.x <span class="op">=</span> <span class="va">self</span>.x <span class="op">-</span> <span class="va">self</span>.learning_rate <span class="op">*</span> grad</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">float</span>(<span class="va">self</span>.x), <span class="bu">float</span>(grad)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>initial_x <span class="op">=</span> <span class="op">-</span><span class="fl">4.0</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentUpdate(</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        objective<span class="op">=</span>f, </span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        init_x<span class="op">=</span>initial_x,</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        learning_rate<span class="op">=</span><span class="fl">0.0001</span> <span class="co"># Need this to be _very_ small since not changing!</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Outer loop managed explicitly by caller</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>num_steps <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>tol <span class="op">=</span> <span class="fl">1e-5</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>old_x_val <span class="op">=</span> initial_x</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(num_steps):</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    new_x_val, grad <span class="op">=</span> opt.step()</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Updated x to"</span>)</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(new_x_val)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">abs</span>(grad) <span class="op">&lt;</span> tol <span class="kw">or</span> <span class="bu">abs</span>(new_x_val <span class="op">-</span> old_x_val) <span class="op">&lt;</span> tol:</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Converged at step </span><span class="sc">{</span>step<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    old_x_val <span class="op">=</span> new_x_val</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Updated x to
+-3.989500045776367
+Updated x to
+-3.9791486263275146
+Updated x to
+-3.968942642211914
+Updated x to
+-3.958879232406616
+Updated x to
+-3.948955535888672
+Updated x to
+-3.939168691635132
+Updated x to
+-3.929515838623047
+Updated x to
+-3.919994592666626
+Updated x to
+-3.91060209274292
+Updated x to
+-3.9013359546661377
+Updated x to
+-3.892193555831909
+Updated x to
+-3.8831725120544434
+Updated x to
+-3.8742706775665283
+Updated x to
+-3.865485668182373
+Updated x to
+-3.8568153381347656
+Updated x to
+-3.848257541656494
+Updated x to
+-3.8398101329803467
+Updated x to
+-3.8314709663391113
+Updated x to
+-3.8232381343841553
+Updated x to
+-3.8151097297668457
+Updated x to
+-3.80708384513855
+Updated x to
+-3.7991585731506348
+Updated x to
+-3.791332244873047
+Updated x to
+-3.7836029529571533
+Updated x to
+-3.7759690284729004
+Updated x to
+-3.7684288024902344
+Updated x to
+-3.7609808444976807
+Updated x to
+-3.7536232471466064
+Updated x to
+-3.746354579925537
+Updated x to
+-3.739173412322998
+Updated x to
+-3.7320780754089355
+Updated x to
+-3.725067138671875
+Updated x to
+-3.718139410018921
+Updated x to
+-3.7112932205200195
+Updated x to
+-3.7045273780822754
+Updated x to
+-3.697840452194214
+Updated x to
+-3.6912312507629395
+Updated x to
+-3.6846985816955566
+Updated x to
+-3.678241014480591
+Updated x to
+-3.6718573570251465
+Updated x to
+-3.6655466556549072
+Updated x to
+-3.6593074798583984
+Updated x to
+-3.6531388759613037
+Updated x to
+-3.6470396518707275
+Updated x to
+-3.6410086154937744
+Updated x to
+-3.635044813156128
+Updated x to
+-3.6291472911834717
+Updated x to
+-3.62331485748291
+Updated x to
+-3.617546558380127
+Updated x to
+-3.6118414402008057</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final x: </span><span class="sc">{</span><span class="bu">float</span>(opt.x)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Final x: -3.6118</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Objective value: </span><span class="sc">{</span>f(opt.x)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Objective value: -30.9138</code></pre>
+</div>
+</div>
+<p>Ok - not exactly correct and maybe a bit clunky - but this basically worked! There is a minimum at <span class="math inline">\(x=-4\)</span> and we got pretty darn close.</p>
+</section><section id="convexity" class="level3"><h3 class="anchored" data-anchor-id="convexity">Convexity</h3>
+<p>So returning to our example from above, how can we <em>guarantee</em> that we get the <em>global</em> optimum (red dot) instead of just a local optimum (blue dot)? Looking at the basic GD structure, it’s clear that if we start sufficiently near the global optimum, we’ll find it, but it’s not at all obvious how near is near enough or how we can ever be sure.</p>
+<p>This is a <strong>really</strong> hard problem in general, but there are a useful class of functions where we can be guaranteed to get the <em>global</em> minimum. Before saying <em>how</em>, it’s important to pause and ask <em>why</em> it may (or may not) be important to get the global minimum.</p>
+<ol type="1">
+<li>To an academic, much of our theory applies to the global minimum. Whether this is important or not depends on how much you value theory.</li>
+<li>There is a reproducibility argument: if we <em>always</em> get the global minimum, then choices like learning rate or starting point don’t matter, which is great. (Good life advice: it’s best if hard choices don’t actually change the outcome.)</li>
+<li>There is also a ‘statistical’ stability argument. If we think of minimizing a loss function based on <em>noisy</em> data, it’s probably a good thing if the minimizer doesn’t move very much. If there are multiple minimizers (as in our blue/red example above), a small change in the function can totally change the location of the global minimizer; this might render our models unstable or unpredictable.</li>
+</ol>
+<p>So how can we guarantee this sort of <em>global</em> optimality. Well, like most things in math, we cheat a bit: specifically, we just assume that all <em>local</em> minima are <em>global</em> minima. Of course, we’re not so explicit about that. We instead say that we are guaranteed to get the global minimizer if <span class="math inline">\(f\)</span> is <em>convex</em>, <em>i.e.</em>, bowl shaped.</p>
+<p>For a convex function like:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>There is only one minimizer and it is both local and global. So finding a local minimizer means we are guaranteed to get a global minimizer.</p>
+<p>Not all convex functions have a single minimizer:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we have many minimizers (that whole flat region), but they are <em>all</em> giving the global optimum (<span class="math inline">\(f_* = 0\)</span>).</p>
+<p>Formally, a function <span class="math inline">\(f\)</span> is convex if:</p>
+<p><span class="math display">\[f(\lambda x + (1 - \lambda)y) \leq \lambda \lambda f(x) + (1 - \lambda) f(y) \text{ for any } \lambda \in [0, 1]\]</span></p>
+<p>That’s a bit formal, but what does it mean. It means that if we pick any two points <span class="math inline">\(x, y\)</span> and draw the line connecting them (<span class="math inline">\(lambda f(x) + (1 - \lambda) f(y)\)</span>), <span class="math inline">\(f\)</span> lies below it</p>
+<p>In our example above:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes06_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><em>TODO</em>: Why does this guarantee optimization will work nicely? Given two guesses, we can get a better guess by looking between them.</p>
+</section></section><section id="stochastic-gradient-descent" class="level2"><h2 class="anchored" data-anchor-id="stochastic-gradient-descent">Stochastic Gradient Descent</h2>
+</section><section id="zeroth-order-optimization" class="level2"><h2 class="anchored" data-anchor-id="zeroth-order-optimization">Zeroth Order Optimization</h2>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>Not entirely <em>for free</em> because we do have the book-keeping steps, but when done smartly, this can be something like 8-10x as slow as just computing <span class="math inline">\(f\)</span>. Certainly not nothing, but much better than computing <span class="math inline">\(f\)</span> <span class="math inline">\(p\)</span> different times in a <span class="math inline">\(p = 10^8\)</span> parameter model.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +1028,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes06.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes06.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes06.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes06.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
