@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-10-03">
 <title>Notes for Lecture #08: Unit II. Regression: Regression in High Dimensions &amp; the Role of Regularization – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,42 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li>
+<a href="#challenges-of-high-dimensional-regression" id="toc-challenges-of-high-dimensional-regression" class="nav-link active" data-scroll-target="#challenges-of-high-dimensional-regression">Challenges of High-Dimensional Regression</a>
+  <ul class="collapse">
+<li><a href="#ridge-regression---core-idea" id="toc-ridge-regression---core-idea" class="nav-link" data-scroll-target="#ridge-regression---core-idea">Ridge Regression - Core Idea</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#constraints" id="toc-constraints" class="nav-link" data-scroll-target="#constraints">Constraints</a>
+  <ul class="collapse">
+<li><a href="#measuring-the-size-of-coefficients" id="toc-measuring-the-size-of-coefficients" class="nav-link" data-scroll-target="#measuring-the-size-of-coefficients">Measuring the Size of Coefficients</a></li>
+  <li><a href="#constraints-and-penalties" id="toc-constraints-and-penalties" class="nav-link" data-scroll-target="#constraints-and-penalties">Constraints and Penalties</a></li>
+  </ul>
+</li>
+  <li><a href="#ridge-regression" id="toc-ridge-regression" class="nav-link" data-scroll-target="#ridge-regression">Ridge Regression</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes08.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes08.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #08: Unit II. Regression: Regression in High Dimensions &amp; the Role of Regularization</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">October 3, 2026</p>
     </div>
   </div>
   
@@ -164,15 +217,170 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<section id="challenges-of-high-dimensional-regression" class="level2"><h2 class="anchored" data-anchor-id="challenges-of-high-dimensional-regression">Challenges of High-Dimensional Regression</h2>
+<section id="ridge-regression---core-idea" class="level3"><h3 class="anchored" data-anchor-id="ridge-regression---core-idea">Ridge Regression - Core Idea</h3>
+</section></section><section id="constraints" class="level2"><h2 class="anchored" data-anchor-id="constraints">Constraints</h2>
+<section id="measuring-the-size-of-coefficients" class="level3"><h3 class="anchored" data-anchor-id="measuring-the-size-of-coefficients">Measuring the Size of Coefficients</h3>
+</section><section id="constraints-and-penalties" class="level3"><h3 class="anchored" data-anchor-id="constraints-and-penalties">Constraints and Penalties</h3>
+<p>Above, we write ridge regression as:</p>
+<p><span class="math display">\[\hat{\bbeta} = \argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{n}\sum_{i=1}^n L(\bbeta^{\top}\bx_i, y_i) = \argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{2}\|\by - \bX\bbeta\|_2^2\]</span></p>
+<p>which is essentially the classical OLS problem (MSE ERM with a linear predictor) with the additional constraint: <span class="math inline">\(\|\bbeta\|_2 \leq \tau\)</span> or, slightly more conveniently, <span class="math inline">\(\|\bbeta\|_2^2 \leq \tau^2\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Here, we’re putting the ‘ridge-ness’ in the <em>constraint</em> by requiring <span class="math inline">\(\bbeta\)</span> to not be ‘too big.’</p>
+<p>This is conceptually elegant, but it does pose a few practical challenges:</p>
+<ul>
+<li>How can we pick <span class="math inline">\(\tau\)</span>?</li>
+<li>How can we solve the above problem? In particular, what happens if our gradient points us ‘beyond the bounds’ of our constraint?</li>
+</ul>
+<p>These are definitely solvable (and indeed solved!) problems, but it certainly would be nice if we could get rid of the constraint. And as it turns out, we can.</p>
+</section></section><section id="ridge-regression" class="level2"><h2 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h2>
+<p><strong>These notes are from a previous class and are a bit beyond the level of this course.</strong></p>
+<p>In the <a href="../notes/notes06.html">previous set of notes</a>, we saw that <span class="math inline">\((\overline{X}_n)_{[-\beta, \beta]}\)</span> could outperform the naive estimator <span class="math inline">\(\overline{X}_n\)</span> if the true parameter is ‘not too big’.</p>
+<p>Can we extend this idea to regression?</p>
+<p>Recall that we formulated OLS as:</p>
+<p><span class="math display">\[\hat{\bbeta}_{\text{OLS}} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\|\]</span></p>
+<p>We can apply a ‘clamp’ as:</p>
+<p><span class="math display">\[\hat{\bbeta}_{\tau-\text{Clamped}} = \argmin_{\bbeta \in \R: \|\bbeta\| &lt; \tau} \frac{1}{2}\|\by - \bX\bbeta\| = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\| \leq {\tau}\]</span></p>
+<p>Here, we have some choice in measuring the ‘size’ of <span class="math inline">\(\hat{\bbeta}\)</span>: in fact, we can <em>theoretically</em> use any of our <span class="math inline">\(\ell_p\)</span>-norms. As with the squared loss, it turns out to be mathematically easiest to start with the <span class="math inline">\(\ell_2\)</span> (Euclidean) norm. This gives us the so-called <em>ridge regression</em> problem:</p>
+<p><span class="math display">\[\hat{\bbeta}_{\text{Ridge}} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\|_2 \leq {\tau} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\|_2^2 \leq {\tau}^2\]</span></p>
+<p>Before we discuss solving this, let’s confirm it is convex. Recall that for a problem to be convex, it needs to have a convex <em>objective</em> and a convex <em>feasible set</em>. Clearly the objective here is convex - we still have the MSE loss from OLS unchanged. So now we need to convince ourselves that <span class="math inline">\(\|\bbeta\|_2^2 \leq \tau^2\)</span> defines a convex set. We can look at this in 2D first:</p>
+<p><span class="math display">\[\|\bbeta\|_2^2 \leq \tau^2 \implies \beta_1^2 + \beta_2^2 \leq \tau\]</span></p>
+<p>But this is just the equation defining a circle and its interior (in math speak a 2D ‘ball’) so it has to be convex!</p>
+<p>In fact, constraints of the form</p>
+<p><span class="math display">\[\|\bbeta\|_p \leq \tau \Leftrightarrow \|\bbeta\|_p^2 \leq \tau^p\]</span></p>
+<p>are convex for all <span class="math inline">\(\ell_p\)</span> norms (<span class="math inline">\(p \geq 1\)</span>). We will use this fact many times in this course. The sets that this constraint defines are called <span class="math inline">\(\ell_p\)</span> ‘balls’ by analogy with the <span class="math inline">\(\ell_2\)</span> figure, even if they aren’t actually round.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So our ridge problem</p>
+<p><span class="math display">\[\hat{\bbeta}_{\text{Ridge}} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\|_2^2 \leq {\tau}^2\]</span> is indeed convex.</p>
+<p>While we can solve this without too much trouble (though we need to adjust our basic gradient descent method to avoid going ‘out of bounds’), it turns out to be easier to use an optimization trick known as <em>Lagrange Multipliers</em> to change this to something easier to solve.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Lagrange_multiplier">Method of Lagrange Multipliers</a> lets us turn <em>constrained</em> optimization problems that look like:</p>
+<p><span class="math display">\[\argmin_x f(x) \text{ such that } g(x) \leq \tau\]</span></p>
+<p>into <em>unconstrained</em> problems like:</p>
+<p><span class="math display">\[\argmin_x f(x) + \lambda g(x)\]</span></p>
+<p>Here, the constant <span class="math inline">\(\lambda\)</span> is known as the Lagrange multiplier. Instead of <em>forcing</em> <span class="math inline">\(g(x)\)</span> to be bounded, we simply <em>penalize</em> any <span class="math inline">\(x\)</span> that makes <span class="math inline">\(g(\cdot)\)</span> large. For large enough penalties (large <span class="math inline">\(\lambda\)</span>), we will eventually force <span class="math inline">\(g(x)\)</span> to be small enough that we satisfy the original constraint. In fact, there is a one-to-one relationship between <span class="math inline">\(\tau\)</span> and <span class="math inline">\(\lambda\)</span>, but it’s usually not possible to work it out in any meaningful useful manner; all we can say is that larger <span class="math inline">\(\lambda\)</span> correspond to smaller <span class="math inline">\(\tau\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Pause to Reflect">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Pause to Reflect
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Why is this true? Why does small <span class="math inline">\(\tau\)</span> imply large <span class="math inline">\(\lambda\)</span> and <em>vice versa</em>?</p>
+</div>
+</div>
+</div>
+<p>In this form, it’s straightforward to pose ridge regression as:</p>
+<p><span class="math display">\[\argmin_{\beta} \frac{1}{2}\|\by - \bX\bbeta\|_2^2 + \frac{\lambda}{2}\|\bbeta\|_2^2\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled" title="Pause to Reflect">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Pause to Reflect
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Why were we allowed to put an extra <span class="math inline">\(\frac{1}{2}\)</span> in front of the penalty term?</p>
+</div>
+</div>
+</div>
+<p>Since both terms of this expression are differentiable, it is easy to show that the solution to this problem is given by:</p>
+<p><span class="math display">\[\hat{\bbeta}_{\lambda} = (\bX^{\top}\bX + \lambda \bI)^{-1}\bX^{\top}\by\]</span></p>
+<p>To wit:</p>
+<p><span class="math display">\[\begin{align*}
+\bzero &amp;= \frac{\partial}{\partial \bbeta}\left(\frac{1}{2}\|\by - \bX\bbeta\|_2^2 + \frac{\lambda}{2}\|\bbeta\|_2^2\right) \\
+       &amp;= -\bX^{\top}(\by - \bX\bbeta) + \lambda \bbeta \\
+\bX^{\top}\by &amp;= (\bX^{\top}\bX + \lambda \bI)\bbeta \\
+\implies \hat{\beta}_{\text{Ridge}} &amp;= (\bX^{\top}\bX + \lambda \bI)^{-1}\bX^{\top}\by
+\end{align*}\]</span></p>
+<p>There are several important things to note about this expression:</p>
+<ul>
+<li><p>There are actually <em>many</em> ridge regression solutions, one for each value of <span class="math inline">\(\lambda\)</span>. It is a bit improper to refer to “the” ridge regression solution. We will discuss selecting <span class="math inline">\(\lambda\)</span> below.</p></li>
+<li>
+<p>If you are a bit sloppy, this looks something like:</p>
+<p><span class="math display">\[\hat{\beta} \approx \frac{SS_{XY}}{SS_{XX} + \lambda}\]</span></p>
+<p>so we ‘shrink’ the standard OLS solution towards zero, by an amount depending on <span class="math inline">\(\lambda\)</span>. Higher <span class="math inline">\(\lambda\)</span></p>
+</li>
+<li>
+<p>The penalized form (as opposed to the constraint form) allows for <span class="math inline">\(\hat{\beta}\)</span> to be arbitrarily large, <strong>if the data supports it.</strong></p>
+<p>More than that, <span class="math inline">\(\lambda\)</span> gives us an explicit <em>trade-off</em>. When comparing two potential solutions (<span class="math inline">\(\hat{\bbeta}_1, \hat{\bbeta}_2\)</span>), we will prefer <span class="math inline">\(\hat{\bbeta}_1\)</span> if:</p>
+<p><span class="math display">\[\begin{align*}
+\frac{1}{2}\|\by - \bX\bbeta_1\|_2^2 + \frac{\lambda}{2}\|\bbeta_1\|_2^2 &amp; \leq \frac{1}{2}\|\by - \bX\bbeta_2\|_2^2 + \frac{\lambda}{2}\|\bbeta_2\|_2^2 \\
+\|\by - \bX\bbeta_1\|_2^2 - \|\by - \bX\bbeta_2\|_2^2 &amp; \leq \lambda(\|\bbeta_2\|_2^2 - \|\bbeta_1\|_2^2) \\
+\Delta \MSE &amp;\leq \lambda \Delta \text{$\ell_2^2$-Norm}
+\end{align*}\]</span></p>
+<p>That is, we will take a solution with a MSE that is <span class="math inline">\(\lambda\)</span> lower if that lowers the squared-norm of the solution by 1. Here <span class="math inline">\(\lambda\)</span> measures the “price” we are willing to pay (in terms of MSE) for shrinking the norm of <span class="math inline">\(\hat{\bbeta}\)</span>: at larger <span class="math inline">\(\lambda\)</span>, we demand a <em>larger</em> MSE reduction <em>ceteribus paribus</em> to accept a larger <span class="math inline">\(\hat{\bbeta}\)</span>, while at small <span class="math inline">\(\lambda\)</span>, we are willing to take a larger <span class="math inline">\(\hat{\bbeta}\)</span> in exchange for a much smaller decrease in MSE.</p>
+</li>
+<li><p>If we set <span class="math inline">\(\lambda = 0\)</span>, we recover standard OLS. Continuing the ‘price’ discussion above, this is the limit in which we will take a larger <span class="math inline">\(\hat{\bbeta}\)</span> for <em>any</em> decrease in training MSE. This makes sense as we originally built OLS as the ERM for MSE, by definition caring about <em>only</em> MSE reduction and nothing else.</p></li>
+<li><p>Unlike the OLS solution, the ridge regression exists even when <span class="math inline">\(p &gt; n\)</span> because the <span class="math inline">\(+\lambda \bI\)</span> term ensures the ‘denominator’ prefactor is always invertible.</p></li>
+</ul>
+<p>While this isn’t as simple to analyze as some of the expressions we considered above, this looks similar enough to our ‘shrunk’ mean estimator that it’s plausible it will improve on OLS. In fact, you can show that there is always <em>some</em> value of <span class="math inline">\(\lambda\)</span> that guarantees improvement over OLS in expectation. (This is a result known as the “MSE Existence Theorem”)</p>
+<p>To wit,</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">*</span> <span class="va">p</span><span class="op">)</span>, nrow<span class="op">=</span><span class="va">n</span><span class="op">)</span></span>
+<span><span class="va">L</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html">chol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/toeplitz.html">toeplitz</a></span><span class="op">(</span><span class="fl">0.6</span><span class="op">^</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">p</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Add 'AR(1)' correlation</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">Z</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">L</span></span>
+<span><span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="va">p</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">eye</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n</span>, <span class="va">n</span><span class="op">)</span></span>
+<span><span class="va">calculate_ridge_mse</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">lambda</span>, <span class="va">nreps</span> <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">MSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span><span class="va">nreps</span>, <span class="op">{</span></span>
+<span>        <span class="va">y</span> <span class="op">&lt;-</span> <span class="va">X</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span>        <span class="va">beta_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/crossprod.html">crossprod</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">+</span> <span class="va">lambda</span> <span class="op">*</span> <span class="fu">eye</span><span class="op">(</span><span class="va">p</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/crossprod.html">crossprod</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">beta</span> <span class="op">-</span> <span class="va">beta_hat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lambda<span class="op">=</span><span class="va">lambda</span>, MSE<span class="op">=</span><span class="va">MSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">lambda_grid</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">^</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out<span class="op">=</span><span class="fl">41</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">RIDGE_MSE</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">lambda_grid</span>, <span class="va">calculate_ridge_mse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">list_rbind</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">OLS_MSE</span> <span class="op">&lt;-</span> <span class="fu">calculate_ridge_mse</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">$</span><span class="va">MSE</span> <span class="co"># Ridge at lambda = 0 =&gt; OLS</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">RIDGE_MSE</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">lambda</span>, y<span class="op">=</span><span class="va">MSE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_abline</span><span class="op">(</span>intercept<span class="op">=</span><span class="va">OLS_MSE</span>, slope<span class="op">=</span><span class="fl">0</span>, lwd<span class="op">=</span><span class="fl">2</span>, lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Estimation Error (MSE)"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Ridge Regularization Improves on OLS"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Clearly, for smallish <span class="math inline">\(\lambda\)</span>, we are actually outperforming OLS, sometimes by a significant amount! For this problem, the minimum MSE (best estimate) actually seems to occur near <span class="math inline">\(\lambda \approx\)</span> 1.585</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>Any norm is non-negative, so both terms of this inequality are non-negative and squaring doesn’t change the order.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +784,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes08.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes08.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes08.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes08.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

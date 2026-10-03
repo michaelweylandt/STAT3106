@@ -9,3 +9,249 @@ notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Clas
 Outline: 
 
 --- 
+
+## Challenges of High-Dimensional Regression
+
+### Ridge Regression - Core Idea
+
+## Constraints
+
+### Measuring the Size of Coefficients
+
+### Constraints and Penalties
+
+Above, we write ridge regression as: 
+
+$$\hat{\bbeta} = \argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{n}\sum_{i=1}^n L(\bbeta^{\top}\bx_i, y_i) = \argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{2}\|\by - \bX\bbeta\|_2^2$$
+
+which is essentially the classical OLS problem (MSE ERM with a linear
+predictor) with the additional constraint: $\|\bbeta\|_2 \leq \tau$ or,
+slightly more conveniently, $\|\bbeta\|_2^2 \leq \tau^2$.[^sq] Here,
+we're putting the 'ridge-ness' in the _constraint_ by requiring $\bbeta$ to not
+be 'too big.'
+
+This is conceptually elegant, but it does pose a few practical challenges: 
+
+- How can we pick $\tau$? 
+- How can we solve the above problem? In particular, what happens if our
+  gradient points us 'beyond the bounds' of our constraint? 
+  
+These are definitely solvable (and indeed solved!) problems, but it certainly
+would be nice if we could get rid of the constraint. And as it turns out, 
+we can. 
+
+
+
+[^sq]: Any norm is non-negative, so both terms of this inequality are
+non-negative and squaring doesn't change the order.
+
+## Ridge Regression
+
+
+**These notes are from a previous class and are a bit beyond the level
+of this course.**
+
+In the [previous set of notes](./notes06.qmd), we saw that
+$(\overline{X}_n)_{[-\beta, \beta]}$ could outperform the naive estimator
+$\overline{X}_n$ if the true parameter is 'not too big'. 
+
+Can we extend this idea to regression? 
+
+Recall that we formulated OLS as: 
+
+$$\hat{\bbeta}_{\text{OLS}} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\|$$
+
+We can apply a 'clamp' as: 
+
+$$\hat{\bbeta}_{\tau-\text{Clamped}} = \argmin_{\bbeta \in \R: \|\bbeta\| < \tau} \frac{1}{2}\|\by - \bX\bbeta\| = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\| \leq {\tau}$$
+
+Here, we have some choice in measuring the 'size' of $\hat{\bbeta}$: in fact, we
+can *theoretically* use any of our $\ell_p$-norms. As with the squared loss, 
+it turns out to be mathematically easiest to start with the $\ell_2$ (Euclidean)
+norm. This gives us the so-called *ridge regression* problem: 
+
+$$\hat{\bbeta}_{\text{Ridge}} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\|_2 \leq {\tau} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\|_2^2 \leq {\tau}^2$$
+
+Before we discuss solving this, let's confirm it is convex. Recall that for a
+problem to be convex, it needs to have a convex *objective* and a convex *feasible
+set*. Clearly the objective here is convex - we still have the MSE loss from OLS
+unchanged. So now we need to convince ourselves that $\|\bbeta\|_2^2 \leq \tau^2$
+defines a convex set.  We can look at this in 2D first: 
+
+$$\|\bbeta\|_2^2 \leq \tau^2 \implies \beta_1^2 + \beta_2^2 \leq \tau$$
+
+But this is just the equation defining a circle and its interior (in math speak
+a 2D 'ball') so it has to be convex!
+
+In fact, constraints of the form 
+
+$$\|\bbeta\|_p \leq \tau \Leftrightarrow \|\bbeta\|_p^2 \leq \tau^p$$
+
+are convex for all $\ell_p$ norms ($p \geq 1$). We will use this fact many times
+in this course. The sets that this constraint defines are called $\ell_p$ 'balls'
+by analogy with the $\ell_2$ figure, even if they aren't actually round.
+
+```{r}
+#| echo: false
+#| fig.asp: 0.3
+library(patchwork)
+plot_ball <- function(p){
+    title <- bquote(l[.(p)]~"Unit Ball")
+    expand_grid(x=seq(-2, 2, length.out=201), 
+                y=seq(-2, 2, length.out=201)) |>
+        mutate(interior = abs(x)^p + abs(y)^p <= 1) |>
+        filter(interior) |>
+        ggplot(aes(x=x, y=y)) + 
+        geom_point() + 
+        coord_fixed() + 
+        ggtitle(title) + 
+        theme_bw() + 
+        xlab("") + ylab("")
+}
+plot_ball(1) + plot_ball(2) + plot_ball(Inf)
+```
+
+So our ridge problem 
+
+$$\hat{\bbeta}_{\text{Ridge}} = \argmin_{\bbeta \in \R} \frac{1}{2}\|\by - \bX\bbeta\| \text{ such that } \|\bbeta\|_2^2 \leq {\tau}^2$$
+is indeed convex. 
+
+While we can solve this without too much trouble (though we need to adjust
+our basic gradient descent method to avoid going 'out of bounds'), it turns
+out to be easier to use an optimization trick known as *Lagrange Multipliers* 
+to change this to something easier to solve. 
+
+The [Method of Lagrange Multipliers](https://en.wikipedia.org/wiki/Lagrange_multiplier)
+lets us turn *constrained* optimization problems that look like: 
+
+$$\argmin_x f(x) \text{ such that } g(x) \leq \tau$$
+
+into *unconstrained* problems like: 
+
+$$\argmin_x f(x) + \lambda g(x)$$
+
+Here, the constant $\lambda$ is known as the Lagrange multiplier. Instead of 
+_forcing_ $g(x)$ to be bounded, we simply _penalize_ any $x$ that makes $g(\cdot)$
+large. For large enough penalties (large $\lambda$), we will eventually force
+$g(x)$ to be small enough that we satisfy the original constraint. In fact, 
+there is a one-to-one relationship between $\tau$ and $\lambda$, but it's usually
+not possible to work it out in any meaningful useful manner; all we can say is that
+larger $\lambda$ correspond to smaller $\tau$. 
+
+::: {.callout-note title="Pause to Reflect" collapse="true"}
+
+Why is this true? Why does small $\tau$ imply large $\lambda$ and *vice versa*?
+
+:::
+
+In this form, it's straightforward to pose ridge regression as: 
+
+$$\argmin_{\beta} \frac{1}{2}\|\by - \bX\bbeta\|_2^2 + \frac{\lambda}{2}\|\bbeta\|_2^2$$
+
+::: {.callout-note title="Pause to Reflect" collapse="true"}
+
+Why were we allowed to put an extra $\frac{1}{2}$ in front of the penalty term?
+
+:::
+
+Since both terms of this expression are differentiable, it is easy to show 
+that the solution to this problem is given by: 
+
+$$\hat{\bbeta}_{\lambda} = (\bX^{\top}\bX + \lambda \bI)^{-1}\bX^{\top}\by$$
+
+To wit: 
+
+$$\begin{align*}
+\bzero &= \frac{\partial}{\partial \bbeta}\left(\frac{1}{2}\|\by - \bX\bbeta\|_2^2 + \frac{\lambda}{2}\|\bbeta\|_2^2\right) \\
+       &= -\bX^{\top}(\by - \bX\bbeta) + \lambda \bbeta \\
+\bX^{\top}\by &= (\bX^{\top}\bX + \lambda \bI)\bbeta \\
+\implies \hat{\beta}_{\text{Ridge}} &= (\bX^{\top}\bX + \lambda \bI)^{-1}\bX^{\top}\by
+\end{align*}$$
+
+There are several important things to note about this expression: 
+
+- There are actually *many* ridge regression solutions, one for each value of
+  $\lambda$. It is a bit improper to refer to "the" ridge regression solution. 
+  We will discuss selecting $\lambda$ below. 
+- If you are a bit sloppy, this looks something like: 
+
+  $$\hat{\beta} \approx \frac{SS_{XY}}{SS_{XX} + \lambda}$$
+  
+  so we 'shrink' the standard OLS solution towards zero, by an amount depending 
+  on $\lambda$. Higher $\lambda$ 
+- The penalized form (as opposed to the constraint form) allows for $\hat{\beta}$
+  to be arbitrarily large, **if the data supports it.**
+  
+  More than that, $\lambda$ gives us an explicit *trade-off*. When comparing
+  two potential solutions ($\hat{\bbeta}_1, \hat{\bbeta}_2$), we will prefer
+  $\hat{\bbeta}_1$ if: 
+  
+  $$\begin{align*}
+  \frac{1}{2}\|\by - \bX\bbeta_1\|_2^2 + \frac{\lambda}{2}\|\bbeta_1\|_2^2 & \leq \frac{1}{2}\|\by - \bX\bbeta_2\|_2^2 + \frac{\lambda}{2}\|\bbeta_2\|_2^2 \\
+  \|\by - \bX\bbeta_1\|_2^2 - \|\by - \bX\bbeta_2\|_2^2 & \leq \lambda(\|\bbeta_2\|_2^2 - \|\bbeta_1\|_2^2) \\
+  \Delta \MSE &\leq \lambda \Delta \text{$\ell_2^2$-Norm}
+  \end{align*}$$
+  
+  That is, we will take a solution with a MSE that is $\lambda$ lower if that lowers
+  the squared-norm of the solution by 1. Here $\lambda$ measures the "price" we
+  are willing to pay (in terms of MSE) for shrinking the norm of $\hat{\bbeta}$:
+  at larger $\lambda$, we demand a *larger* MSE reduction *ceteribus paribus*
+  to accept a larger $\hat{\bbeta}$, while at small $\lambda$, we are willing
+  to take a larger $\hat{\bbeta}$ in exchange for a much smaller decrease in MSE.
+  
+- If we set $\lambda = 0$, we recover standard OLS. Continuing the 'price'
+  discussion above, this is the limit in which we will take a larger $\hat{\bbeta}$
+  for *any* decrease in training MSE. This makes sense as we originally built
+  OLS as the ERM for MSE, by definition caring about *only* MSE reduction and
+  nothing else. 
+- Unlike the OLS solution, the ridge regression exists even when $p > n$ because
+  the $+\lambda \bI$ term ensures the 'denominator' prefactor is always 
+  invertible.
+  
+While this isn't as simple to analyze as some of the expressions we considered 
+above, this looks similar enough to our 'shrunk' mean estimator that it's 
+plausible it will improve on OLS. In fact, you can show that there is always 
+_some_ value of $\lambda$ that guarantees improvement over OLS in expectation. 
+(This is a result known as the "MSE Existence Theorem")
+
+To wit, 
+
+```{r}
+#| warning: false
+n <- 100
+p <- 80
+Z <- matrix(rnorm(n * p), nrow=n)
+L <- chol(toeplitz(0.6^(1:p))) # Add 'AR(1)' correlation
+X <- Z %*% L
+beta <- runif(p, 2, 3)
+
+eye <- function(n) diag(1, n, n)
+calculate_ridge_mse <- function(lambda, nreps = 1000){
+    MSE <- mean(replicate(nreps, {
+        y <- X %*% beta + rnorm(n, sd=1)
+        beta_hat <- solve(crossprod(X) + lambda * eye(p), crossprod(X, y))
+        sum((beta - beta_hat)^2)
+    }))
+    
+    data.frame(lambda=lambda, MSE=MSE)
+}
+
+lambda_grid <- 10^(seq(-2, 2, length.out=41))
+
+RIDGE_MSE <- map(lambda_grid, calculate_ridge_mse) |> list_rbind()
+OLS_MSE <- calculate_ridge_mse(0)$MSE # Ridge at lambda = 0 => OLS
+
+ggplot(RIDGE_MSE, aes(x=lambda, y=MSE)) + 
+    geom_point() + 
+    geom_line() + 
+    geom_abline(intercept=OLS_MSE, slope=0, lwd=2, lty=2) + 
+    xlab(expression(lambda)) + 
+    ylab("Estimation Error (MSE)") + 
+    ggtitle("Ridge Regularization Improves on OLS") + 
+    theme_bw() + 
+    scale_x_log10()
+```
+
+Clearly, for smallish $\lambda$, we are actually outperforming OLS, sometimes
+by a significant amount! For this problem, the minimum MSE (best estimate) actually
+seems to occur near $\lambda \approx$ `r RIDGE_MSE |> filter(MSE == min(MSE)) |> pull(lambda) |> round(3)`
