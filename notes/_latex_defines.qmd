@@ -14,3 +14,25 @@ conflicted::conflict_prefer("select", "dplyr")
 
 set.seed(3106)
 ```
+
+```{r notes_main_update}
+#| echo: false
+#| message: false
+#| warning: false
+library(fs)
+
+latest_updated_notes_qmd <- 
+    fs::dir_ls("notes", glob="notes/notes*qmd") |>
+    map(fs::file_info) |> 
+    map("modification_time") |> 
+    list_c() |> 
+    max()
+
+latest_updated_notes_main <- "docs/notes.html" |> 
+    fs::file_info() |>
+    pull(modification_time)
+
+if(latest_updated_notes_qmd > latest_updated_notes_main){
+    quarto::quarto_render("notes.qmd")
+}
+```

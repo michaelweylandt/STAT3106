@@ -12,11 +12,292 @@ Outline:
 
 ## Challenges of High-Dimensional Regression
 
+Last time, we discussed several challenges associated with doing
+statistical inference with _many_ features; that is, data that is
+_high-dimensional_. Principally, these came from two sources: 
+
+- Multiple testing problems: if we take enough swings, any _rare_
+  event will eventually occur. In the context of statistical testing, 
+  this can blow up our normal error rate guarantees. Naively, we 
+  can just raise our bar to be ever stricter, but without sufficient
+  data, this just winds up putting everything 'out of reach'
+- Large variance problems: when estimating _many_ values, the variance
+  of our estimates can become uncomfortably large. To avoid this 
+  variance, we are willing to take on a bit of _bias_ and, we balance
+  things out correctly, this can net out well for us. 
+  
+  This bias can take two forms: 
+  
+  - Intuitively, if we have lots of related little problems, we can
+    partially _pool_ information, *e.g.*, shrink everything a bit
+    towards the grand / population mean. Here, we massively reduce
+    variance by blending together a large number of samples into the
+    'shrinkage target' and, if those samples are not too unrelated, 
+    we don't incur too much bias along the way. 
+  - Less intuitively, we don't actually need our different problems
+    to be related at all; even in the case of estimating many
+    independent normal means, a _little_ bit of shrinkage always
+    helps. 
+    
+That latter phenomenon - most notably explored by James and Stein - is
+and should be quite counterintuitive. But ultimately, it comes from a
+close examination of bias and variance. 
+
+If we are estimating $p \gg 1$ different means from a set of sample
+means, each with variance $\sigma^2$, the total MSE of our problem
+will be $p \sigma^2$. (Sample means are unbiased, so we only have
+variance here and variance adds for independent variables.) If instead
+of using the sample means $\hat{\mu_i}$, we instead look at a slightly
+'shrunk' version $(1 - \rho)\hat{\mu_i}$, we now have a small bias of 
+
+$$\text{Bias}_i = \mu_i^* - \E[(1-\rho)\hat{\mu_i}] = \mu_i^* - (1-\rho)\mu_i^* = -\rho\mu_i^*$$
+
+and a reduced variance of 
+
+$$\text{Variance}_i = \V[(1-\rho)\hat{\mu_i}] = (1-\rho)^2\V[\hat{\mu_i}] = (1-\rho)^2 \sigma^2$$
+
+Putting these together, the MSE for each individual sample is 
+
+$$\text{MSE}_i = \text{Bias}_i^2 + \text{Variance}_i = \rho^2(\mu_i^*)^2 + (1-\rho)^2\sigma^2$$
+
+A bit of calculus shows that the _best_ $\rho$ we could pick is 
+
+$$\rho_i^* = \frac{\sigma^2}{(\mu_i^*)^2 + \sigma^2}$$
+
+which gives an MSE of 
+
+$$\text{MSE}(\rho_i^*) = TODO$$
+
+Of course, getting this right required us to know $\mu_i^*, \sigma^2$ 
+which we don't normally have. (If we knew $\mu_i^*$, why are we doing
+any of this?)
+
+James and Stein's remarkable finding was to show that a slight variant
+of this process works _for all_ $\mu_i^*, \sigma^2$. 
+
+\[\hat{\mu}_i = TODO \]
+
+What does any of this have to do with regression? Well, let's go back
+to that MSE formula above; instead of picking just the best $\rho$,
+let's look at the _derivative_ at 0: 
+
+\[\frac{\text{d}\,\text{MSE}}{\text{d}\,\rho} = \rho(\mu^2 + \sigma^2) - \sigma^2 \implies \left.\frac{\text{d}\,\text{MSE}}{\text{d}\,\rho}\right|_{\rho = 0} = -\sigma^2 < 0\]
+
+So a _little_ bit of shrinkage towards zero always helps. The ideal
+amount depends on the specifics of $\mu, \sigma$, but if there is any
+noise, a little bit of shrinkage towards zero should always help us.
+
+Just in case you don't believe me: 
+
+```{r}
+library(tidyverse)
+library(ggforce)
+
+mu <- 3
+sigma <- 1
+estimate_mse <- function(rho){
+    X <- rnorm(5000, mean=mu, sd=sigma)
+    shrunk_estimate = (1 - rho) * X
+    data.frame(rho, 
+               mse_shrinkage = mean((mu - shrunk_estimate)^2))
+}
+
+simulation_mse <- 
+    map(seq(-2, 2, length.out=5001), estimate_mse) |>
+    list_rbind()
+
+
+ggplot(simulation_mse, 
+       aes(x=rho, y=mse_shrinkage)) + 
+    geom_point() + 
+    theme_bw() + 
+    xlab(expression(rho)) + 
+    geom_hline(yintercept=estimate_mse(0)$mse_shrinkage, 
+               color="red4") + 
+    ylab("MSE") + 
+    ggtitle("Effect of Shrinkage on Estimating Sample Means") + 
+    facet_zoom(xlim=c(-0.1, 0.1), 
+               ylim=c(0, 1))
+```
+
+Admittedly, this isn't the easiest to see and we had to zoom, but
+it's there! At zero, there is a small downward slope, so a tiny bit 
+of shrinkage helps, even in this super simple problem. 
+
+In this way, I like to think of shrinkage as like _salt_ in cooking.
+A little bit is essentially always helpful, but too much can certainly
+be a problem.
+
+This general phenomenon is also referred to as **regularization**, as it relates
+to an older mathematical idea of 'smoothing out' the rough edges of models to
+make them more tractable. We won't use that perspective in this course, but 
+the term **regularization** is definitely worth knowing. 
+
 ### Ridge Regression - Core Idea
+
+Ridge regression extends this idea to the high-dimensional regression
+setting. Recall that by high-dimensional, we many data with _many_
+features, possibly even more features than there are samples in the
+data set ('wide' data). In these scenarios, we have _lots_ of variance
+--because we have little data to 'tame' it--so we want to apply
+some shrinkage to our data. 
+
+While the 'make everything a bit smaller' strategy does work, it's a
+bit more conventional to represent this in a different way: we choose
+to keep the regression coefficients from being _too big_. Specifically,
+we're going to put a _max size_ on the _total_ of our coefficients. 
+
+By imposing a 'budget' on our problem, we're going to force most of
+the small effects to be even closer to zero and prevent the big effects
+from being _too big_. (Or at least, that's the hope.) We can think of
+this as a sort of 'adaptive' shrinkage. While we started by shrinking
+multiple things totally independently, regression 'blends' all of our
+features together, so we want a more gloabl sort of shrinkage. 
 
 ## Constraints
 
+To do this, we need to introduce the idea of _constrained_ ERM. 
+Recall that our general ERM for linear regression under MSE loss was
+
+$$\hat{\bbeta} = \argmin_{\bbeta \in \R^p} \frac{1}{n}\sum_{i=1}^n (y_i - \bx_i^{\top}\bbeta)^2 \tag{OLS}$$
+
+Here, we only require $\bbeta$ to be a set of $p$ real-valued
+coefficients (for our $p$ features). This problem is functionally
+unconstrained. But we might consider other sorts of constraints:
+*e.g.*, we might know that our features could only have a non-negative
+(zero or positive) coefficient based on some prior knowledge about
+the problem. In this case, we could modify the above problem as
+
+$$\hat{\bbeta} = \argmin_{\substack{\bbeta \in \R^p \\ \beta_i \geq 0 \text{ for all } i}} \frac{1}{n}\sum_{i=1}^n (y_i - \bx_i^{\top}\bbeta)^2 \tag{NN-OLS}$$
+
+This gives us _non-negative_ OLS. Instead of looking at all coefficients, we 
+just find the best _non-negative_ $\hat{\bbeta}$. That second part: non-negativity
+is a constraint. You can also write this as $\bbeta \in \R^p_{\geq 0}$ where 
+$\R^p$ is the 'positive orthant' (the 'positive corner' of the real plane). 
+Because $\R^p_{\geq 0} \subsetneq \R^p$, this is a _constrained_ problem. 
+
+Let's think about what this does: 
+
+- We're looking over a smaller search space, so we have less variance
+- **If** our true $\bbeta^*$ has some negative values, we will be
+  systematically wrong, introducing bias. 
+  
+So this is one of those 'bias-variance' gambits. If our restriction
+to non-negative values is true, this is a pure-win on variance and no
+pain on bias; if our true values are very large and negative, this can
+hurt us quite a lot. And if our true values are a mix of near zero, 
+positive and negative, we may or may not benefit. 
+
+Alternatively, we can note that this is just like any sort of assumption in 
+our modeling: if it's true, it helps; and if it's false, it can hurt. 
+
+Finally, we note that we might have other reasons beyond pure MSE optimization
+to consider this type of thing: NN-OLS may be far simpler to interpret 
+and, it turns out, will wind up 'zeroing' (throwing out) lots of features. But
+we're getting a few days ahead of ourselves. 
+
 ### Measuring the Size of Coefficients
+
+Ok - non-negativity is straightforward enough. But how do we encode something
+like 'not too big'? We need a way of describing how big a set of regression
+coefficients is. 
+
+Which of these is a 'bigger' set of coefficients: 
+
+$$(1, -1, 1) \text{ vs. } (2, 0, 0)$$
+
+There are clearly several ways of measuring bigness that might make sense: 
+
+- Number of non-zero elements (number of features used). Here, the first
+  vector is clearly 'bigger' (3 vs 1)
+- Maximum (absolute) coefficient. Here, the second vector is clearly bigger
+  (2 vs 1)
+- Sum of absolute coefficients. Here, the first vector edges out the
+  second $|1| + |-1| + |1| = 3 > 2 = |2| + |0| + |0|$.
+- Sum of squared coefficients. Here, the second edges out the first: 
+  $2^2 + 0^2 + 0^2 = 4 > 3 = 1^2 + (-1)^2 + 1^2$
+  
+All of these are correct for different types of problems, but we need a
+mathematical way to distinguish them. The mathematical concept of a **norm**
+measures 'how big' something is and, when applied to vectors of coefficients,
+we can measure these using the $\ell_p$ family of norms: 
+
+$$\|\bx\|_p = \sqrt[p]{\sum_{i=1}^n |x_i|^p}$$
+
+So, with our examples above, for the $\ell_1$ norm, we had: 
+
+$$\|(1, -1, 1)\|_1 = \sqrt[1]{|1|^1+ |-1|^1 + |1|^1} = 3$$
+
+and 
+
+$$\|(2, 0, 0)\|_2 = \sqrt[2]{|2|^2+ |0|^2 + |0|^2} = 2$$
+
+Here, the $\ell_2$ norm measures distance 'as the crow flies' or in a straight
+line. (You might notice that this looks sort of like the Pythagorean theorem; 
+that's no coincidence.) Conversely, the $\ell_1$ norm captures how many steps
+you might need to take on a rectangular grid. For this reason, the $\ell_2$ norm
+is sometimes called the _Euclidean_ norm while the $\ell_1$ is called the
+_taxicab_ or _Manhattan_ norm because it captures how many blocks you would need
+to walk.[^blocks]
+
+Visually, these constraints give us different 'balls' that we are requiring
+our coefficients to fall in: 
+
+```{r}
+#| echo: false
+#| fig.asp: 0.3
+library(patchwork)
+plot_ball <- function(p){
+    title <- bquote(l[.(p)]~"Unit Ball")
+    expand_grid(x=seq(-2, 2, length.out=201), 
+                y=seq(-2, 2, length.out=201)) |>
+        mutate(interior = abs(x)^p + abs(y)^p <= 1) |>
+        filter(interior) |>
+        ggplot(aes(x=x, y=y)) + 
+        geom_point() + 
+        coord_fixed() + 
+        ggtitle(title) + 
+        theme_bw() + 
+        xlab("") + ylab("")
+}
+plot_ball(1) + plot_ball(2)
+```
+
+Here, the $\ell_1$ "ball" is pointy and isn't a ball in any normal sense, but
+that's the terminology of math. The $\ell_2$ ball should feel familiar.[^ped]
+
+[^ped]: Formally, the $\ell_2$ 'circle' is the boundary while the entire
+enterior is the 'ball'. We basically always use 'ball' constraints instead
+of circle constraints. If the best value is even smaller than the edge of the
+ball, we don't want to 'drag' things outwards. 
+
+![From Wikipedia on [Taxicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)](https://en.wikipedia.org/wiki/Taxicab_geometry#/media/File:Manhattan_distance.svg)
+
+[^blocks]: Yes, East-West and North-South blocks are not the same size in
+Manhattan, so the 'real' Manhattan norm should treat the two dimensions
+differently, but Manhattan isn't $p$-dimensional so we accept a bit of 
+over-simplification. 
+
+To set up our first form of *regularized* regression, we're going to use
+the $\ell_2$ norm: 
+
+$$\hat{\bbeta} = \argmin_{\bbeta: \|\bbeta\|_2^2 \leq \tau^2} \frac{1}{n}\sum_{i=1}^n L(\bbeta^{\top}\bx_i, y_i) \tag{Ridge Regression}$$
+
+Here, we're requiring the sum of squared coefficients from being more than
+some value $\tau$. $\tau$ here is a _hyperparameter_ that we have to choose. 
+Bigger $\tau$ gives us a larger set of possible $\bbeta$, hence more variance
+and less bias, while smaller $\tau$ gives us more bias, but less variance.[^sd]
+
+[^sd]: Remember that the standard deviation of _anything_ in statistics that
+takes values falling in the range $[a, b]$ is never more than $|b-a|/2$, so
+by keeping our values in a $[-\tau, \tau]$ range, the standard deviation is
+basically capped at $\tau$. 
+
+How can we choose $\tau$? This, like the $K$ in $K$-NN, is one of those 
+situations where pure ERM will fail us. Since the ball associated with a
+larger $\tau$ always includes a smaller $\tau$, pure _in-sample_ minimization
+will always push us towards a bigger $\tau$. We need to use some sort of
+holdout / cross-validation strategy here and will return to that in the future. 
 
 ### Constraints and Penalties
 
@@ -38,8 +319,35 @@ This is conceptually elegant, but it does pose a few practical challenges:
   
 These are definitely solvable (and indeed solved!) problems, but it certainly
 would be nice if we could get rid of the constraint. And as it turns out, 
-we can. 
+we can. A bit of mathematical trickery lets us rewrite the above problem as
 
+
+$$\hat{\bbeta} =\argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{2}\|\by - \bX\bbeta\|_2^2 = \argmin_{\bbeta \in \R^p} \frac{1}{2}\|\by - \bX\bbeta\|_2^2 + \lambda \|\bbeta\|_2^2$$
+
+Here, we have moved our 'ridgefulness' out of the constraint and into a second
+part of our objective function. This is known as a **penalty** term as it 
+keeps $\bbeta$ from being 'too big'. Notably, unlike the constrained form, 
+we could theoretically get a _really big_ $\bbeta$, but it would have to
+'pay for itself' in terms of better MSE. Essentially, we are putting a 'price'
+on bigger coefficients. We're willing to use them, but only if they 'prove their
+worth' in terms of MSE.[^stepwise]
+
+Constraints are a bit of a pain computationally (we have to modify normal 
+gradient descent so it doesn't take out out of bounds), so this _penalized_ form
+is a bit more common in practice, but there is no conceptual difference. The
+penalty form lets us see how this works quite nicely. 
+
+Suppose we were using a first-order (gradient descent method). Normally, we would
+just take a step in the direction of the gradient of the loss. What happens here?
+Since the gradient of $\|\bbeta\|_2^2$ always points outwards, a _descent_ step
+will always steer us a bit back towards the origin. 
+
+- Small effects => pirhanas, why not choose?
+- Small effects => stability
+- Weight decay
+
+[^stepwise]: If this sounds like a 'soft' version of using $F$-tests, ANOVAs, 
+or stepwise methods to decide what features to include in model, you aren't wrong.
 
 
 [^sq]: Any norm is non-negative, so both terms of this inequality are
@@ -48,8 +356,8 @@ non-negative and squaring doesn't change the order.
 ## Ridge Regression
 
 
-**These notes are from a previous class and are a bit beyond the level
-of this course.**
+**These notes are from a previous class I've taught and are a bit beyond the 
+level of this course.**
 
 In the [previous set of notes](./notes06.qmd), we saw that
 $(\overline{X}_n)_{[-\beta, \beta]}$ could outperform the naive estimator

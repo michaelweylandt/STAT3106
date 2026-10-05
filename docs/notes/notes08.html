@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-10-03">
+<meta name="dcterms.date" content="2026-10-05">
 <title>Notes for Lecture #08: Unit II. Regression: Regression in High Dimensions &amp; the Role of Regularization – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -206,7 +206,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 3, 2026</p>
+      <p class="date">October 5, 2026</p>
     </div>
   </div>
   
@@ -223,20 +223,150 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>Outline:</p>
 <hr>
 <section id="challenges-of-high-dimensional-regression" class="level2"><h2 class="anchored" data-anchor-id="challenges-of-high-dimensional-regression">Challenges of High-Dimensional Regression</h2>
+<p>Last time, we discussed several challenges associated with doing statistical inference with <em>many</em> features; that is, data that is <em>high-dimensional</em>. Principally, these came from two sources:</p>
+<ul>
+<li><p>Multiple testing problems: if we take enough swings, any <em>rare</em> event will eventually occur. In the context of statistical testing, this can blow up our normal error rate guarantees. Naively, we can just raise our bar to be ever stricter, but without sufficient data, this just winds up putting everything ‘out of reach’</p></li>
+<li>
+<p>Large variance problems: when estimating <em>many</em> values, the variance of our estimates can become uncomfortably large. To avoid this variance, we are willing to take on a bit of <em>bias</em> and, we balance things out correctly, this can net out well for us.</p>
+<p>This bias can take two forms:</p>
+<ul>
+<li>Intuitively, if we have lots of related little problems, we can partially <em>pool</em> information, <em>e.g.</em>, shrink everything a bit towards the grand / population mean. Here, we massively reduce variance by blending together a large number of samples into the ‘shrinkage target’ and, if those samples are not too unrelated, we don’t incur too much bias along the way.</li>
+<li>Less intuitively, we don’t actually need our different problems to be related at all; even in the case of estimating many independent normal means, a <em>little</em> bit of shrinkage always helps.</li>
+</ul>
+</li>
+</ul>
+<p>That latter phenomenon - most notably explored by James and Stein - is and should be quite counterintuitive. But ultimately, it comes from a close examination of bias and variance.</p>
+<p>If we are estimating <span class="math inline">\(p \gg 1\)</span> different means from a set of sample means, each with variance <span class="math inline">\(\sigma^2\)</span>, the total MSE of our problem will be <span class="math inline">\(p \sigma^2\)</span>. (Sample means are unbiased, so we only have variance here and variance adds for independent variables.) If instead of using the sample means <span class="math inline">\(\hat{\mu_i}\)</span>, we instead look at a slightly ‘shrunk’ version <span class="math inline">\((1 - \rho)\hat{\mu_i}\)</span>, we now have a small bias of</p>
+<p><span class="math display">\[\text{Bias}_i = \mu_i^* - \E[(1-\rho)\hat{\mu_i}] = \mu_i^* - (1-\rho)\mu_i^* = -\rho\mu_i^*\]</span></p>
+<p>and a reduced variance of</p>
+<p><span class="math display">\[\text{Variance}_i = \V[(1-\rho)\hat{\mu_i}] = (1-\rho)^2\V[\hat{\mu_i}] = (1-\rho)^2 \sigma^2\]</span></p>
+<p>Putting these together, the MSE for each individual sample is</p>
+<p><span class="math display">\[\text{MSE}_i = \text{Bias}_i^2 + \text{Variance}_i = \rho^2(\mu_i^*)^2 + (1-\rho)^2\sigma^2\]</span></p>
+<p>A bit of calculus shows that the <em>best</em> <span class="math inline">\(\rho\)</span> we could pick is</p>
+<p><span class="math display">\[\rho_i^* = \frac{\sigma^2}{(\mu_i^*)^2 + \sigma^2}\]</span></p>
+<p>which gives an MSE of</p>
+<p><span class="math display">\[\text{MSE}(\rho_i^*) = TODO\]</span></p>
+<p>Of course, getting this right required us to know <span class="math inline">\(\mu_i^*, \sigma^2\)</span> which we don’t normally have. (If we knew <span class="math inline">\(\mu_i^*\)</span>, why are we doing any of this?)</p>
+<p>James and Stein’s remarkable finding was to show that a slight variant of this process works <em>for all</em> <span class="math inline">\(\mu_i^*, \sigma^2\)</span>.</p>
+<p>[_i = TODO ]</p>
+<p>What does any of this have to do with regression? Well, let’s go back to that MSE formula above; instead of picking just the best <span class="math inline">\(\rho\)</span>, let’s look at the <em>derivative</em> at 0:</p>
+<p>[ = (^2 + ^2) - ^2 .|_{= 0} = -^2 &lt; 0]</p>
+<p>So a <em>little</em> bit of shrinkage towards zero always helps. The ideal amount depends on the specifics of <span class="math inline">\(\mu, \sigma\)</span>, but if there is any noise, a little bit of shrinkage towards zero should always help us.</p>
+<p>Just in case you don’t believe me:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggforce.data-imaginist.com">ggforce</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">sigma</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">estimate_mse</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">rho</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fl">5000</span>, mean<span class="op">=</span><span class="va">mu</span>, sd<span class="op">=</span><span class="va">sigma</span><span class="op">)</span></span>
+<span>    <span class="va">shrunk_estimate</span> <span class="op">=</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">rho</span><span class="op">)</span> <span class="op">*</span> <span class="va">X</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">rho</span>, </span>
+<span>               mse_shrinkage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">mu</span> <span class="op">-</span> <span class="va">shrunk_estimate</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">simulation_mse</span> <span class="op">&lt;-</span> </span>
+<span>    <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out<span class="op">=</span><span class="fl">5001</span><span class="op">)</span>, <span class="va">estimate_mse</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">simulation_mse</span>, </span>
+<span>       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">rho</span>, y<span class="op">=</span><span class="va">mse_shrinkage</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">rho</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_hline</a></span><span class="op">(</span>yintercept<span class="op">=</span><span class="fu">estimate_mse</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">$</span><span class="va">mse_shrinkage</span>, </span>
+<span>               color<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"MSE"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Effect of Shrinkage on Estimating Sample Means"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggforce.data-imaginist.com/reference/facet_zoom.html">facet_zoom</a></span><span class="op">(</span>xlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span>, </span>
+<span>               ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Admittedly, this isn’t the easiest to see and we had to zoom, but it’s there! At zero, there is a small downward slope, so a tiny bit of shrinkage helps, even in this super simple problem.</p>
+<p>In this way, I like to think of shrinkage as like <em>salt</em> in cooking. A little bit is essentially always helpful, but too much can certainly be a problem.</p>
+<p>This general phenomenon is also referred to as <strong>regularization</strong>, as it relates to an older mathematical idea of ‘smoothing out’ the rough edges of models to make them more tractable. We won’t use that perspective in this course, but the term <strong>regularization</strong> is definitely worth knowing.</p>
 <section id="ridge-regression---core-idea" class="level3"><h3 class="anchored" data-anchor-id="ridge-regression---core-idea">Ridge Regression - Core Idea</h3>
+<p>Ridge regression extends this idea to the high-dimensional regression setting. Recall that by high-dimensional, we many data with <em>many</em> features, possibly even more features than there are samples in the data set (‘wide’ data). In these scenarios, we have <em>lots</em> of variance –because we have little data to ‘tame’ it–so we want to apply some shrinkage to our data.</p>
+<p>While the ‘make everything a bit smaller’ strategy does work, it’s a bit more conventional to represent this in a different way: we choose to keep the regression coefficients from being <em>too big</em>. Specifically, we’re going to put a <em>max size</em> on the <em>total</em> of our coefficients.</p>
+<p>By imposing a ‘budget’ on our problem, we’re going to force most of the small effects to be even closer to zero and prevent the big effects from being <em>too big</em>. (Or at least, that’s the hope.) We can think of this as a sort of ‘adaptive’ shrinkage. While we started by shrinking multiple things totally independently, regression ‘blends’ all of our features together, so we want a more gloabl sort of shrinkage.</p>
 </section></section><section id="constraints" class="level2"><h2 class="anchored" data-anchor-id="constraints">Constraints</h2>
+<p>To do this, we need to introduce the idea of <em>constrained</em> ERM. Recall that our general ERM for linear regression under MSE loss was</p>
+<p><span class="math display">\[\hat{\bbeta} = \argmin_{\bbeta \in \R^p} \frac{1}{n}\sum_{i=1}^n (y_i - \bx_i^{\top}\bbeta)^2 \tag{OLS}\]</span></p>
+<p>Here, we only require <span class="math inline">\(\bbeta\)</span> to be a set of <span class="math inline">\(p\)</span> real-valued coefficients (for our <span class="math inline">\(p\)</span> features). This problem is functionally unconstrained. But we might consider other sorts of constraints: <em>e.g.</em>, we might know that our features could only have a non-negative (zero or positive) coefficient based on some prior knowledge about the problem. In this case, we could modify the above problem as</p>
+<p><span class="math display">\[\hat{\bbeta} = \argmin_{\substack{\bbeta \in \R^p \\ \beta_i \geq 0 \text{ for all } i}} \frac{1}{n}\sum_{i=1}^n (y_i - \bx_i^{\top}\bbeta)^2 \tag{NN-OLS}\]</span></p>
+<p>This gives us <em>non-negative</em> OLS. Instead of looking at all coefficients, we just find the best <em>non-negative</em> <span class="math inline">\(\hat{\bbeta}\)</span>. That second part: non-negativity is a constraint. You can also write this as <span class="math inline">\(\bbeta \in \R^p_{\geq 0}\)</span> where <span class="math inline">\(\R^p\)</span> is the ‘positive orthant’ (the ‘positive corner’ of the real plane). Because <span class="math inline">\(\R^p_{\geq 0} \subsetneq \R^p\)</span>, this is a <em>constrained</em> problem.</p>
+<p>Let’s think about what this does:</p>
+<ul>
+<li>We’re looking over a smaller search space, so we have less variance</li>
+<li>
+<strong>If</strong> our true <span class="math inline">\(\bbeta^*\)</span> has some negative values, we will be systematically wrong, introducing bias.</li>
+</ul>
+<p>So this is one of those ‘bias-variance’ gambits. If our restriction to non-negative values is true, this is a pure-win on variance and no pain on bias; if our true values are very large and negative, this can hurt us quite a lot. And if our true values are a mix of near zero, positive and negative, we may or may not benefit.</p>
+<p>Alternatively, we can note that this is just like any sort of assumption in our modeling: if it’s true, it helps; and if it’s false, it can hurt.</p>
+<p>Finally, we note that we might have other reasons beyond pure MSE optimization to consider this type of thing: NN-OLS may be far simpler to interpret and, it turns out, will wind up ‘zeroing’ (throwing out) lots of features. But we’re getting a few days ahead of ourselves.</p>
 <section id="measuring-the-size-of-coefficients" class="level3"><h3 class="anchored" data-anchor-id="measuring-the-size-of-coefficients">Measuring the Size of Coefficients</h3>
+<p>Ok - non-negativity is straightforward enough. But how do we encode something like ‘not too big’? We need a way of describing how big a set of regression coefficients is.</p>
+<p>Which of these is a ‘bigger’ set of coefficients:</p>
+<p><span class="math display">\[(1, -1, 1) \text{ vs. } (2, 0, 0)\]</span></p>
+<p>There are clearly several ways of measuring bigness that might make sense:</p>
+<ul>
+<li>Number of non-zero elements (number of features used). Here, the first vector is clearly ‘bigger’ (3 vs 1)</li>
+<li>Maximum (absolute) coefficient. Here, the second vector is clearly bigger (2 vs 1)</li>
+<li>Sum of absolute coefficients. Here, the first vector edges out the second <span class="math inline">\(|1| + |-1| + |1| = 3 &gt; 2 = |2| + |0| + |0|\)</span>.</li>
+<li>Sum of squared coefficients. Here, the second edges out the first: <span class="math inline">\(2^2 + 0^2 + 0^2 = 4 &gt; 3 = 1^2 + (-1)^2 + 1^2\)</span>
+</li>
+</ul>
+<p>All of these are correct for different types of problems, but we need a mathematical way to distinguish them. The mathematical concept of a <strong>norm</strong> measures ‘how big’ something is and, when applied to vectors of coefficients, we can measure these using the <span class="math inline">\(\ell_p\)</span> family of norms:</p>
+<p><span class="math display">\[\|\bx\|_p = \sqrt[p]{\sum_{i=1}^n |x_i|^p}\]</span></p>
+<p>So, with our examples above, for the <span class="math inline">\(\ell_1\)</span> norm, we had:</p>
+<p><span class="math display">\[\|(1, -1, 1)\|_1 = \sqrt[1]{|1|^1+ |-1|^1 + |1|^1} = 3\]</span></p>
+<p>and</p>
+<p><span class="math display">\[\|(2, 0, 0)\|_2 = \sqrt[2]{|2|^2+ |0|^2 + |0|^2} = 2\]</span></p>
+<p>Here, the <span class="math inline">\(\ell_2\)</span> norm measures distance ‘as the crow flies’ or in a straight line. (You might notice that this looks sort of like the Pythagorean theorem; that’s no coincidence.) Conversely, the <span class="math inline">\(\ell_1\)</span> norm captures how many steps you might need to take on a rectangular grid. For this reason, the <span class="math inline">\(\ell_2\)</span> norm is sometimes called the <em>Euclidean</em> norm while the <span class="math inline">\(\ell_1\)</span> is called the <em>taxicab</em> or <em>Manhattan</em> norm because it captures how many blocks you would need to walk.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>Visually, these constraints give us different ‘balls’ that we are requiring our coefficients to fall in:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here, the <span class="math inline">\(\ell_1\)</span> “ball” is pointy and isn’t a ball in any normal sense, but that’s the terminology of math. The <span class="math inline">\(\ell_2\)</span> ball should feel familiar.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="https://en.wikipedia.org/wiki/Taxicab_geometry#/media/File:Manhattan_distance.svg" class="img-fluid figure-img"></p>
+<figcaption>From Wikipedia on <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Taxicab Geometry</a></figcaption></figure>
+</div>
+<p>To set up our first form of <em>regularized</em> regression, we’re going to use the <span class="math inline">\(\ell_2\)</span> norm:</p>
+<p><span class="math display">\[\hat{\bbeta} = \argmin_{\bbeta: \|\bbeta\|_2^2 \leq \tau^2} \frac{1}{n}\sum_{i=1}^n L(\bbeta^{\top}\bx_i, y_i) \tag{Ridge Regression}\]</span></p>
+<p>Here, we’re requiring the sum of squared coefficients from being more than some value <span class="math inline">\(\tau\)</span>. <span class="math inline">\(\tau\)</span> here is a <em>hyperparameter</em> that we have to choose. Bigger <span class="math inline">\(\tau\)</span> gives us a larger set of possible <span class="math inline">\(\bbeta\)</span>, hence more variance and less bias, while smaller <span class="math inline">\(\tau\)</span> gives us more bias, but less variance.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>How can we choose <span class="math inline">\(\tau\)</span>? This, like the <span class="math inline">\(K\)</span> in <span class="math inline">\(K\)</span>-NN, is one of those situations where pure ERM will fail us. Since the ball associated with a larger <span class="math inline">\(\tau\)</span> always includes a smaller <span class="math inline">\(\tau\)</span>, pure <em>in-sample</em> minimization will always push us towards a bigger <span class="math inline">\(\tau\)</span>. We need to use some sort of holdout / cross-validation strategy here and will return to that in the future.</p>
 </section><section id="constraints-and-penalties" class="level3"><h3 class="anchored" data-anchor-id="constraints-and-penalties">Constraints and Penalties</h3>
 <p>Above, we write ridge regression as:</p>
 <p><span class="math display">\[\hat{\bbeta} = \argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{n}\sum_{i=1}^n L(\bbeta^{\top}\bx_i, y_i) = \argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{2}\|\by - \bX\bbeta\|_2^2\]</span></p>
-<p>which is essentially the classical OLS problem (MSE ERM with a linear predictor) with the additional constraint: <span class="math inline">\(\|\bbeta\|_2 \leq \tau\)</span> or, slightly more conveniently, <span class="math inline">\(\|\bbeta\|_2^2 \leq \tau^2\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Here, we’re putting the ‘ridge-ness’ in the <em>constraint</em> by requiring <span class="math inline">\(\bbeta\)</span> to not be ‘too big.’</p>
+<p>which is essentially the classical OLS problem (MSE ERM with a linear predictor) with the additional constraint: <span class="math inline">\(\|\bbeta\|_2 \leq \tau\)</span> or, slightly more conveniently, <span class="math inline">\(\|\bbeta\|_2^2 \leq \tau^2\)</span>.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> Here, we’re putting the ‘ridge-ness’ in the <em>constraint</em> by requiring <span class="math inline">\(\bbeta\)</span> to not be ‘too big.’</p>
 <p>This is conceptually elegant, but it does pose a few practical challenges:</p>
 <ul>
 <li>How can we pick <span class="math inline">\(\tau\)</span>?</li>
 <li>How can we solve the above problem? In particular, what happens if our gradient points us ‘beyond the bounds’ of our constraint?</li>
 </ul>
-<p>These are definitely solvable (and indeed solved!) problems, but it certainly would be nice if we could get rid of the constraint. And as it turns out, we can.</p>
-</section></section><section id="ridge-regression" class="level2"><h2 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h2>
+<p>These are definitely solvable (and indeed solved!) problems, but it certainly would be nice if we could get rid of the constraint. And as it turns out, we can. A bit of mathematical trickery lets us rewrite the above problem as</p>
+<p><span class="math display">\[\hat{\bbeta} =\argmin_{\bbeta: \|\bbeta\|_2 \leq \tau} \frac{1}{2}\|\by - \bX\bbeta\|_2^2 = \argmin_{\bbeta \in \R^p} \frac{1}{2}\|\by - \bX\bbeta\|_2^2 + \lambda \|\bbeta\|_2^2\]</span></p>
+<p>Here, we have moved our ‘ridgefulness’ out of the constraint and into a second part of our objective function. This is known as a <strong>penalty</strong> term as it keeps <span class="math inline">\(\bbeta\)</span> from being ‘too big’. Notably, unlike the constrained form, we could theoretically get a <em>really big</em> <span class="math inline">\(\bbeta\)</span>, but it would have to ‘pay for itself’ in terms of better MSE. Essentially, we are putting a ‘price’ on bigger coefficients. We’re willing to use them, but only if they ‘prove their worth’ in terms of MSE.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+<p>Constraints are a bit of a pain computationally (we have to modify normal gradient descent so it doesn’t take out out of bounds), so this <em>penalized</em> form is a bit more common in practice, but there is no conceptual difference. The penalty form lets us see how this works quite nicely.</p>
+<p>Suppose we were using a first-order (gradient descent method). Normally, we would just take a step in the direction of the gradient of the loss. What happens here? Since the gradient of <span class="math inline">\(\|\bbeta\|_2^2\)</span> always points outwards, a <em>descent</em> step will always steer us a bit back towards the origin.</p>
+<ul>
+<li>Small effects =&gt; pirhanas, why not choose?</li>
+<li>Small effects =&gt; stability</li>
+<li>Weight decay</li>
+</ul></section></section><section id="ridge-regression" class="level2"><h2 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h2>
 <p><strong>These notes are from a previous class and are a bit beyond the level of this course.</strong></p>
 <p>In the <a href="../notes/notes06.html">previous set of notes</a>, we saw that <span class="math inline">\((\overline{X}_n)_{[-\beta, \beta]}\)</span> could outperform the naive estimator <span class="math inline">\(\overline{X}_n\)</span> if the true parameter is ‘not too big’.</p>
 <p>Can we extend this idea to regression?</p>
@@ -255,7 +385,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <div class="cell">
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -335,7 +465,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>While this isn’t as simple to analyze as some of the expressions we considered above, this looks similar enough to our ‘shrunk’ mean estimator that it’s plausible it will improve on OLS. In fact, you can show that there is always <em>some</em> value of <span class="math inline">\(\lambda\)</span> that guarantees improvement over OLS in expectation. (This is a result known as the “MSE Existence Theorem”)</p>
 <p>To wit,</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">*</span> <span class="va">p</span><span class="op">)</span>, nrow<span class="op">=</span><span class="va">n</span><span class="op">)</span></span>
 <span><span class="va">L</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html">chol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/toeplitz.html">toeplitz</a></span><span class="op">(</span><span class="fl">0.6</span><span class="op">^</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">p</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Add 'AR(1)' correlation</span></span>
@@ -355,31 +485,35 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <span></span>
 <span><span class="va">lambda_grid</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">^</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out<span class="op">=</span><span class="fl">41</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">RIDGE_MSE</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">lambda_grid</span>, <span class="va">calculate_ridge_mse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">list_rbind</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">RIDGE_MSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">lambda_grid</span>, <span class="va">calculate_ridge_mse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">OLS_MSE</span> <span class="op">&lt;-</span> <span class="fu">calculate_ridge_mse</span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">$</span><span class="va">MSE</span> <span class="co"># Ridge at lambda = 0 =&gt; OLS</span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">RIDGE_MSE</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">lambda</span>, y<span class="op">=</span><span class="va">MSE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">geom_abline</span><span class="op">(</span>intercept<span class="op">=</span><span class="va">OLS_MSE</span>, slope<span class="op">=</span><span class="fl">0</span>, lwd<span class="op">=</span><span class="fl">2</span>, lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">xlab</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Estimation Error (MSE)"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">ggtitle</span><span class="op">(</span><span class="st">"Ridge Regularization Improves on OLS"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">RIDGE_MSE</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">lambda</span>, y<span class="op">=</span><span class="va">MSE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_abline</a></span><span class="op">(</span>intercept<span class="op">=</span><span class="va">OLS_MSE</span>, slope<span class="op">=</span><span class="fl">0</span>, lwd<span class="op">=</span><span class="fl">2</span>, lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Estimation Error (MSE)"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="st">"Ridge Regularization Improves on OLS"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
-<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+<figure class="figure"><p><img src="notes08_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Clearly, for smallish <span class="math inline">\(\lambda\)</span>, we are actually outperforming OLS, sometimes by a significant amount! For this problem, the minimum MSE (best estimate) actually seems to occur near <span class="math inline">\(\lambda \approx\)</span> 1.585</p>
+<p>Clearly, for smallish <span class="math inline">\(\lambda\)</span>, we are actually outperforming OLS, sometimes by a significant amount! For this problem, the minimum MSE (best estimate) actually seems to occur near <span class="math inline">\(\lambda \approx\)</span> 1.259</p>
 
 
 </section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 <ol>
-<li id="fn1"><p>Any norm is non-negative, so both terms of this inequality are non-negative and squaring doesn’t change the order.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Yes, East-West and North-South blocks are not the same size in Manhattan, so the ‘real’ Manhattan norm should treat the two dimensions differently, but Manhattan isn’t <span class="math inline">\(p\)</span>-dimensional so we accept a bit of over-simplification.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Formally, the <span class="math inline">\(\ell_2\)</span> ‘circle’ is the boundary while the entire enterior is the ‘ball’. We basically always use ‘ball’ constraints instead of circle constraints. If the best value is even smaller than the edge of the ball, we don’t want to ‘drag’ things outwards.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Remember that the standard deviation of <em>anything</em> in statistics that takes values falling in the range <span class="math inline">\([a, b]\)</span> is never more than <span class="math inline">\(|b-a|/2\)</span>, so by keeping our values in a <span class="math inline">\([-\tau, \tau]\)</span> range, the standard deviation is basically capped at <span class="math inline">\(\tau\)</span>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Any norm is non-negative, so both terms of this inequality are non-negative and squaring doesn’t change the order.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>If this sounds like a ‘soft’ version of using <span class="math inline">\(F\)</span>-tests, ANOVAs, or stepwise methods to decide what features to include in model, you aren’t wrong.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
