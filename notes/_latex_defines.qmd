@@ -33,6 +33,6 @@ latest_updated_notes_main <- "docs/notes.html" |>
     pull(modification_time)
 
 if(latest_updated_notes_qmd > latest_updated_notes_main){
-    quarto::quarto_render("notes.qmd")
+    quarto::quarto_render("notes.qmd", output_format="html")
 }
 ```

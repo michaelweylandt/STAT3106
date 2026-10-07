@@ -271,7 +271,7 @@ enterior is the 'ball'. We basically always use 'ball' constraints instead
 of circle constraints. If the best value is even smaller than the edge of the
 ball, we don't want to 'drag' things outwards. 
 
-![From Wikipedia on [Taxicab Geometry](https://en.wikipedia.org/wiki/Taxicab_geometry)](https://en.wikipedia.org/wiki/Taxicab_geometry#/media/File:Manhattan_distance.svg)
+![From Wikipedia on [Taxicab Geometry. The red, yellow, and blue lines all measure the $\ell_1$ distance, while the green line is the (unique) $\ell_2$ shortest path](https://en.wikipedia.org/wiki/Taxicab_geometry)](../assets/manhattan_distance.svg)
 
 [^blocks]: Yes, East-West and North-South blocks are not the same size in
 Manhattan, so the 'real' Manhattan norm should treat the two dimensions

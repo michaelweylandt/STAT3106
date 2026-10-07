@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-10-05">
+<meta name="dcterms.date" content="2026-10-07">
 <title>Notes for Lecture #08: Unit II. Regression: Regression in High Dimensions &amp; the Role of Regularization – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -206,7 +206,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 5, 2026</p>
+      <p class="date">October 7, 2026</p>
     </div>
   </div>
   
@@ -341,8 +341,8 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </div>
 <p>Here, the <span class="math inline">\(\ell_1\)</span> “ball” is pointy and isn’t a ball in any normal sense, but that’s the terminology of math. The <span class="math inline">\(\ell_2\)</span> ball should feel familiar.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="https://en.wikipedia.org/wiki/Taxicab_geometry#/media/File:Manhattan_distance.svg" class="img-fluid figure-img"></p>
-<figcaption>From Wikipedia on <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Taxicab Geometry</a></figcaption></figure>
+<figure class="figure"><p><img src="../assets/manhattan_distance.svg" class="img-fluid figure-img"></p>
+<figcaption>From Wikipedia on <a href="https://en.wikipedia.org/wiki/Taxicab_geometry">Taxicab Geometry. The red, yellow, and blue lines all measure the <span class="math inline">\(\ell_1\)</span> distance, while the green line is the (unique) <span class="math inline">\(\ell_2\)</span> shortest path</a></figcaption></figure>
 </div>
 <p>To set up our first form of <em>regularized</em> regression, we’re going to use the <span class="math inline">\(\ell_2\)</span> norm:</p>
 <p><span class="math display">\[\hat{\bbeta} = \argmin_{\bbeta: \|\bbeta\|_2^2 \leq \tau^2} \frac{1}{n}\sum_{i=1}^n L(\bbeta^{\top}\bx_i, y_i) \tag{Ridge Regression}\]</span></p>
@@ -367,7 +367,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <li>Small effects =&gt; stability</li>
 <li>Weight decay</li>
 </ul></section></section><section id="ridge-regression" class="level2"><h2 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h2>
-<p><strong>These notes are from a previous class and are a bit beyond the level of this course.</strong></p>
+<p><strong>These notes are from a previous class I’ve taught and are a bit beyond the level of this course.</strong></p>
 <p>In the <a href="../notes/notes06.html">previous set of notes</a>, we saw that <span class="math inline">\((\overline{X}_n)_{[-\beta, \beta]}\)</span> could outperform the naive estimator <span class="math inline">\(\overline{X}_n\)</span> if the true parameter is ‘not too big’.</p>
 <p>Can we extend this idea to regression?</p>
 <p>Recall that we formulated OLS as:</p>
