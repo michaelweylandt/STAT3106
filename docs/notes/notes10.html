@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-10-12">
 <title>Notes for Lecture #10: Unit II. Regression: Stability Approaches in Applied Machine Learning – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,30 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#the-lasso" id="toc-the-lasso" class="nav-link active" data-scroll-target="#the-lasso">The LASSO</a></li>
+  <li><a href="#tuning-lasso" id="toc-tuning-lasso" class="nav-link" data-scroll-target="#tuning-lasso">Tuning LASSO</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes10.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes10.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #10: Unit II. Regression: Stability Approaches in Applied Machine Learning</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">October 12, 2026</p>
     </div>
   </div>
   
@@ -164,15 +205,276 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<section id="the-lasso" class="level2"><h2 class="anchored" data-anchor-id="the-lasso">The LASSO</h2>
+<p><a href="../notes/notes09.html">Last time</a>, we argued that we could use the “zero-norm”:</p>
+<p><span class="math display">\[\|\bx\|_0 = \text{Number of Non-Zero Elements of } \bx\]</span></p>
+<p>to characterize <em>sparse</em> models. Specifically, recall that the <span class="math inline">\(\|\cdot\|_0\)</span> norm works like:</p>
+<p><span class="math display">\[\begin{align*}
+\|(1, 2, 3)\|_0 &amp;= 3  \\
+\|(0, 0, 0)\|_0 &amp;= 0 \\
+\|(0, 2, 0)\|_0 = 1
+\end{align*}\]</span></p>
+<p>Like the sum-of-squares norm that we used for ridge regression, this captures a notion of ‘not too big’-ness (and makes a bias-variance gambit), but instead of judging a model by <em>how big</em> its coefficients are, it judges it by <em>how many</em> coefficients it uses. We saw that ridge regression had the ability to ‘automatically’ make our model coefficients smaller and only make them big when the data demanded it (at a price of <span class="math inline">\(\lambda\)</span>); use of the <span class="math inline">\(\ell_0\)</span>-norm will do the same thing.</p>
+<p>In our constrained form, this looks like:</p>
+<p><span class="math display">\[\argmin_{\substack{\bbeta \in \R^p \\ \|\bbeta\|_0 \leq k}} \text{TrainingMSE}(\bbeta).\]</span> Here, we’re saying find me the best linear model <strong>using no more than <span class="math inline">\(k\)</span> of the total <span class="math inline">\(p\)</span> features</strong> as measured by training MSE. As with ridge regression, this is a <em>hard constraint</em> and will never select more than <span class="math inline">\(k\)</span> features.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> We can translate this to ‘penalty’ form:</p>
+<p><span class="math display">\[\argmin_{\bbeta \in \R^p} \text{TrainingMSE}(\bbeta) + \lambda \|\bbeta\|_0.\]</span></p>
+<p>Here, we will include a feature if and only if it reduces our Training MSE by <span class="math inline">\(\lambda\)</span> or more over the next best alternative. (Can you argue why?)</p>
+<p>Many of the <em>model selection</em> tools you have seen in previous courses are instances of this set-up, which is generally called ‘best subsets’ because we seek the best subset of <span class="math inline">\(k\)</span> predictors (again, as measured by Training MSE). Things like <em>forward stepwise</em> or <em>backward stepwise</em> model selection are algorithms that attempt to solve the above problems, typically based on some theoretically driven (<span class="math inline">\(p\)</span>-value, <span class="math inline">\(F\)</span>-test, ANOVA, <em>etc</em>) choice of <span class="math inline">\(\lambda\)</span>.</p>
+<p>This is all well and good for simple problems, where brute force can be sufficient. With <span class="math inline">\(p\)</span> possible features, an exhaustive search requires us to solve <span class="math inline">\(2^p\)</span> different OLS problems. At the scale of <span class="math inline">\(p\approx 10-20\)</span>, this may not be completely unrealistic for small data sets where the individual OLS fits are near instant. (Applying OLS to the penguins data <span class="math inline">\(2^20\)</span> times takes a bit under 8 minutes on my laptop.) But as problems get bigger and bigger, this quickly becomes essentially impossible.</p>
+<p>First order (gradient) methods don’t really help here, because the gradient of <span class="math inline">\(\|\cdot\|_0\)</span> gives us no information. (Recall that it is flat everywhere except <span class="math inline">\(0\)</span> where it jumps down by 1 at a single point.) So it is hard to beat the ‘wander around randomly trying things’ strategy in a systematic fashion.</p>
+<p>This leaves us with a set of alternatives: we can either</p>
+<ul>
+<li>Solve the <em>exact</em> best-subsets problem <em>approximately</em>; or</li>
+<li>Solve an <em>approximation</em> to best-subsets <em>exactly</em>.</li>
+</ul>
+<p>(I suppose we could also solve the approximation approximately, but we don’t typically need to go quite that far.) As mentioned above, you already know some approaches for <em>approximate</em> solves for the <em>exact</em> problem, so now let’s look instead at how we might <em>approximate</em> the best-subsets problem.</p>
+<p>In approximating the best subsets problem, what are we looking for? We want to find another similar problem that is:</p>
+<ul>
+<li>Easy to solve with first order methods</li>
+<li>Has a solution that is ‘close’ to the best-subsets problem</li>
+<li>Inherits the desirable properties of best subsets (automatic model selection)</li>
+</ul>
+<p>Ridge regression actually gets us surprisingly close: it’s certainly easy to solve and typically gives us a solution with many small values. It’s not unreasonable to think that we could just ‘throw away’ the small values, keeping the larger ones. This – “thresholded ridge” – is a viable strategy more often than textbooks might suggest, but it still has some problems:</p>
+<ul>
+<li>We now have two knobs (how much ridge + how small is small enough to safely discard) to tune</li>
+<li>Ridge typically pushes many features down to zero at the same rate</li>
+</ul>
+<p>Because ridge cares much more about the difference between 10 and 11 (<span class="math inline">\(11^2 - 10^2 = 21\)</span>) than 2 and 1 (<span class="math inline">\(2^2 - 1^2 = 3\)</span>), ridge regression will put the bulk of its shrinkage activity on the biggest coefficients, leaving the ‘reasonably small’ things alone until <span class="math inline">\(\lambda\)</span> is quite large. This is exactly the opposite of what we want. We’d much prefer a model that puts its shrinkage into the small coefficients, leaving the larger values unscathed.</p>
+<p>Sadly, this is not quite doable, but we can at least find a closely related problem that shrinks everything, high and low, <em>at the same rate</em>. Our hope here, is that a large value, say 11, is shrunk to 10, but a small value, say 1, gets pushed all the way to 0. In essence, we want a ‘bigness’ measure that is essentially <em>linear</em> in the inputs.</p>
+<p>And we have one! Remember back a few lectures when we talked about different vector ‘norms’ - measures of bigness or size. At the time, we looked at our ‘Euclidean’ (<span class="math inline">\(\ell_2\)</span>)</p>
+<p><span class="math display">\[\|\bx\|_2^2 = \sum_i x_i^2\]</span></p>
+<p>distance because it was geometrically familiar and ‘played nice’ with the squares of least squares, but we also had our <em>taxicab</em> (Manhattan or <span class="math inline">\(\ell_1\)</span>) norm:</p>
+<p><span class="math display">\[\|\bx\|_1 = \sqrt[1]{\sum_i |x_i|^1} = \sum_i |x_i|\]</span></p>
+<p>That is, the sum of the absolute values of <span class="math inline">\(\bx\)</span>. If we plot the absolute value function, we see that it has exactly that linear type of behavior we wanted:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes10_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If we use something like this as a penalty, it should stand a much better chance at ‘zeroing’ out coefficients (like <span class="math inline">\(\ell_0\)</span>) while still being something we can actually solve efficiently (like <span class="math inline">\(\ell_2\)</span> / ridge).<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>And, <em>mirabile dictu</em>, this heuristic argument not only works, but works well and gives us a problem that we can solve efficiently. I present you with the <code>LASSO</code>:</p>
+<p><span class="math display">\[\argmin_{\bbeta} \text{TrainingMSE}(\bbeta) + \lambda \|\bbeta\|_1 = \argmin_{\bbeta} \text{TrainingMSE}(\bbeta) + \lambda \sum_{i=1}^p |\beta_i|\]</span></p>
+<p>For <span class="math inline">\(\lambda \to 0\)</span>, like ridge, we get back to OLS, but as <span class="math inline">\(\lambda\)</span> gets large we’ll actually get <em>exact</em> zeros out. (This is actually the ‘easy to solve’ problem that is closest to best squares and so we call it the ‘tightest relaxation’.) It lives on the magic margin of ‘easy to solve’ while also ‘giving exact zeros’, a territory occupied by nothing else.</p>
+<p>So what is <code>LASSO</code>? Well, it is firstly a somewhat janky acronym for the <em>Least Absolute Selection and Shrinkage Operator</em>:</p>
+<ul>
+<li>
+<em>Least</em>. We will apply this as a ‘bolt-on’ to our general minimum training error / ERM paradigm.</li>
+<li>
+<em>Absolute</em>. We penalize according to absolute values, not squares.</li>
+<li>
+<em>Selection</em>. This will automatically select certain coefficients and zero out others</li>
+<li>
+<em>Shrinkage</em>. While this will only push some features <em>all the way</em> to zero, it will push the rest <em>towards</em> zero, doing a bit of a bias-variance gambit on all features, even the ones it keeps.</li>
+<li>
+<em>Operator</em>. Generic math word to make the acronym work.</li>
+</ul>
+<p>While on the nice end of the math spectrum, this is still not quite as simple as OLS and ridge regression, so we do need to use an iterative algorithm to find the solution. The <code>glmnet</code> package that we used for ridge regression can also solve LASSO problems and, indeed, was originally developed for LASSO-type problems.</p>
+<p>We start with the same data as before:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generated with help of Gemini</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org">stringr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://juliasilge.github.io/tidytext/">tidytext</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'Matrix'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loaded glmnet 5.1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 1. Ingest static TidyTuesday snapshot</span></span>
+<span><span class="va">raw_wine</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span></span>
+<span>    <span class="st">"https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2019/2019-05-28/winemag-data-130k-v2.csv"</span>,</span>
+<span>    show_col_types <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 2. Subsample to create a controlled p &gt; n setting (n = 100)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">3106</span><span class="op">)</span></span>
+<span><span class="va">wine_sample</span> <span class="op">&lt;-</span> <span class="va">raw_wine</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">variety</span> <span class="op">==</span> <span class="st">"Pinot Noir"</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">description</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>wine_id <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">wine_id</span>, <span class="va">points</span>, <span class="va">description</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Tokenize, strip stopwords/digits, and prune singletons</span></span>
+<span><span class="va">tidy_words</span> <span class="op">&lt;-</span> <span class="va">wine_sample</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://juliasilge.github.io/tidytext/reference/unnest_tokens.html">unnest_tokens</a></span><span class="op">(</span><span class="va">word</span>, <span class="va">description</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter-joins.html">anti_join</a></span><span class="op">(</span><span class="va">stop_words</span>, by <span class="op">=</span> <span class="st">"word"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html">str_detect</a></span><span class="op">(</span><span class="va">word</span>, <span class="st">"^[0-9]+$"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">frequent_words</span> <span class="op">&lt;-</span> <span class="va">tidy_words</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span><span class="op">(</span><span class="va">wine_id</span>, <span class="va">word</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="va">word</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">n</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Reshape to wide DTM via pivot_wider()</span></span>
+<span><span class="va">dtm</span> <span class="op">&lt;-</span> <span class="va">tidy_words</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter-joins.html">semi_join</a></span><span class="op">(</span><span class="va">frequent_words</span>, by <span class="op">=</span> <span class="st">"word"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="va">wine_id</span>, <span class="va">word</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span>
+<span>        names_from <span class="op">=</span> <span class="va">word</span>,</span>
+<span>        values_from <span class="op">=</span> <span class="va">n</span>,</span>
+<span>        values_fill <span class="op">=</span> <span class="fl">0</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 5. Build design matrix X and continuous target y</span></span>
+<span><span class="va">aligned</span> <span class="op">&lt;-</span> <span class="va">wine_sample</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">wine_id</span>, <span class="va">points</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">dtm</span>, by <span class="op">=</span> <span class="st">"wine_id"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">aligned</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">wine_id</span>, <span class="op">-</span><span class="va">points</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">aligned</span><span class="op">$</span><span class="va">points</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Next, we apply <code>glmnet</code>, but here we set <code>alpha=1</code> (or just leave it unspecified since <span class="math inline">\(\alpha=1\)</span> is the default) to fit the LASSO:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'Matrix'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loaded glmnet 5.1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/">broom</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 5
+  term          step estimate lambda dev.ratio
+  &lt;chr&gt;        &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+1 (Intercept)      1   88.7        1    0.0433
+2 black            1    0.365      1    0.0433
+3 concentrated     1    0.146      1    0.0433
+4 structured       1    0.110      1    0.0433</code></pre>
+</div>
+</div>
+<p>From here, we see that at <span class="math inline">\(\lambda=1\)</span>, only three features (three words) are selected and to a non-oeniphile, they seem pretty reasonable to me.</p>
+<p>As with ridge regression, getting the <em>right</em> value of <span class="math inline">\(\lambda\)</span> is a tricky problem. Before we do this, let’s note that <code>glmnet</code> provides several nice “multi-<span class="math inline">\(\lambda\)</span>” features. In particular, <code>glmnet</code> will</p>
+<ol type="1">
+<li>Automatically find the value of <span class="math inline">\(\lambda\)</span> that makes all your coefficients zero and stop there (so-called <span class="math inline">\(\lambda_{\max}\)</span>)</li>
+<li>Solve for a wide range of <span class="math inline">\(\lambda\)</span> ending at <span class="math inline">\(\lambda_{\max}\)</span>
+</li>
+<li>Do so in a clever way that makes solving at 100 different <span class="math inline">\(\lambda\)</span>’s almost as fast as solving at a single <span class="math inline">\(\lambda\)</span>:</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes10_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This looks similar to the <em>regularization paths</em> we saw for ride regression, but with some interesting differences:</p>
+<ol type="1">
+<li>The paths are a bit ‘pointier’: while the ridge paths were smooth, here we see some artifacts of the ‘sharp corner’ in the absolute value penalty</li>
+<li>The paths eventually hit zero and stop. This is exactly the <em>shrinkage</em> we expect! While it is possible for a feature to hit zero for a while and then ‘reactivate’ (possibly even with a different sign!), the typical behavior is for a feature to be shrunk ‘out of existence’ permanently.</li>
+<li>We can now make some sense of the values along the top. These measure the number of <em>non-zero</em> coefficients. At the left side of the plot, where <span class="math inline">\(-\log(\lambda)\)</span> is small <span class="math inline">\(\leftrightarrow\)</span> <span class="math inline">\(\lambda\)</span> is large, we see that most features are ‘zeroed out’ and only a few remain. As we move to the right, more and more features get ‘activated’, until we stop at <span class="math inline">\(n=p\)</span> total features. (We will <em>never</em> select <em>more</em> than <span class="math inline">\(n\)</span> features.)</li>
+</ol>
+<p>When talking about ridge, we found that the <span class="math display">\[\hat{\beta} = \frac_{SS_{XY}}{SS_{XX} + \lambda}\]</span> ‘metaphor’ was helpful to demonstrate the form of shrinkage. We can’t get a nice expression like that for LASSO (and remember that was even a bit informal for ridge) except in one very special case. If</p>
+<p><span class="math display">\[\bX = \begin{pmatrix} 1 &amp;0 &amp; 0  &amp; \dots &amp; 0 \\
+0 &amp; 1 &amp; 0 &amp; \dots &amp; 0 \\
+0 &amp; 0 &amp; 1 &amp; \dots &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; \ddots &amp; 0 \\
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\
+0 &amp; 0 &amp; 0 &amp; \dots &amp; 1 \end{pmatrix}\]</span></p>
+<p>we have an exact solution:</p>
+<p><span class="math display">\[\hat{\beta}_i = \begin{cases} y_i - \lambda &amp; y_i &gt; \lambda \\ 0 &amp; 0 &amp; |y_i| \leq \lambda \\ y_i + \lambda &amp; y_i &lt; -\lambda \end{cases}\]</span></p>
+<p>It’s a bit easier to compare this to the ridge solution <span class="math inline">\(\hat{\beta}_i = y_i / (1 + \lambda)\)</span> and the OLS solution <span class="math inline">\(\hat{\beta} = y_i\)</span> visually:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes10_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Unsurpisingly, the OLS penalty is a straight-line and the ridge penalty is a ‘flattened’ version of that same line. (Why?) The LASSO effect is a bit more interesting. Near <span class="math inline">\(0\)</span>, we see that it gives gives <em>more</em> shrinkage than ridge and indeed zeros things out. Farther away (large values), we see less shrinkage. So it seems that the LASSO indeed is giving us what we want: a bit more shrinkage, leading to actual selection (zeroing) of small values, near zero while putting a bit less of a thumb on thescale to shrink large values.</p>
+<p>Is this helpful? It depends what we believe about the world. If we believe that there are a few strong effects and a lot of ‘true zeros’, this is clearly a reasonable modeling choice. But those situations are definitely not the norm: in our wine example, do we expect that there are a few ‘magic’ words and <em>no other words</em> have <em>any</em> ability to predict the final score? Not really…</p>
+<p>In these situations, the benefits of sparsity are <em>interpretational</em> and <em>practical</em>:</p>
+<ul>
+<li>What are the <em>most important</em> words? These are hopefully the last ones that the LASSO will discard.</li>
+<li>If we can only use a few features for engineering-type reasons (speed, cost of data collection, interpretability), which ones should we use?</li>
+</ul>
+<p>While we do have good rules of thumb for picking a good <span class="math inline">\(\lambda\)</span> (more to follow), it is often just as useful to look at the <em>order</em> that the Lasso picks and selects features.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">term</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_max</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">!=</span> <span class="st">"(Intercept)"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>sign <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sign.html">sign</a></span><span class="op">(</span><span class="va">lambda</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">term</span>, final_lambda<span class="op">=</span><span class="va">lambda</span>, <span class="va">sign</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>rank <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html">dense_rank</a></span><span class="op">(</span><span class="va">final_lambda</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 123 × 4
+   term         final_lambda  sign  rank
+   &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+ 1 black               1.11      1    63
+ 2 concentrated        1.01      1    62
+ 3 structured          1.01      1    62
+ 4 power               0.838     1    61
+ 5 tea                 0.800     1    60
+ 6 vines               0.800     1    60
+ 7 funky               0.764     1    59
+ 8 complex             0.729     1    58
+ 9 texture             0.696     1    57
+10 cream               0.664     1    56
+# ℹ 113 more rows</code></pre>
+</div>
+</div>
+<p>Here, I have pulled out each coefficient (each word) and found the largest lambda at which it is still nonzero. After looking at the sign of its coefficient, I have ranked them by LASSO-implied usefulness (higher final <span class="math inline">\(\lambda\)</span> implies the feature ‘held on’ longer implies more important). The results seem to be reasonable-again, with little knowledge of wine culture.</p>
+<p>So what is <em>actually</em> important under this sort of lasso ranking? Well, predictive utility (clearly, as we are still basically doing ERM) is the baseline, but we can temper this a bit:</p>
+<ul>
+<li><p>As always, predictive power is not necessarily ‘true causal’ effect (kids shoes and IQ), but it is suggestive</p></li>
+<li>
+<p>When we have <em>strongly</em> correlated features, lasso will pick one more or less at random. (Think: left and right shoe sizes vs IQ in children. LASSO will be happy with just one (again, basically at random) since the difference between them is miniscule.) Contrast this to ridge which will ‘split the difference’ and include both at a smaller coefficient value.</p>
+<p>The ridge behavior is a bit more robust here (if one feature ‘goes weird’ and takes an abnormal value, ridge will react about half as much as lasso might since it averages them), but lasso clearly wins on parsimony.</p>
+</li>
+<li><p>From the above, LASSO will do a bit better when there isn’t much correlation among the features. This is theoretically quite nice - and useful in some limited experimental settings - but under our ‘many features occur when we measure many related things’ heuristic, the practical value of this is only so-so.</p></li>
+</ul>
+<p>Overall, LASSO and related methods are rarely the <em>last word</em> in knowing what “truly matters”, but it provides us a quick, efficient, and easy-to-use framework that does about as well as any sparse method could do.</p>
+</section><section id="tuning-lasso" class="level2"><h2 class="anchored" data-anchor-id="tuning-lasso">Tuning LASSO</h2>
+<p>Ok, enough flim-flammery, how do we actually pick <span class="math inline">\(\lambda\)</span>? If we really just need to commit to one, we need some guidance.</p>
+<p>TODO</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>And because more features essentially always helps, this will essentially always select exactly <span class="math inline">\(k\)</span> features.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A bit more technical, but it’s worth thinking about what happens to a value of <span class="math inline">\(\beta\)</span> that the data suggests is small; the OLS squared term will have a gradient proportional to <span class="math inline">\(\beta\)</span> (derivative of squared term is linear) while the derivative of the absolute value will always be <span class="math inline">\(\pm 1\)</span> (whichever pushes towards the zero point). Hence, the absolute value will push ‘harder’ than the MSE term, giving us exact zeros. Contrast this to ridge, where we have have two terms both with a linear gradient; one (data/MSE) pushes us away from zero, while the other (ridge penalty) pushes us towards zero and we have no reason to think we’ll land exactly on zero.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +878,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes10.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes10.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes10.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes10.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
