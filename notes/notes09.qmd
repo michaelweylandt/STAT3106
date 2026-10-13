@@ -95,6 +95,8 @@ So what does a ridge regression solution actually _look like_ in that situation?
 
 ```{r wine_setup}
 #| cache: true
+#| message: false
+#| warning: false
 # Generated with help of Gemini
 library(readr)
 library(dplyr)
@@ -110,7 +112,7 @@ raw_wine <- read_csv(
 )
 
 # 2. Subsample to create a controlled p > n setting (n = 100)
-set.seed(9750)
+set.seed(3106)
 wine_sample <- raw_wine |>
     filter(variety == "Pinot Noir", !is.na(points), !is.na(description)) |>
     slice_sample(n = 100) |>

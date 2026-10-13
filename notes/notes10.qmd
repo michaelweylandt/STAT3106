@@ -187,6 +187,8 @@ We start with the same data as before:
 
 ```{r winesetup}
 #| cache: true
+#| message: false
+#| warning: false
 # Generated with help of Gemini
 library(readr)
 library(dplyr)
@@ -281,7 +283,7 @@ with some interesting differences:
    more and more features get 'activated', until we stop at $n=p$ total features.
    (We will _never_ select *more* than $n$ features.)
    
-When talking about ridge, we found that the $$\hat{\beta} = \frac_{SS_{XY}}{SS_{XX} + \lambda}$$ 'metaphor' was helpful to demonstrate the form of shrinkage. We can't
+When talking about ridge, we found that the $$\hat{\beta} = (\bX^{\top}\bX + \lambda \bI)^{-1}\bX^{\top}\by \approx  \frac{SS_{XY}}{SS_{XX} + \lambda}$$ 'metaphor' was helpful to demonstrate the form of shrinkage. We can't
 get a nice expression like that for LASSO (and remember that was even a bit
 informal for ridge) except in one very special case. If 
 

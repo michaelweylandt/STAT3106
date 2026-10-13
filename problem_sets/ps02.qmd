@@ -1,6 +1,316 @@
 ---
-lab_num: "`r ps <- 2; ps`"
+ps_num: "`r ps <- 2; ps`"
+ps_title: "Regression"
 ---
 
 {{< include _setup.qmd >}}
+
+## Introduction  {.unnumbered}
+
+In this problem set, you will use a variety of _linear_ and _non-linear_
+regression methods on both a 'tall' and a 'wide' prediction task. As you 
+work through these, be sure to consider the relative pros and cons of each
+approach. As we've emphasized throughout the semester, there is no 
+universally best method -- "no free lunch" -- for any given task and the best
+method for a task will be a complex function of data types, your goals, data 
+size, and personal preferences. 
+
+## Data Files  {.unnumbered}
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+dc_bike <- read_csv("problem_sets/data/ps02_dc_bike.csv")
+ca_drought <- read_csv("problem_sets/data/ps02_ca_drought.csv")
+```
+
+
+We introduce two new regression data sets for this problem set. The first, 
+the [DC BikeShare](./data/ps02_dc_bike.csv) data set, has hourly bike-rental 
+counts from the [Capital Bikeshare](https://capitalbikeshare.com/) program 
+serving Washington, D.C.[^citi] This data contains `r NROW(dc_bike)` rows of 
+hourly data (`r min(dc_bike$time)` to `r max(dc_bike$time)`) and your goal is 
+to predict the number of bikes rented (checkout time) in
+that hour. To predict ridership, I provide you local temperature, humidity, 
+wind speed, precipitation as well as some pre-constructed time features
+(hour 0 to 23), day of week, day of year, and weekend / weekday. You can 
+choose to make your predictions on a linear (`ridership`) or logarithmic
+(`log_ridership`) scale, but you can only use one `ridership` variable. 
+
+```{r}
+#| eval: false
+dc_bike <- read_csv("https://michael-weylandt/STAT3106/problem_sets/data/ps02_dc_bike.csv")
+skimr::skim(dc_bike)
+```
+
+```{r}
+#| echo: false
+skimr::skim(dc_bike)
+```
+
+This is the "tall" data set referenced below. 
+
+The second "wide" data set arises from an important problem in climate 
+forecasting. Specifically, in the [CA PDSI](./data/ps02_ca_drought.csv) data set, 
+we have global sea surface temperatures (`sst`) and want
+to use them to predict the degree of drought in California. (Think *El Nino*.)
+This data set has `r NROW(ca_drought)` rows of historical monthly data (via
+NASA's POWER data) along with `sst` from a
+roughly 4 degree global grid, which can be used to predict the 
+[Palmer Drought Severity Index (PSDI)](https://en.wikipedia.org/wiki/Palmer_drought_index)
+for California in the same month.[^land]
+
+```{r}
+#| eval: false
+ca_drought <- readr::read_csv("https://michael-weylandt/STAT3106/problem_sets/data/ps02_ca_drought.csv")
+skimr::skim(ca_drought)
+```
+
+```{r}
+#| echo: false
+ca_drought |> select(1:10) |> skimr::skim()
+```
+
+(Many similar rows omitted)
+
+[^land]: Note that we only have 
+`r ca_drought |> select(starts_with("sst")) |> NCOL()` SST columns, even though
+we're on a 4 degree grid (4050 total cells) because we have to mask out cells
+with land.
+
+[^citi]: Capital Bikeshare operates quite similarly to NYC's CitiBike program. 
+
+
+## ML Best Practices Question (16 Points)
+
+Consider the scenario below in I describe a hypothetical application of
+ML. There are (at least) 5 issues in how the ML system is developed, tested, 
+and deployed. Identify **four** distinct issues and, for each issue you identify,
+describe: 
+
+- The mistake that was made (1 points)
+- The likely adverse impact arising from the mistake (1 points)
+- What should have been done instead (2 points)
+
+(This is what lawyers might call an "Issue Spotter" question.)
+
+**Scenario**: Hamilton, Butler, and Low (HBL) is an elite management consulting
+firm, which has long-prided itself on hiring only the most elite and high-achiving
+Ivy League undergraduates. To be more 'AI forward', to reduce historical
+hiring biases, to eliminate the thousands of (otherwise billable) partner hours 
+spent vetting undergraduate applications, HBL tasked its People Analytics team
+with developing an automated screening engine dubbed *Project ROAR 
+(Rapid Objective Applicant Ranking)*. 
+
+Historically, HBL's recruitment had relied heavily on informal alumni 
+networking, on-campus partner dinners, and unstructured behavioral interviews, 
+which leadership acknowledged had favored traditional feeder networks and a 
+predominantly male candidate pool. To cast a wider, more meritocratic net, the 
+project sponsor announced that ROAR would serve as an automated, 
+interview-free gatekeeper for all incoming applicants: any candidate whose 
+predicted first-year job performance score exceeded 78 on HBL's standard 
+continuous 1 to 100 rating scale would automatically receive an offer for a 
+final-round interview slot, while those below 78 would be rejected without 
+additional human review.
+
+The analytics team began by querying internal HR records from 2017 to 2021, 
+compiling complete digital application files and subsequent first-year review 
+scores for 1,400 junior associates hired under the firm's historical recruiting
+regime. To capture every possible objective signal, the data engineers extracted
+hundreds of resume keywords, collegiate club memberships, undergraduate major
+indicators, and assigned onboarding salary tiers, while imputing missing 
+collegiate transcript grades with the global mean across the entire 5-year
+archive. Before fitting any models, the team normalized all continuous predictors
+using the mean and variance computed over the complete 1,400-employee database,
+and ran a univariate screening step across all columns to pre-filter down to
+the top 200 most correlated features. They adopted Mean Squared Error (MSE) as
+their primary accuracy measure, reasoning that quadratic penalties on score 
+discrepancies were mathematically tractable, captured the 'big miss is a big loss'
+phenomenon in hiring, and cleanly mirrored standard regression theory. 
+
+For the predictive engine, the team evaluated high-dimensional linear models and
+forward stepwise polynomial regression. To tune the model, the lead 
+analyst configured the forward stepwise algorithm to continually add polynomial 
+terms and pairwise interactions until the in-sample Residual Sum of Squares (RSS)
+ceased to drop by more than 0.25%, celebrating when the model achieved an 
+in-sample $R^2$ of 0.91. When fitting Ridge and Lasso models as benchmarks, the 
+engineers selected the penalty parameter $\lambda$ that maximized in-sample 
+explained variance on the training set, concluding that because $\lambda \to 0$
+delivered the lowest error, regularization was unhelpful and could be safely
+omitted. To evaluate the pipeline prior to deployment, the team partitioned
+the 1,400 past employees into an 80/20 train/validation split using uniform
+random sampling across the rows. Upon finding that the model achieved a
+validation RMSE of just 3.4 points on the 1–100 scale, the team declared ROAR 
+production-ready.
+
+The system was launched for the 2024–2025 recruiting cycle, where HBL actively
+marketed its new "resume-blind, network-free" process to hundreds of 
+non-traditional campuses, successfully attracting an applicant pool that was
+majority female and demographically unprecedented for the firm. 
+
+## Qualitative Questions (10 Points)
+
+1. Give two examples where 'shrinkage' might make improve a large set of
+   predictions, other than those discussed in class. (2 points)
+2. Explain at an intuitive level why the 'best subsets' ($\|\cdot\|_0$) penalty
+   is rarely used in practice, even though it is theoretically quite nice. 
+   (2 points)
+3. Give two reasons other than 'the real model is sparse' that sparse models may
+   be preferred. (2 points)
+4. When performing many statistical tests (or equivalently, when estimating many
+   different model parameters) issues of _multiple testing_ come to the fore. 
+   As discussed in class, one way we can address this is by examining the 
+   _false discovery rate_ instead of the _false positive rate_ of our tests. 
+   Define the FDR mathematically, provide an intuitive interpretation, and explain
+   why it may be preferred over traditional false-positive rate control. (3 points)
+5. Ridge regression is equivalent to the method of _weight decay_ in neural 
+   network practice. Define _weight decay_ and explain why ridge regression 
+   does the same thing. You do not need to be super rigorous in your answer. 
+   (3 points)
+   
+   *Hint*: Rather than comparing the problems directly, it may be easier to 
+   look at what a ridge penalty does to a first-order method and compare it to
+   how weight decay is applied in practice. 
+
+## First-Order Methods (15 Points)
+
+In this question, you will apply _first-order_ (gradient-based optimization) 
+methods to linear models. You will compare 'classic' gradient descent with
+stochastic accelerated variants and see the benefits of early stopping. 
+
+### Gradient Descent for Linear Models (5 Points)
+
+When faced with a very large data set, it may be computationally impractical to 
+use the closed-form solutions to fit OLS or ridge regression. Using the 
+[NYSED data](./data/ps01_nysed.csv) from [the previous problem set](./ps01.qmd),
+implement a standard *gradient descent* method to fit OLS to this problem (after
+performing suitable encoding of categorical variables).  
+
+You may use a fixed (small) step size or, if you are feeling ambitious / impatient,
+a _backtracking_ method to select good step-sizes. (See Algorithm 9.2 of the
+book by Boyd and Vandeberghe for a simple backtracking method.)
+
+Compare your results against the exact OLS solutions you obtained in the previous
+homework. (They will not be _exactly_ the same, but they should be 'close'
+in some suitable sense.)
+
+**Use PyTorch, JAX, or similar to compute the gradient of the OLS loss. You
+do not need to do this by hand. You should write the implement GD steps out 
+directly instead of using a built-in optimizer.**
+
+*Note*: This data set is not actually so large that OLS is actually impractical 
+(as you surely saw in the previous assignment). This gives us a nice 
+'gold standard' to compare against. 
+
+### Advanced SGD for Linear Models (5 Points)
+
+Pure GD is rarely used for large-scale machine learning as: 
+
+- Computing the ERM loss and its gradient across _all_ training points can be slow
+- Tuning step sizes is a bit of a chore
+
+Instead, _stochastic_ (mini-batch) gradient descent and its various 'smart step
+size' variants are commonly used. Compare your pure GD implementation from
+the previous section against one or more 'advanced' SGD variants (AdaGrad, AdaM,
+AdamW, *etc*). Make sure to compare both the quality of the final solution and
+the time required to reach that solution and explain your findings.[^time]
+
+For this problem, you may use 'built-in' optimizers and do not need to implement
+the SGD methods directly. Continue to use your direct GD implementation from
+the previous subsection. 
+
+[^time]: You should look at both _iterations_ (number of steps) and _wall clock
+time_ (actual time, in seconds or minutes). 
+
+### Early Stopping of First Order Methods
+
+When fitting first-order methods, it is typically not necessary to run things
+'all the way to the end'. Getting the first several decimal places is usually
+enough: the final decimal places exist 'within the noise' and give
+functionally equivalent predictions. (Put another way, the steps required to
+get the 7th digit of precision are functionally pointless and don't typically
+improve predictions by a measurable amount.) This motivates _early-stopping_:
+the idea that we can stop a first-order method when its predictions stop
+improving, rather than running until the weights fully stabilize. 
+
+To implement early-stopping in practice, it is important to have a hold-out 
+(validation) set. After each (S)GD update, prediction error on the hold-out set
+is computed. When it stops decreasing (or, heaven forbid, starts increasing!), we
+stop the first-order method. 
+
+Adapt your GD and SGD methods to implement this type of early stopping. To do
+so: 
+
+1) Split your data into 'training' and 'validation' components
+2) Modify your update loop to compute the training and validation errors at each
+   step and to track them
+3) Plot the training and validation errors over the course of model fitting.[^p] 
+4) Annotate where you would perform 'early stopping' and compare the 
+   computational cost and prediction performance of the 'early stopped' model 
+   with the 'fully fitted' version.
+   
+[^p]: Something like: ![From <akyokus.com>](http://www.akyokus.com/spring2020/ap/lectures/deitel-ipynbs/ch16/ch16images/tensorboard.png)
+though you should implement your visualization 'by hand' instead of using a tool
+like `TensorBoard`.
+
+## Ridge Regression (9 Points)
+
+Implement ridge regression for both the 'tall' and 'wide' data sets. Use
+cross-validation to select an optimal value of $\lambda$. Compare the 
+performance against OLS (tall data only) and $K$-nearest neighbors. 
+
+What do you observe? Is this consistent with our discussion of ridge regression
+in class? Are your results the same for both data sets or do they differ? 
+
+*You may use `glmnet()` or similar tools for both fitting ridge regression and
+for performing cross-validation for this problem.*
+
+## Sparse Regression and Feature Selection (15 Points)
+
+Let us now apply _feature selection_ methods (*i.e.*, LASSO) to the 
+wide data set. First, apply lasso regression and use cross-validation to get 
+estimates of the prediction error. 
+
+In this problem, you are going to use several strategies to select 'important' 
+features. Implement each of the following methods and compare your findings. 
+(Note that your results may not be consistent across heuristics - life is hard!)
+
+1. Which are the _first_ variables selected by the lasso? 
+2. Which variables are included when you use the "1 standard error" tuning rule?
+   How big are their coefficients? 
+3. Which variables are included when you use the "minimum error" tuning rule?
+   How big are their coefficients? 
+4. Which variables are _reliable_ across a range of choices of $\lambda$? 
+5. Which variables are selected under a _stability_ analysis? That is, after
+   randomly splitting or re-sampling (bootstrapping) the data, which variables
+   does a CV-tuned lasso select? If a variable is consistently selected, it is
+   more likely to be important than one which is only selected sporadically. 
+6. What are the most important variables as indicated by a LOCO study (see the
+   previous problem set)? It is computationally expensive to LOCO every variable,
+   so I'd recommend doing a LOCO analysis on a somewhat smaller universe of 
+   variables, say those that ridge regression assigns the largest coefficients to.
+   
+Based on your findings, which would you identify as the most important features?
+Are these scientifically reasonable?
+
+*As in the previous problem, you may use `glmnet()` or similar tools for both 
+fitting the lasso and for performing cross-validation for this problem, but
+you need to do the stability, LOCO, *etc* analyses directly rather than using
+pre-packaged functionality.*
+
+## Non-Linear Methods (10 Points)
+
+Apply a non-linear regression method to the tall data set, allowing for 
+non-linear relationships in any variable where it may make sense. 
+
+1) Use some sort of data-driven tuning to select which variables should be 
+   'non-linear' and which should be linear. This can be a simple CV-scheme
+   (checking for a statistically significant improvement in prediction by
+   'non-linearizing' a feature) or something more advanced. 
+2) Visualize and interpret any non-linear relationships in your final model. 
+
+You can use a pre-packaged non-linear model like `mgcv::gam()` or something
+more advanced like Sparse Additive Models (SpAM) or trend-fildering if you're
+feeling ambitious. 
 

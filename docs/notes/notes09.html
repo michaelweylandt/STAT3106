@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-10-07">
+<meta name="dcterms.date" content="2026-10-13">
 <title>Notes for Lecture #09: Unit II. Regression: Regularization Methods for Model Selection – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -193,7 +193,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 7, 2026</p>
+      <p class="date">October 13, 2026</p>
     </div>
   </div>
   
@@ -206,461 +206,6 @@ window.Quarto = {
 <p><span class="math display">\[
 $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[31m
-
-processing file: notes.qmd
-[39m
-  |                                                          
-  |                                                    |   0%
-  |                                                          
-  |.................                                   |  33%                  
-  |                                                          
-  |...................................                 |  67% [unnamed-chunk-1]
-  |                                                          
-  |....................................................| 100%                  [31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m[31mRows: 40 Columns: 6
-[39m[31m── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (4): Day of Week, Item, Details, Suggested Reading
-dbl  (1): Number
-date (1): Date
-[39m[31m
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-[39m
-                                                                                                            
-[31moutput file: notes.knit.md
-
-[39m[1mpandoc [22m
-  to: html
-  output-file: notes.html
-  standalone: true
-  title-prefix: STAT 3106
-  section-divs: true
-  html-math-method: mathjax
-  wrap: none
-  default-image-extension: png
-  toc: true
-  email-obfuscation: javascript
-  
-[1mmetadata[22m
-  document-css: false
-  link-citations: true
-  date-format: long
-  lang: en
-  editor:
-    mode: source
-  theme: darkly
-  margin-left: 0em
-  code-copy: true
-  toc_depth: 5
-  toc-location: left
-  page-layout: full
-  title: 'STAT 3106 - Handouts and Additional Notes'
-  aliases:
-    - ./notes/index.html
-  date: '`r Sys.Date()`'
-  
-Output created: docs/notes.html</code></pre>
-</div>
 </div>
 <p>Outline:</p>
 <ul>
@@ -707,39 +252,22 @@ Output created: docs/notes.html</code></pre>
 <p>This is <em>incredibly</em> important in fields where getting additional measurements (<span class="math inline">\(p\)</span>) is cost effective, but getting additional samples (<span class="math inline">\(n\)</span>) is expensive. Think medical trials, consumer tracking, weather and climate monitoring (after you’ve bought and installed your weather monitor, letting it run for a longer period is cheap; buying a new one and paying someone to install it is expensive) and many more.</p>
 <p>So what does a ridge regression solution actually <em>look like</em> in that situation?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generated with help of Gemini</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generated with help of Gemini</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org">stringr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://juliasilge.github.io/tidytext/">tidytext</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Matrix</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'Matrix'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:tidyr':
-
-    expand, pack, unpack</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loaded glmnet 5.1</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 1. Ingest static TidyTuesday snapshot</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 1. Ingest static TidyTuesday snapshot</span></span>
 <span><span class="va">raw_wine</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span></span>
 <span>    <span class="st">"https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2019/2019-05-28/winemag-data-130k-v2.csv"</span>,</span>
 <span>    show_col_types <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>New names:
-• `` -&gt; `...1`</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># 2. Subsample to create a controlled p &gt; n setting (n = 100)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">9750</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Subsample to create a controlled p &gt; n setting (n = 100)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">3106</span><span class="op">)</span></span>
 <span><span class="va">wine_sample</span> <span class="op">&lt;-</span> <span class="va">raw_wine</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">variety</span> <span class="op">==</span> <span class="st">"Pinot Noir"</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">description</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -777,727 +305,662 @@ Attaching package: 'Matrix'</code></pre>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 100 338</code></pre>
+<pre><code>[1] 100 313</code></pre>
 </div>
 </div>
 <p>Here we have a data set with <span class="math inline">\(n = 100\)</span> rows corresponding to reviews of different bottles of wine and <span class="math inline">\(p &gt; n\)</span> words used within those reviews. Our outcome <span class="math inline">\(Y\)</span> is the rating (on a 0-100 scale) given to each bottle.</p>
 <p>The <code>glmnet</code> package will let us fit ridge regression easily:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Matrix</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'Matrix'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:tidyr':
-
-    expand, pack, unpack</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loaded glmnet 5.1</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># alpha = 0 &lt;=&gt; ridge. Hold on for alpha = 1!</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://glmnet.stanford.edu">glmnet</a></span><span class="op">)</span></span>
+<span><span class="co"># alpha = 0 &lt;=&gt; ridge. Hold on for alpha = 1!</span></span>
 <span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda<span class="op">=</span><span class="fl">1</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>339 x 1 sparse Matrix of class "dgCMatrix"
-                        s0
-(Intercept)   87.747366670
-acidity        0.443106474
-ava            0.634053362
-black          0.256059430
-blue           0.528156086
-compact        0.487291259
-decades        0.778073727
-firm           0.236546198
-fruits         0.025659220
-gun            0.467653081
-life           0.655457152
-light          0.118565002
-metal          0.453697736
-peppery        0.061635733
-streak         0.317941132
-tannins        0.046927874
-tight         -0.107057020
-wine           0.056133114
-wines          0.642681272
-block          0.839620283
-cherry         0.102030498
-chocolate      0.617043362
-clone          0.646482504
-core           0.099378139
-cranberry      0.298091248
-dark           0.376794496
-estate         0.351269270
-finish        -0.134868085
-found          0.514550066
-glass          0.437721304
-grown         -0.134199966
-lush           0.686638660
-marks          0.609022316
-orange         0.819927892
-pinot         -0.016187950
-spicy          0.525960199
-strawberry     0.010673023
-vintage        0.566675842
-blast          0.293422281
-cellar         0.685719006
-cherries       0.076804190
-complexities   0.195396478
-earthy        -0.199658820
-enormous       0.925962084
-fruit          0.194106420
-hit            0.400446726
-makes          0.376729832
-mouth          0.221741772
-raspberries    0.280006711
-acre           0.218179072
-additional     0.353717655
-aromas        -0.326619059
-bright         0.466721002
-grenadine     -0.942852309
-hints         -0.194280172
-lavender       0.132902176
-pepper         0.415293707
-violets        0.120895211
-white          0.375727891
-complex        0.602396830
-cru            0.538543704
-dense          0.387672467
-drink          0.377135904
-future         0.932576469
-generous       0.512787855
-grand          0.538990297
-powerful       0.819995747
-rich           0.355690269
-saint          0.067484392
-vineyards      0.163378894
-balance        0.425459658
-body           0.604175743
-earth         -0.047313829
-flavors       -0.086456769
-forest         0.256273196
-graceful       0.096797772
-intense        0.181979202
-pine           0.279061204
-strawberries   0.141769937
-suggest        0.198159352
-texture       -0.038866199
-adds           0.505124342
-aroma          0.741768432
-bodied        -0.384201064
-medium        -0.330664457
-mild          -0.595188265
-nice           1.081804511
-note           0.259296678
-oak            0.278450050
-plum           0.113113994
-red           -0.028149375
-ripe           0.413785082
-smooth        -0.480577727
-ample          0.336410673
-bottle        -0.170110414
-effort         0.279803493
-focused        0.299550605
-lightly        0.278724855
-spiced         0.346679747
-tart           0.229962003
-balanced       0.081156080
-berry          0.448358377
-concentrated   0.384743453
-dry           -0.245624648
-fresh         -0.232639376
-luscious       0.315134408
-palate        -0.085683018
-price         -0.235484834
-round          0.527972928
-watermelon    -0.243512137
-cinnamon       0.271719001
-cola           0.096538174
-delicious      0.496790212
-expression     0.069820202
-floor          0.941971764
-intriguing     0.468234744
-juicy          0.501740920
-offers         0.046214833
-structured    -0.035974936
-succulent      0.283047462
-tea           -0.082106799
-velvety        0.620898682
-waves         -0.058069858
-crisp         -0.289626061
-earthiness    -0.925080822
-finishing      0.802929853
-mushroom       0.338503726
-savory         0.420155901
-alcohol       -0.341678810
-develop        0.806004642
-fades          0.305165120
-fine           0.129551620
-hard           0.047067939
-low            0.338672221
-raspberry     -0.125786930
-sweet         -0.129885892
-tannic         0.355398806
-character     -0.278500365
-developing     0.287147841
-fruity        -0.125674208
-structure      0.385357147
-elements       0.094994025
-ground         0.488168696
-length         0.246561647
-natural        0.217523330
-providing      0.619421143
-varietal      -0.198327852
-bottling       0.005423317
-county        -0.407273702
-exotic        -0.491436959
-lots           0.128353422
-notes         -0.267345366
-petals         0.511763955
-pomegranate    0.231435985
-rose           0.533473849
-sandalwood     0.408758275
-spice          0.186387909
-tangy          0.402838150
-vineyard       0.209490971
-acid           0.575891425
-aging          0.730360903
-bit            0.177369366
-feels          0.528550257
-heavy         -0.201787345
-jammy          0.986670550
-mocha         -0.108609774
-tannin         0.706501257
-baking         0.493140930
-french        -0.304465553
-oaky          -0.289948127
-silky          0.131777571
-spices         0.262367810
-vanilla        0.155602214
-noir          -0.442321377
-strong         0.769172869
-mid           -0.567059738
-past          -0.503595545
-quickly       -0.221594535
-solid         -0.499282070
-char          -0.450760894
-lighter       -0.259311969
-wood          -0.083477491
-grip           0.028282882
-lingering      0.309573962
-nose           0.063992425
-violet         0.315211118
-appellation    0.653600884
-barely         0.632006882
-berries        0.240741103
-blend          0.256717949
-blossom        0.382380444
-currant       -0.569757717
-producer       0.215117756
-region        -0.287892310
-wild           0.198727435
-drinking      -0.015237146
-grows         -0.203798615
-ready         -0.093715601
-warms         -0.139860667
-citrus        -0.799764398
-compelling     1.069359423
-elegant        0.129253170
-layers        -0.712513874
-vines          0.699336827
-features       0.609163211
-mouthfeel      0.468569540
-mushrooms      0.270447954
-widely        -0.069335671
-blackberry     0.192995066
-crushed       -0.238655178
-dried          0.250702166
-paste          0.102961515
-refreshing    -0.196335660
-slightly       0.024207930
-thyme         -0.217699625
-polished       0.089151134
-supple         0.067847129
-pleasant      -2.041732434
-smoke          0.800626975
-sour          -0.634395113
-thins          0.343959295
-whiff         -0.341739069
-color          0.194296566
-rim            0.110140647
-shadings       0.367320081
-soft          -0.236173852
-subtle        -0.442425093
-taste          1.039684082
-delicate       0.068292998
-dusty          0.676605588
-fun            1.455630198
-evident        0.668789890
-floral        -0.767722489
-petal          0.209315737
-scents         0.168148567
-sense          0.568274723
-suggests      -0.354032309
-weight         0.409596731
-wrapped        0.785584848
-acids         -0.852559019
-california's   1.606321445
-pinots         0.737991281
-gentle         0.064170631
-toast         -0.022634664
-tobacco       -0.205682738
-true          -0.263972295
-carries       -0.258988301
-mixes          0.398432382
-moderate      -0.219409415
-inviting      -0.096430420
-layered        0.427695596
-accents        0.174287339
-anise          0.178457691
-leaf           0.558573421
-star           0.402663887
-asian          0.282509366
-designate     -0.513287281
-plenty        -0.574274447
-provide       -0.601045233
-textured       0.094240860
-flat          -1.447784812
-flavor        -0.619597835
-mint          -0.539758340
-mix           -1.101464869
-offering      -0.861053103
-muted         -0.458412298
-tasting       -0.833975146
-hint           0.257950461
-winemaker     -0.224460984
-bottlings      0.060534555
-smoky          0.491379764
-winery         0.471843548
-brooding      -0.219556399
-grippy        -0.725983914
-robust        -0.342171940
-cracker       -0.317192460
-herb           0.250187728
-pretty         0.255357796
-baked         -0.034833015
-bittersweet   -0.229954455
-herbal        -0.495787607
-site          -0.235902974
-gracefully     0.602367835
-including      0.387729504
-mountain       0.122610994
-persistent     0.140645191
-touch          0.668874295
-grapes         0.184662945
-real          -0.400624173
-reward         0.425212371
-grilled        0.024110198
-coffee        -1.119747725
-profile        0.297058720
-warm          -0.472720129
-pommard       -0.270748033
-typical        0.070111499
-underneath     0.166483077
-suave          0.079306845
-filling       -0.167144397
-pie           -0.269915310
-raw           -1.014097386
-accented      -0.328739344
-hot            0.090524181
-lead           0.342323343
-short         -0.870043355
-clean         -0.182415966
-licorice       0.567991652
-time          -0.067851360
-backdrop       0.924749628
-clove         -0.219663582
-rhubarb        0.435053131
-set            0.501472617
-purple         0.480853962
-chunky        -1.035413751
-feel          -0.490352779
-roasted       -0.224486957
-due           -0.221517626
-lean          -0.209508506
-veteran        0.392175509
-mellow        -0.297402242
-apple         -0.262876052
-skins         -0.269514055
-equal          0.993146140
-road           0.691419489
-tomato        -0.241438300
-style          0.032750358
-concentration  0.566902404
-côte          -0.001086929
-de            -0.001031986
-shape         -0.051716951
-bite           0.499011448
-ocean          0.448054347
-wound          0.446837287
-describe       1.442712685
-flashy         0.961940397
-zest           0.003247119
-nuits         -0.752140322
-reveal         0.095418464
-richness      -0.484133564</code></pre>
+<pre><code>314 x 1 sparse Matrix of class "dgCMatrix"
+                          s0
+(Intercept)    86.9994914329
+ample           0.2688258835
+bold            0.7622131660
+cherry         -0.0784196238
+finish          0.1357575476
+fruit           0.2108639764
+mouthwatering   0.7163730703
+palate          0.2380382697
+pinot          -0.0382187984
+plum           -0.0629886138
+silky           0.1233417409
+spicy           0.7201952180
+supple          0.3622081947
+weight          0.3905027546
+accessible      0.0901977298
+cherries        0.0310821860
+immediately     0.1431728536
+likeable       -0.1870269583
+marked          0.1580689190
+oak             0.0980205828
+pleasant       -0.3296208985
+raspberries    -0.0409163982
+rich            0.1844110493
+smoky           0.3997452171
+sweet           0.1128430684
+cola            0.0286853773
+drinkable      -0.9382282478
+easy            0.0317194056
+flavors        -0.2999796217
+light           0.0971022463
+noir           -0.4172561783
+savory          0.4731671257
+spice           0.0847963070
+texture         0.3979474813
+acidity         0.1073953314
+aftertaste     -0.0876521479
+age             0.6329804381
+character       0.6072756975
+crisp           0.4192701082
+drink           0.3639891298
+juicy           0.0401289875
+ripe            0.0524334327
+style           0.0296317365
+tannins         0.1338739832
+vineyard        0.4377772880
+vintage         0.0630673020
+wine            0.1417412537
+aroma          -0.4933693872
+impression     -0.7147956318
+overripe       -0.3791379240
+pinots         -0.5520880214
+ready          -0.4496313560
+taste           0.2753843776
+bodied          0.2405943336
+brawny          0.5707878806
+color           0.0235090228
+dark            0.5959707630
+elegant         0.4710263954
+fans            0.0662300185
+mouth           0.0543617632
+nose           -0.2351763339
+plenty         -0.9506957659
+rhubarb        -0.1283667374
+smells         -0.2646826831
+tart           -0.1173968706
+tastes          0.1948546281
+apples          0.4537865652
+aromas          0.1761751171
+balance         0.5112919735
+beautifully     0.7265322195
+classic         0.4959459175
+cream           0.8934760707
+fresh           0.3656832228
+lingering       0.7497279858
+spices          0.5281592607
+toast           0.2886899032
+toasted         0.0191723390
+vanilla        -0.2350236436
+bitter         -0.1682039080
+black           0.3128603013
+chocolate      -0.2495646266
+concentrated    1.0178423716
+deep            0.7322049996
+dense           0.1257636992
+firm            0.4433921809
+fruits          0.4468698508
+licorice        0.8337203306
+power           0.8091578687
+richness        0.7428748610
+solid           0.9150199107
+structured      0.6686390610
+clean           0.9612720895
+complex         0.7623159829
+dry             0.2358811464
+mellow         -0.0799165061
+pretty         -0.0219113665
+real            0.4354018938
+acids           0.1079798731
+berry          -0.0621691359
+brambly         0.6303157066
+citrusy        -0.3274295376
+herbs          -0.1253060480
+highlights      0.0271140103
+kick            0.2339452102
+lightly        -0.1635815834
+pepper          0.2823558732
+tangy           0.5375003533
+based          -0.9566943161
+candy           0.9315225694
+delicate        0.5720679078
+lovely          0.9759572868
+marks           0.1602465976
+mushroom        0.8442109958
+sour           -0.2097985767
+cardamom        0.6217603416
+cluster         0.7160946939
+fermentation    0.8525498026
+flavorful       0.3920300039
+moderately     -0.1990228020
+nutmeg          0.2688184880
+pomegranate     0.3070833746
+red            -0.3218211955
+smelling       -0.0078832823
+tannic         -0.0008178751
+clove          -0.4132229769
+dried          -0.1807972119
+feels           0.2435695866
+funky          -1.6156583546
+woody          -0.9004369307
+accents        -0.2568903712
+beautiful       1.0022235504
+broad           0.3128176860
+fruity         -0.3960387248
+layered         0.9006173933
+plump           0.4950963684
+soft           -0.3598241801
+unique          0.2039362827
+wine's          0.1358740933
+edge           -0.3788117876
+vegetal        -1.8559601905
+blackberry     -0.0886301642
+body           -0.0553793427
+complexity      0.3200760295
+flavor         -0.3632188250
+medium          0.4155807920
+package        -0.3809384225
+structure       0.6024316923
+velvety         0.7433091667
+alcohol         0.4443364972
+bottle          0.4003963881
+edges          -0.6473502875
+heavy           1.5390303529
+hold           -0.5347141921
+hours          -0.2115366008
+pie            -0.2568462187
+raspberry       0.2282541040
+round           0.0178594676
+sheer           0.6920037436
+bright         -0.1802846688
+citrus          0.1097983963
+completely      0.7401696144
+designate       0.4245415356
+elevation       0.0280494219
+experience     -0.4704425617
+play            0.2545074374
+remain          0.3442394103
+site            0.2841723024
+succulent       0.2576880576
+earth          -0.1662736690
+herb           -0.3858308870
+offers         -0.0937677534
+profile        -0.2958774264
+tannin         -0.3712148671
+develop         0.3394163094
+earthy         -0.3077307489
+lean           -0.8771158591
+grenadine      -0.4724938270
+initially      -0.3102888049
+mix             0.2114552662
+cranberry      -0.0134196094
+expression     -0.6451844980
+tomato         -0.6875668445
+de              0.9113296103
+vines           1.2603213296
+generous        0.4595044804
+smooth          0.2111973198
+strongly        1.4877863905
+atop           -0.0693179029
+bottling       -0.6992682522
+cold            0.3072552333
+grapes          0.3338126127
+occidental      0.5329851333
+ocean           0.5367381653
+amount          0.3312431545
+slight         -0.0751396695
+finishes       -0.4078844577
+hint           -0.3713730454
+offset         -0.1656126770
+preserves      -0.2599906131
+strawberry      0.0192236858
+elements       -0.0110531074
+green          -0.8277736181
+persists       -0.9335011639
+planted         0.2675747535
+valley         -0.2074098914
+fruitiness      0.0439356514
+bad             0.1308687283
+caramel         0.3717999628
+crisply        -0.1705129065
+designated     -0.1810975725
+estate          0.5787470461
+orange          0.7519404940
+peel            0.9955433573
+sourced        -0.0981897075
+touch           0.6721554848
+barrel         -0.3260835973
+petals         -0.0568255537
+rose            0.4404370614
+low            -2.2351362327
+core            0.6726426908
+fruitier       -0.7773984139
+accented        0.5995454607
+brooding        1.3465834883
+integrated      0.4357942996
+meticulously    0.6527042949
+powerful        0.4306740585
+tea             0.9830293286
+delicious      -0.5171478671
+packed          0.2765171645
+note           -0.0417573826
+softly          0.0273427077
+thin           -0.7204707366
+candied        -0.3287985922
+leaf           -0.2007939657
+shadings        0.4980282028
+barely         -1.2938603565
+perfectly       0.2891513193
+proportioned    0.6417556142
+seductive       0.4065526311
+elegance        0.4686263354
+fine            0.7533690177
+blend          -0.2878801235
+herbal         -0.4280515967
+midpalate       0.1926835200
+notes          -0.1204036029
+baking          0.2145437339
+bit             0.3187072610
+element         0.5809891820
+proportion      0.5332016705
+delivers       -0.0702153910
+roasted        -0.2883435063
+fade            0.1042310057
+quickly        -0.3994771118
+wild           -0.3626468092
+added           0.2151052848
+characteristic  0.4702010599
+cool            0.0947187397
+persimmon       0.1179743217
+ava             0.3964784126
+density        -0.2997871670
+minerality      0.3553764612
+aging           0.5232623873
+grape           0.1525317185
+offering        0.5198394596
+iron           -0.0785687065
+rocks          -0.6503292656
+wet            -0.4200670037
+cinnamon        0.2316096311
+combine         0.1135200180
+berries         0.3571575447
+tight           0.5942516759
+refreshing      0.6274561378
+driven          0.0192601162
+food           -0.0907132684
+waves           0.5944409089
+currants        0.3664848857
+mocha          -0.0840028559
+brings         -0.7378128971
+dusty           0.1869582948
+pork           -0.3464079597
+strawberries   -0.0551531963
+concentration   0.3980375465
+mint           -0.3485267474
+sanguine       -0.1308485175
+damp           -0.2264541229
+gentle         -0.2297070404
+hints          -0.2163083335
+moss           -0.2289012165
+intense        -0.2963327136
+intensely       0.3998685774
+buttered       -0.0301250932
+climate         0.2054747591
+pure            0.6305012984
+sandalwood     -0.0292210098
+reliable       -0.5191498337
+forest         -1.1413765086
+hails           0.0416476236
+bois           -0.3142252838
+slightly       -0.5991550028
+sous           -0.3158606721
+smoked         -0.3998001298
+drinking       -0.7273422512
+pomegranates    0.5597447809
+spiced          0.5683787512
+rust           -0.4629132980
+leather        -0.5096541124
+currant        -0.7403098374
+makes          -0.6116166020
+anise           1.1625230341
+perfumed        0.3718773485
+grown           0.6113082912
+time            0.3252340071
+plums           0.7149767962
+appealing       0.1994796837</code></pre>
 </div>
 </div>
 <p>Ok - so we get a lot of <em>nearly</em> zero coefficients. What happens if we let <span class="math inline">\(\lambda\)</span> get bigger?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda<span class="op">=</span><span class="fl">100</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda<span class="op">=</span><span class="fl">100</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>339 x 1 sparse Matrix of class "dgCMatrix"
-                         s0
-(Intercept)   89.5047200335
-acidity        0.0498003987
-ava            0.0747844586
-black          0.0472400196
-blue           0.0731901982
-compact        0.0863803294
-decades        0.1390982372
-firm           0.0369531648
-fruits         0.0155579749
-gun            0.0863798920
-life           0.1262487626
-light         -0.0007019568
-metal          0.0863792839
-peppery        0.0237872303
-streak         0.0138578364
-tannins        0.0203034511
-tight          0.0035456073
-wine           0.0083630398
-wines          0.1013000324
-block          0.0935581637
-cherry         0.0072570170
-chocolate      0.0758000691
-clone          0.0735368979
-core           0.0125914621
-cranberry      0.0347863568
-dark           0.0477386937
-estate         0.0424978576
-finish        -0.0258294752
-found          0.0566737592
-glass          0.0201100334
-grown          0.0016437963
-lush           0.0935541116
-marks          0.0898298271
-orange         0.0490344022
-pinot         -0.0025523804
-spicy          0.0568395237
-strawberry     0.0171749764
-vintage        0.0568533749
-blast         -0.0376102486
-cellar         0.0788601888
-cherries       0.0183594950
-complexities   0.0098990401
-earthy        -0.0372111123
-enormous       0.0804747284
-fruit          0.0299745794
-hit            0.0186397733
-makes         -0.0010592025
-mouth          0.0151335251
-raspberries    0.0239957315
-acre           0.0608013095
-additional     0.0444578026
-aromas        -0.0464716323
-bright         0.0164380135
-grenadine     -0.0781611541
-hints         -0.0081751882
-lavender       0.0333578907
-pepper         0.0367995482
-violets       -0.0037400826
-white          0.0123233675
-complex        0.0534994686
-cru            0.1140556217
-dense          0.0635093895
-drink          0.0517167603
-future         0.1146655575
-generous       0.0535688933
-grand          0.1127224363
-powerful       0.0883211849
-rich           0.0434198504
-saint          0.0579378040
-vineyards      0.0255589225
-balance        0.0616027041
-body           0.0916718682
-earth          0.0124916644
-flavors       -0.0119704128
-forest         0.0364585813
-graceful       0.0222350469
-intense        0.0153926915
-pine           0.0139005811
-strawberries   0.0161742651
-suggest        0.0495472886
-texture        0.0111433996
-adds           0.0475596104
-aroma          0.0982452765
-bodied        -0.0380701781
-medium        -0.0282282915
-mild          -0.0618239959
-nice           0.0682250167
-note           0.0149939003
-oak            0.0245156254
-plum           0.0204225951
-red            0.0059028209
-ripe           0.0495108585
-smooth        -0.0486281033
-ample          0.0297472277
-bottle        -0.0289202596
-effort         0.0205329267
-focused        0.0474696365
-lightly        0.0226029626
-spiced         0.0552893082
-tart           0.0204313337
-balanced      -0.0077095219
-berry          0.0393201828
-concentrated   0.0367945889
-dry           -0.0333303739
-fresh         -0.0357860761
-luscious       0.0483952471
-palate        -0.0142354396
-price         -0.0185046185
-round          0.0402717227
-watermelon    -0.0576124520
-cinnamon       0.0412365704
-cola           0.0135159056
-delicious      0.0480828927
-expression     0.0579109231
-floor          0.0773169346
-intriguing     0.0753840336
-juicy          0.0709675013
-offers         0.0115462135
-structured     0.0404669742
-succulent      0.0613292202
-tea           -0.0073936310
-velvety        0.0780742538
-waves          0.0575595838
-crisp         -0.0433575832
-earthiness    -0.0630997925
-finishing     -0.0001889437
-mushroom      -0.0079527304
-savory        -0.0061197237
-alcohol       -0.0214141093
-develop        0.0794261956
-fades          0.0474913465
-fine           0.0456402180
-hard           0.0004005000
-low            0.0748092897
-raspberry     -0.0192872271
-sweet          0.0082025225
-tannic         0.0553977088
-character     -0.0313767954
-developing     0.0074177827
-fruity        -0.0423881335
-structure      0.0368551734
-elements       0.0066374969
-ground         0.0359970472
-length        -0.0043111397
-natural        0.0480043292
-providing      0.0376765962
-varietal      -0.0468885901
-bottling       0.0362853356
-county        -0.0090554870
-exotic        -0.0227995939
-lots          -0.0100439870
-notes         -0.0152262649
-petals         0.0536610086
-pomegranate    0.0395018359
-rose           0.0427948406
-sandalwood     0.0534352061
-spice          0.0299628852
-tangy          0.0297623155
-vineyard       0.0164741774
-acid           0.0501007864
-aging          0.0995588139
-bit           -0.0012537482
-feels          0.0199536262
-heavy         -0.0032303689
-jammy          0.0812170708
-mocha         -0.0242047960
-tannin         0.0497027985
-baking         0.0403616973
-french        -0.0216304974
-oaky          -0.0868555898
-silky         -0.0041512830
-spices         0.0155919789
-vanilla       -0.0058522260
-noir          -0.0330941076
-strong         0.0768107463
-mid           -0.0511739025
-past          -0.0489706690
-quickly       -0.0884913321
-solid         -0.0489706239
-char          -0.0373065178
-lighter       -0.0193761572
-wood          -0.0242733588
-grip          -0.0062474846
-lingering      0.0378793111
-nose           0.0186067013
-violet         0.0293611986
-appellation    0.0650919837
-barely         0.0751310541
-berries        0.0187936895
-blend          0.0480316527
-blossom        0.0452418412
-currant       -0.0163797193
-producer       0.0436203736
-region        -0.0299545697
-wild           0.0474114953
-drinking      -0.0018531249
-grows         -0.0468554784
-ready         -0.0558331542
-warms         -0.0085010613
-citrus        -0.0780726590
-compelling     0.0294140809
-elegant       -0.0046785127
-layers        -0.0059596885
-vines          0.0813608655
-features       0.0483089077
-mouthfeel      0.0297394353
-mushrooms      0.0515330762
-widely         0.0076762818
-blackberry     0.0330211784
-crushed       -0.0345523636
-dried          0.0394689982
-paste          0.0177426142
-refreshing    -0.0346004043
-slightly      -0.0304748038
-thyme          0.0173781934
-polished      -0.0015975790
-supple        -0.0063049422
-pleasant      -0.1374798425
-smoke          0.0490827921
-sour          -0.0736763912
-thins         -0.0302332750
-whiff         -0.0499141092
-color         -0.0236573110
-rim           -0.0036538547
-shadings      -0.0254470597
-soft          -0.0002429033
-subtle        -0.0483015887
-taste          0.0824392043
-delicate      -0.0112079605
-dusty          0.0135495861
-fun            0.0967116144
-evident        0.0743222995
-floral        -0.0595608483
-petal          0.0469398039
-scents         0.0084451961
-sense          0.0650861395
-suggests      -0.0350784667
-weight         0.0375296505
-wrapped        0.0776968997
-acids         -0.0381411765
-california's   0.1100858768
-pinots         0.0514323227
-gentle         0.0248595036
-toast         -0.0169640056
-tobacco       -0.0006887475
-true          -0.0635132430
-carries       -0.0462270605
-mixes          0.0084116149
-moderate      -0.0343654712
-inviting      -0.0427998237
-layered        0.0635799925
-accents        0.0504666043
-anise          0.0828179723
-leaf           0.0561079321
-star           0.0866042078
-asian          0.0441417502
-designate     -0.0158371000
-plenty        -0.0811381736
-provide       -0.0626976851
-textured      -0.0180761747
-flat          -0.1841554475
-flavor        -0.0827334106
-mint          -0.1028532847
-mix           -0.0997260187
-offering      -0.0933875207
-muted         -0.0593851915
-tasting       -0.1277384996
-hint          -0.0012948056
-winemaker      0.0132820652
-bottlings      0.0455324458
-smoky          0.0472381063
-winery         0.0652514330
-brooding      -0.0136044789
-grippy        -0.0269361801
-robust        -0.0600207244
-cracker       -0.0712229174
-herb          -0.0530009605
-pretty        -0.0138931073
-baked         -0.0042577453
-bittersweet   -0.0197781913
-herbal        -0.0741795645
-site          -0.0197781599
-gracefully     0.0497254446
-including      0.0345083645
-mountain       0.0185648120
-persistent     0.0600090169
-touch          0.0718551489
-grapes         0.0175856369
-real          -0.0830739687
-reward         0.0548883890
-grilled        0.0085707506
-coffee        -0.1424210067
-profile       -0.0391273691
-warm          -0.0713471186
-pommard       -0.0353519179
-typical        0.0156097061
-underneath     0.0074547119
-suave          0.0239365822
-filling       -0.0448820315
-pie           -0.0458389343
-raw           -0.1310576537
-accented      -0.0175643166
-hot           -0.0270287192
-lead           0.0635005590
-short         -0.1298537829
-clean         -0.0336960598
-licorice       0.0515190291
-time           0.0074185754
-backdrop       0.0796781169
-clove         -0.0332106181
-rhubarb        0.0231330161
-set            0.0211961823
-purple         0.0876695872
-chunky        -0.1408374870
-feel          -0.0106950627
-roasted       -0.0229409217
-due           -0.0098709669
-lean          -0.0098710155
-veteran        0.0456938050
-mellow        -0.0212550806
-apple         -0.1203917883
-skins         -0.1203917662
-equal          0.0546238049
-road           0.0504032179
-tomato        -0.0715566173
-style          0.0079494716
-concentration  0.0891002217
-côte           0.0050015632
-de             0.0050015671
-shape         -0.0193941903
-bite           0.0128290821
-ocean          0.0628030940
-wound          0.0331718249
-describe       0.1477538973
-flashy         0.0679649326
-zest          -0.0057660703
-nuits         -0.0527058708
-reveal         0.0198940656
-richness      -0.0616268304</code></pre>
+<pre><code>314 x 1 sparse Matrix of class "dgCMatrix"
+                          s0
+(Intercept)     8.861669e+01
+ample           5.531184e-03
+bold            9.172154e-02
+cherry          1.778672e-03
+finish         -1.356604e-03
+fruit           8.590443e-03
+mouthwatering   5.897754e-02
+palate          2.392506e-04
+pinot           4.410128e-03
+plum           -1.839022e-02
+silky          -2.970742e-03
+spicy           5.127560e-02
+supple          5.561780e-02
+weight          3.737429e-02
+accessible     -1.916668e-02
+cherries       -1.214486e-02
+immediately    -3.134085e-02
+likeable       -4.900801e-02
+marked         -4.467764e-02
+oak             1.012367e-02
+pleasant       -7.547185e-02
+raspberries    -7.452774e-03
+rich            1.950558e-02
+smoky           2.478912e-02
+sweet           1.637916e-02
+cola           -1.523081e-02
+drinkable      -9.739186e-02
+easy           -1.932932e-02
+flavors        -3.679427e-02
+light          -3.248575e-03
+noir           -7.706595e-03
+savory          4.578159e-02
+spice           1.855675e-02
+texture         6.368970e-02
+acidity         3.362439e-02
+aftertaste     -9.032039e-03
+age             6.354000e-02
+character       4.948442e-02
+crisp           9.409245e-03
+drink           2.875219e-02
+juicy           1.595570e-02
+ripe            2.549771e-02
+style           8.571564e-03
+tannins         4.025775e-02
+vineyard        5.644069e-02
+vintage        -1.682408e-02
+wine            2.678952e-02
+aroma          -7.011936e-02
+impression     -8.375676e-02
+overripe       -4.205338e-02
+pinots         -4.448382e-02
+ready          -8.264325e-02
+taste           8.015991e-03
+bodied          9.370362e-03
+brawny          3.642101e-02
+color          -1.564702e-02
+dark            5.029306e-02
+elegant         4.435935e-02
+fans            5.960901e-03
+mouth          -9.640579e-03
+nose           -4.738795e-02
+plenty         -7.579070e-02
+rhubarb         2.514744e-02
+smells         -2.502410e-04
+tart           -3.316001e-02
+tastes          4.923415e-02
+apples          4.535399e-02
+aromas         -2.480378e-02
+balance         5.408828e-02
+beautifully     8.842478e-02
+classic         9.659540e-02
+cream           1.303133e-01
+fresh           5.189269e-02
+lingering       9.789565e-02
+spices          4.259371e-02
+toast           4.119347e-02
+toasted         2.985560e-02
+vanilla        -9.114687e-03
+bitter          9.976996e-03
+black           7.373034e-02
+chocolate       3.289489e-03
+concentrated    1.146949e-01
+deep            1.550592e-01
+dense           8.643086e-02
+firm            1.130635e-01
+fruits          5.784906e-02
+licorice        1.080285e-01
+power           9.662508e-02
+richness        1.133050e-01
+solid           9.984477e-02
+structured      1.423956e-01
+clean           3.566575e-02
+complex         8.826092e-02
+dry             1.106174e-02
+mellow         -3.983779e-03
+pretty          2.059315e-02
+real            4.969687e-02
+acids           3.867981e-03
+berry          -1.458138e-02
+brambly         7.268652e-02
+citrusy        -6.077482e-02
+herbs          -2.139362e-02
+highlights      1.842949e-02
+kick           -5.091447e-03
+lightly        -3.987467e-03
+pepper          2.573607e-02
+tangy           5.220407e-02
+based          -4.631965e-02
+candy           3.904757e-02
+delicate        5.365934e-02
+lovely          6.777512e-02
+marks           1.958234e-02
+mushroom        5.638404e-02
+sour           -4.531710e-02
+cardamom        5.205083e-02
+cluster         1.399307e-01
+fermentation    1.272226e-01
+flavorful       9.814754e-02
+moderately     -1.427179e-02
+nutmeg          4.975383e-02
+pomegranate     3.193513e-02
+red            -1.808151e-02
+smelling        2.451592e-02
+tannic          1.023692e-02
+clove          -6.304379e-02
+dried          -3.963759e-02
+feels           5.921244e-03
+funky          -1.694168e-01
+woody          -1.210683e-01
+accents         3.099624e-02
+beautiful       9.334589e-02
+broad           3.538439e-02
+fruity         -3.291280e-02
+layered         8.214165e-02
+plump           7.282412e-02
+soft           -9.956624e-03
+unique          6.009962e-02
+wine's          4.537854e-02
+edge            1.001180e-03
+vegetal        -1.431209e-01
+blackberry     -3.799634e-04
+body            7.571163e-03
+complexity      2.299164e-03
+flavor         -1.955656e-02
+medium         -2.414939e-03
+package         2.048087e-03
+structure       6.792280e-02
+velvety         5.452193e-02
+alcohol         5.695190e-02
+bottle          3.466092e-02
+edges          -2.774163e-02
+heavy           6.654598e-02
+hold            2.734682e-02
+hours           6.822714e-02
+pie            -1.119702e-02
+raspberry       1.011028e-02
+round           5.557168e-02
+sheer           6.263004e-02
+bright          1.247227e-02
+citrus          3.625745e-02
+completely      1.144634e-01
+designate       7.409093e-02
+elevation       2.830966e-02
+experience     -2.867598e-02
+play            1.967219e-02
+remain          5.255093e-02
+site            4.576946e-02
+succulent       9.713742e-02
+earth          -6.399830e-02
+herb           -1.082573e-01
+offers          1.826900e-02
+profile        -8.151396e-04
+tannin         -6.251167e-02
+develop         2.427651e-02
+earthy         -1.320269e-02
+lean           -1.346215e-01
+grenadine      -1.456749e-02
+initially       2.610819e-02
+mix             5.836893e-02
+cranberry      -1.268535e-02
+expression     -6.580807e-02
+tomato         -6.568814e-02
+de              6.338131e-02
+vines           1.270257e-01
+generous        3.846004e-02
+smooth          2.433670e-02
+strongly        1.325711e-01
+atop            9.302254e-04
+bottling       -5.447389e-02
+cold            1.933319e-02
+grapes          6.465587e-03
+occidental      7.324232e-02
+ocean           7.324215e-02
+amount          4.241675e-02
+slight         -7.422260e-02
+finishes       -3.797812e-02
+hint           -5.106115e-02
+offset         -7.906305e-03
+preserves      -2.372401e-02
+strawberry     -1.153433e-02
+elements       -3.871114e-03
+green          -1.001802e-01
+persists       -8.287830e-02
+planted         4.893666e-02
+valley         -2.542362e-02
+fruitiness      7.515460e-02
+bad             4.644992e-02
+caramel         1.014421e-01
+crisply         5.264130e-03
+designated      2.640992e-03
+estate          8.878643e-02
+orange          8.431099e-02
+peel            9.016685e-02
+sourced        -5.730367e-03
+touch           3.821198e-02
+barrel         -2.664139e-02
+petals          1.839455e-02
+rose            5.672993e-02
+low            -3.708754e-02
+core            5.613297e-02
+fruitier       -8.049820e-02
+accented        7.526366e-02
+brooding        1.343404e-01
+integrated      9.590149e-02
+meticulously    9.102548e-02
+powerful        5.501808e-02
+tea             1.245843e-01
+delicious      -5.313813e-02
+packed          3.565575e-02
+note           -7.340687e-02
+softly         -4.585759e-02
+thin           -9.686851e-02
+candied        -5.038380e-02
+leaf           -7.812421e-02
+shadings       -3.918152e-03
+barely         -1.374360e-01
+perfectly       9.964617e-02
+proportioned    1.024903e-01
+seductive       6.984799e-02
+elegance        1.052838e-02
+fine            6.570956e-02
+blend          -6.195062e-02
+herbal         -5.057968e-02
+midpalate      -6.414836e-03
+notes          -4.249271e-02
+baking          9.806497e-03
+bit             1.251984e-02
+element         8.972398e-02
+proportion      4.941793e-02
+delivers       -4.664584e-02
+roasted        -2.220212e-02
+fade           -1.905922e-02
+quickly        -7.555683e-02
+wild           -7.557748e-02
+added           4.463020e-03
+characteristic  2.133743e-02
+cool            9.152767e-03
+persimmon       1.849331e-02
+ava             4.749804e-02
+density        -2.492429e-02
+minerality      3.630171e-02
+aging           5.058194e-02
+grape           1.993862e-02
+offering        5.875891e-02
+iron           -6.330180e-02
+rocks          -7.588012e-02
+wet            -7.080375e-02
+cinnamon       -1.968781e-03
+combine         7.961606e-03
+berries         3.239073e-02
+tight           2.306614e-02
+refreshing      1.079234e-02
+driven          1.966230e-02
+food           -3.470375e-02
+waves          -1.468853e-02
+currants        6.529009e-03
+mocha          -6.151369e-02
+brings         -9.439516e-02
+dusty           1.914737e-02
+pork           -2.109213e-02
+strawberries   -3.441221e-02
+concentration   1.001438e-01
+mint           -6.267660e-02
+sanguine       -3.387745e-02
+damp           -1.649628e-02
+gentle          5.079355e-03
+hints          -2.915795e-02
+moss           -1.649606e-02
+intense        -9.611684e-07
+intensely       8.467643e-02
+buttered        1.881673e-02
+climate         4.888845e-02
+pure            7.806239e-02
+sandalwood      1.881669e-02
+reliable       -6.407096e-02
+forest         -7.221601e-02
+hails           2.924026e-02
+bois           -7.174773e-02
+slightly       -8.693340e-02
+sous           -7.174772e-02
+smoked         -4.208723e-02
+drinking       -6.881034e-02
+pomegranates    5.231291e-02
+spiced          5.231294e-02
+rust           -7.847648e-02
+leather        -6.387134e-02
+currant        -6.300501e-02
+makes          -9.283469e-02
+anise           8.175258e-02
+perfumed        5.621187e-03
+grown           1.149886e-01
+time            4.821998e-02
+plums           3.994626e-02
+appealing      -4.334934e-03</code></pre>
 </div>
 </div>
 <p>You can make <span class="math inline">\(\lambda\)</span> even bigger, but you won’t see many exact zeros.</p>
 <p>It turns out to be helpful to look at many <span class="math inline">\(\lambda\)</span> at once and smart algorithms make this not too slow. The <code>glmnet</code> package can do this for us:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ridge_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ridge_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ridge_model</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
@@ -1512,7 +975,7 @@ richness      -0.0616268304</code></pre>
 <p>Instead, we may want a model that <em>explicitly</em> only uses a few features. Sometimes, this may be something we really believe, but more often, it’s a sort of ‘simplification for the sake of interpretation.’</p>
 <p>As an aside, <code><a href="https://glmnet.stanford.edu/reference/glmnet.html">glmnet()</a></code> can also help us perform CV to pick a strong <span class="math inline">\(\lambda\)</span>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ridge_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ridge_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html">cv.glmnet</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, alpha<span class="op">=</span><span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">ridge_cv</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
@@ -1539,7 +1002,7 @@ richness      -0.0616268304</code></pre>
 </ul>
 <p>How do we <em>quantify</em> sparsity? Recall that last time, we used the <span class="math inline">\(\ell_p\)</span> norms to measure bigness. Using a calculus-y limiting sort of argument, we can argue the <span class="math inline">\(\ell_0\)</span> norm can be used to count the number of non-zero elements in a vector.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">0</span>, <span class="fl">4</span>, <span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">0</span>, <span class="fl">4</span>, <span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compute |x|_p^p. </span></span>
 <span><span class="va">lp_norm_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Vectorize.html">Vectorize</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">p</span><span class="op">)</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">^</span><span class="va">p</span><span class="op">)</span><span class="op">}</span>, <span class="st">"p"</span><span class="op">)</span></span>
@@ -1547,11 +1010,11 @@ richness      -0.0616268304</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 15</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">lp_norm_p</span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span><span class="op">)</span> <span class="co"># Matches direct calculation sum((1:5)^2)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">lp_norm_p</span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span><span class="op">)</span> <span class="co"># Matches direct calculation sum((1:5)^2)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 55</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">lp_norm_p</span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.5</span>, <span class="fl">0.1</span>, <span class="fl">0.05</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">lp_norm_p</span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.5</span>, <span class="fl">0.1</span>, <span class="fl">0.05</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 15.000000  8.382332  5.511214  5.247304  5.048186</code></pre>
 </div>
@@ -1568,7 +1031,7 @@ richness      -0.0616268304</code></pre>
 <p>So we cheat. Or, as the mathematicians would say, we ‘relax the problem.’ Instead of solving the optimal, but impossible, problem, we solve a closely related, simpler problem, and hope that it’s good enough.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> Specifically, what if we don’t use <span class="math inline">\(\ell_0\)</span> but instead use some other <span class="math inline">\(\ell_{p \approximately 0}\)</span>. Let’s look at this graphically.</p>
 <p>Here, I show <span class="math inline">\(|x|^p\)</span> for different <span class="math inline">\(p\)</span>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggforce.data-imaginist.com">ggforce</a></span><span class="op">)</span></span>
 <span><span class="va">p_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">x_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">201</span><span class="op">)</span></span>

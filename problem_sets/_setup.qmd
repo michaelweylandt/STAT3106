@@ -1,5 +1,5 @@
 
-```{r}
+```{r setup_dates}
 #| echo: false
 #| message: false
 #| warning: false
@@ -24,7 +24,11 @@ get_ps_due <- function(N=ps){
 ```
 
 - Problem Set Assigned: `r get_ps_assigned(ps)`
-- **Due Date: `r get_ps_due(ps)`**
+- **Due Date: `r get_ps_due(ps)`**[^grace]
+
+[^grace]: All Problem Sets have an automatic 'grace period' over the weekend. 
+Submissions before Monday morning will not be penalized. You do not need to 
+request this grace period. See [the Syllabus](../syllabus.qmd) for more details.
 
 ::: {.callout-important title="Submission Instructions"}
 
@@ -46,15 +50,20 @@ but I recommend [`Quarto`](https://quarto.org/).
 
 Examples: [`R`-focused](./ps_example_r.qmd) and [`python`-focused](./ps_example_py.qmd)
 
+You may work with as many classmates as you wish, but please note the names of
+classmates with whom you collaborated.
+
 :::
 
-```{r}
+```{r copy_templates}
 #| include: false
 fs::file_copy("problem_sets/ps_example_r.qmd", 
-              "docs/problem_sets/ps_example_r.qmd")
+              "docs/problem_sets/ps_example_r.qmd", 
+              overwrite = TRUE)
 
 fs::file_copy("problem_sets/ps_example_py.qmd", 
-              "docs/problem_sets/ps_example_py.qmd")
+              "docs/problem_sets/ps_example_py.qmd", 
+              overwrite = TRUE)
 ```
 
 $$\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}}$$
