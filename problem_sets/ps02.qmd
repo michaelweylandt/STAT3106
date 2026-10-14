@@ -250,7 +250,7 @@ so:
    computational cost and prediction performance of the 'early stopped' model 
    with the 'fully fitted' version.
    
-[^p]: Something like: ![From <akyokus.com>](http://www.akyokus.com/spring2020/ap/lectures/deitel-ipynbs/ch16/ch16images/tensorboard.png)
+[^p]: Something like: ![Copied from <akyokus.com>](../assets/tensorboard_image.png)
 though you should implement your visualization 'by hand' instead of using a tool
 like `TensorBoard`.
 
