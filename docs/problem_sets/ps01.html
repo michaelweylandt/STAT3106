@@ -210,7 +210,9 @@ window.Quarto = {
 
 </header><ul>
 <li>Problem Set Assigned: Monday September 21</li>
-<li><strong>Due Date: Friday October 09 at 5:00PM on Canvas/Courseworks</strong></li>
+<li>
+<strong>Due Date: Friday October 09 at 5:00PM on Canvas/Courseworks</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+</li>
 </ul>
 <div class="callout callout-style-default callout-important callout-titled" title="Submission Instructions">
 <div class="callout-header d-flex align-content-center">
@@ -225,22 +227,27 @@ window.Quarto = {
 <p>Submit your assignment as a PDF on Canvas/Courseworks.</p>
 <p>Please observe the following guidelines when submitting an assignment:</p>
 <ol type="1">
-<li>Use 10-12 point font, double-spaced.</li>
+<li>Use 10-12 point font, 1.25 or 1.5-spaced.</li>
 <li>Each problem should start on a new page. It is allowed, but not required, for subparts to start a new page, <em>e.g.</em>, you do not need a page break before starting 2(b), but you do need a page break before starting 2(a).</li>
 <li>When including code alongside a submission, run it through a code formatting tool and keep lines to no more than 80 characters so they don’t run off the end of the page. Unintelligible code is presumtively incorrect.</li>
 <li>Figures and tables should have proper titles, axis labels, units, <em>etc.</em>
 </li>
 </ol>
 <p>You can use any formatting engine you prefer (<code>jupyter</code>, <code>R Markdown</code>, <em>etc</em>), but I recommend <a href="https://quarto.org/"><code>Quarto</code></a>.</p>
-<p>Examples: <a href="./ps_example_r.qmd"><code>R</code>-focused</a> and <a href="./ps_example_py.qmd"><code>python</code>-focused</a></p>
+<p>Examples:</p>
+<ul>
+<li><p><code>R</code>-focused: <a href="https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/problem_sets/ps_example_r.qmd">Source</a> and <a href="./ps_example_r.pdf">Output</a></p></li>
+<li><p><code>python</code>-focused: <a href="https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/problem_sets/ps_example_py.qmd">Source</a> and <a href="./ps_example_py.pdf">Output</a></p></li>
+</ul>
+<p>You may work with as many classmates as you wish, but please note the names of classmates with whom you collaborated.</p>
 </div>
 </div>
-<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}}\]</span></p>
+<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}}\]</span></p>
 <section id="introduction" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this problem set, you will apply machine learning (ML) methods to the problem of predicting school-wide test scores on NYS standardized mathematics exams, given geographic and socioeconomic information about the student population.</p>
 <p>Along the way, we will review some basic ML terminology, take a closer look at how qualitative features like school district can be transformed for use in quantiative contexts, compare a variety of linear regression methods under different loss functions, benchmark against a basic non-linear model, and estimate the out-of-sample performance of different models for the same data.</p>
 </section><section id="data-files" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="data-files">Data Files</h2>
-<p>For this problem set, you will make use of the NYSED Math Scores data posted <a href="./data/ps01_nysed.csv">here</a>. This data set is extracted from standardized math test scores from (essentially) all public schools in New York State.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> For each school, I have reported the percent of students who achieve passing (‘proficient’) status for that exam, as well as a variety of other pieces of aggregate demographic data about the student body of that school. The full data set looks like this:</p>
+<p>For this problem set, you will make use of the NYSED Math Scores data posted <a href="./data/ps01_nysed.csv">here</a>. This data set is extracted from standardized math test scores from (essentially) all public schools in New York State.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> For each school, I have reported the percent of students who achieve passing (‘proficient’) status for that exam, as well as a variety of other pieces of aggregate demographic data about the student body of that school. The full data set looks like this:</p>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 9721 Columns: 34
@@ -330,7 +337,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 <ul>
 <li>While OLS reduces the (potentially) large training data down to a few coefficients, <span class="math inline">\(K\)</span>-NN has no coefficients</li>
 <li>Making predictions with OLS is easy (just a few multiplications and additions) while making predictions with <span class="math inline">\(K\)</span>-NN can be slow if we have to review the entire training set every time we want to use it</li>
-<li>When fit to non-linear relationships, OLS necessarily loses some information (by forcing things into a single plane) while <span class="math inline">\(K\)</span>-NN can fit any shape with enough data.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>
+<li>When fit to non-linear relationships, OLS necessarily loses some information (by forcing things into a single plane) while <span class="math inline">\(K\)</span>-NN can fit any shape with enough data.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
 </li>
 </ul>
 <div class="callout callout-style-default callout-tip callout-titled" title="Question 2">
@@ -2082,8 +2089,8 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 </section><section id="estimating-out-of-sample-performance-with-cross-validation-20-points" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="estimating-out-of-sample-performance-with-cross-validation-20-points">
 <span class="header-section-number">4</span> Estimating Out of Sample Performance with Cross-Validation (20 points)</h2>
 <p>Recall that our primary focus in this course is on developing models that perform well <em>out-of-sample</em>, <em>i.e.</em>, on new ‘test’ data. Unfortunately, we do not always have an unlimited supply of ‘new’ data we can use for model evaluation and instead have to find a way to use our existing data for both model fitting and model evaluation. Doing this correctly can be a bit tricky: we want to avoid testing the model on data it has already seen so we don’t give it credit for ‘teaching to the test.’</p>
-<p>But the fix is not too hard! We can split our data into two parts and use one for model fitting and the other for model evaluation in lieu of ‘true’ test data. The ‘golden rule’ here is simple: what is used to fit a model <em>cannot</em> be used to evaluate it and <em>vice versa</em>. In general, fitting a model is harder than simply estimating its out-of-sample accuracy, so we don’t use a straight 50/50 split, but it’s hard to give a universal guideline.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> This is known as the <strong>hold-out</strong> method.</p>
-<p>One criticism of the <strong>hold-out</strong> method is that it can be a bit wasteful and a bit random. If we set 40% of our data aside for the holdout set, we are fitting our model on only 60% as much data as we would hope to and this can make our predictions <em>much</em> worse.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> With ‘large enough’ data, this may not be a problem, but ‘large enough’ is always relative to the model being fit and we would rather use a large data set to fit a flexible and powerful model; in other problems, data is scarce and spending 25-40% on model testing can significantly impair our ability to fit models at all.</p>
+<p>But the fix is not too hard! We can split our data into two parts and use one for model fitting and the other for model evaluation in lieu of ‘true’ test data. The ‘golden rule’ here is simple: what is used to fit a model <em>cannot</em> be used to evaluate it and <em>vice versa</em>. In general, fitting a model is harder than simply estimating its out-of-sample accuracy, so we don’t use a straight 50/50 split, but it’s hard to give a universal guideline.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> This is known as the <strong>hold-out</strong> method.</p>
+<p>One criticism of the <strong>hold-out</strong> method is that it can be a bit wasteful and a bit random. If we set 40% of our data aside for the holdout set, we are fitting our model on only 60% as much data as we would hope to and this can make our predictions <em>much</em> worse.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> With ‘large enough’ data, this may not be a problem, but ‘large enough’ is always relative to the model being fit and we would rather use a large data set to fit a flexible and powerful model; in other problems, data is scarce and spending 25-40% on model testing can significantly impair our ability to fit models at all.</p>
 <p>The method of [<em>cross-validation</em>](https://en.wikipedia.org/wiki/Cross-validation_(statistics) (CV) attempts to address some of these limitations. Rather than performing a single split, we first:</p>
 <ul>
 <li>Split the entire data set into <span class="math inline">\(K\)</span> chunks of (roughly) equal size;</li>
@@ -2127,7 +2134,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 <p><em>Important</em>: When fitting CV for all features, make sure to avoid any “data leakage” during the encoding steps. You may need to look into concepts like <em>stratified sampling</em>. If a feature has too many values you can drop it from your analysis, but just be sure to note that you did.</p>
 </section><section id="using-cross-validation-for-model-selection-15-points" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="using-cross-validation-for-model-selection-15-points">
 <span class="header-section-number">5</span> Using Cross-Validation for Model Selection (15 points)</h2>
-<p>Another use of cross-validation is selecting certain ‘hyperparameters’. <em>Hyperparameters</em> in this context refers to decisions that are made before the model encounters data: <em>e.g.</em>, we might pre-select which features to include in a linear model before we actually use our data to estimate the regression coefficients.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> Recalling our ‘north star’ of optimizing predictions, we can try a reasonable range of values for a hyperparameter and pick the one that gives the most accurate cross-validation predictions.</p>
+<p>Another use of cross-validation is selecting certain ‘hyperparameters’. <em>Hyperparameters</em> in this context refers to decisions that are made before the model encounters data: <em>e.g.</em>, we might pre-select which features to include in a linear model before we actually use our data to estimate the regression coefficients.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> Recalling our ‘north star’ of optimizing predictions, we can try a reasonable range of values for a hyperparameter and pick the one that gives the most accurate cross-validation predictions.</p>
 <p>There is, however, a slight risk here as the CV error we get is not an unbiased estimate of the true prediction error. Remember: if we pick the values of the model parameters to minimize our loss, we expect our future loss to be a bit worse; the same logic applies to selecting <em>hyperparameters</em>. To avoid this, we should use a combination of CV + holdout.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Question 5">
 <div class="callout-header d-flex align-content-center">
@@ -2153,7 +2160,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 <p>You may use the fast (approximate) <span class="math inline">\(K\)</span>-nearest neighbors from the previous question.</p>
 </section><section id="estimating-loco-feature-importance-15-points" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="estimating-loco-feature-importance-15-points">
 <span class="header-section-number">6</span> Estimating LOCO Feature Importance (15 points)</h2>
-<p>In certain applications, it may be important to <em>interpret</em> or <em>explain</em> the output of an ML model. Because different models work differently and different users require different types of interpretations, this is a challenging task for which a variety of methods have been proposed.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> In this sub-problem, you will explore a basic strategy sometimes called <strong>LOCO</strong> (Leave-One-Covariate-Out) feature importance.</p>
+<p>In certain applications, it may be important to <em>interpret</em> or <em>explain</em> the output of an ML model. Because different models work differently and different users require different types of interpretations, this is a challenging task for which a variety of methods have been proposed.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> In this sub-problem, you will explore a basic strategy sometimes called <strong>LOCO</strong> (Leave-One-Covariate-Out) feature importance.</p>
 <p>The idea of LOCO is simple: a model is fit with and without a given feature and compare its performance. If the performance of the model falls when a feature is omitted, it is important; if the performance doesn’t significantly change, the feature is probably not too important to the model (or can be ‘replaced’ by other features in the data). Since, as always, we are interested in out-of-sample performance, the LOCO score is typically computed within a cross-validation scheme, rather than simply comparing in-sample error.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Question 6">
 <div class="callout-header d-flex align-content-center">
@@ -2178,12 +2185,13 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 
 </section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 <ol>
-<li id="fn1"><p>I have restricted the data set to only those schools that choose to report the full set of demographic variables in the data set, so there are no missing values to deal with.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>For this reason, we say <span class="math inline">\(K\)</span>-NN is <em>universally consistent</em>. As we will discuss, this is a double-edged sword: it can fit <em>any</em> pattern, but it can also fit <em>any</em> noise.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>In general, you want to use as much data as needed to get a good estimate of model performance, but no more; without having some <em>a priori</em> knowledge of the inherent difficulty (variance) of a problem, this is a bit easier said than done.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Think of estimating the mean of a distribution. With 100 samples, the standard error in our estimation of the mean is <span class="math inline">\(\hat{\sigma}/\sqrt{100}\)</span> from the full data, but only <span class="math inline">\(\hat{\sigma}/\sqrt{60}\)</span> from the ‘fitting’ portion of the data. This could increase our error by a factor of around <span class="math inline">\(1.3 \approx \sqrt{100}/\sqrt{60}\)</span> - that’s the difference between success and failure in many problems!<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>If you think that this line can be a bit fuzzy in practice, you are not wrong. Still, the idea of ‘structural’ vs ‘ERM-driven’ choices is an important one.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>G.I. Allen, L. Gan, and L. Zheng. “Interpretable Machine Learning for Discovery: Statistical Challenges and Opportunities.” <em>Annual Review of Statistics and Its Application</em> <strong>11</strong>, p.97-121 (2024). DOI:<a href="https://doi.org/10.1146/annurev-statistics-040120-030919">10.1146/annurev-statistics-040120-030919</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>All Problem Sets have an automatic ‘grace period’ over the weekend. Submissions before Monday morning will not be penalized. You do not need to request this grace period. See <a href="../syllabus.html">the Syllabus</a> for more details.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>I have restricted the data set to only those schools that choose to report the full set of demographic variables in the data set, so there are no missing values to deal with.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>For this reason, we say <span class="math inline">\(K\)</span>-NN is <em>universally consistent</em>. As we will discuss, this is a double-edged sword: it can fit <em>any</em> pattern, but it can also fit <em>any</em> noise.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>In general, you want to use as much data as needed to get a good estimate of model performance, but no more; without having some <em>a priori</em> knowledge of the inherent difficulty (variance) of a problem, this is a bit easier said than done.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Think of estimating the mean of a distribution. With 100 samples, the standard error in our estimation of the mean is <span class="math inline">\(\hat{\sigma}/\sqrt{100}\)</span> from the full data, but only <span class="math inline">\(\hat{\sigma}/\sqrt{60}\)</span> from the ‘fitting’ portion of the data. This could increase our error by a factor of around <span class="math inline">\(1.3 \approx \sqrt{100}/\sqrt{60}\)</span> - that’s the difference between success and failure in many problems!<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>If you think that this line can be a bit fuzzy in practice, you are not wrong. Still, the idea of ‘structural’ vs ‘ERM-driven’ choices is an important one.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>G.I. Allen, L. Gan, and L. Zheng. “Interpretable Machine Learning for Discovery: Statistical Challenges and Opportunities.” <em>Annual Review of Statistics and Its Application</em> <strong>11</strong>, p.97-121 (2024). DOI:<a href="https://doi.org/10.1146/annurev-statistics-040120-030919">10.1146/annurev-statistics-040120-030919</a><a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

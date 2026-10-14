@@ -1,6 +1,8 @@
 ---
 title: "STAT 3106: Problem Set 00 -- Machines and Things"
 author: "YOUR NAME HERE"
+execute:
+    freeze: true
 format: 
     pdf: 
         documentclass: article

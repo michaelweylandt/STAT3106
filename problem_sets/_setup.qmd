@@ -48,7 +48,11 @@ Please observe the following guidelines when submitting an assignment:
 You can use any formatting engine you prefer (`jupyter`, `R Markdown`, *etc*), 
 but I recommend [`Quarto`](https://quarto.org/). 
 
-Examples: [`R`-focused](./ps_example_r.qmd) and [`python`-focused](./ps_example_py.qmd)
+Examples:
+
+  - `R`-focused: [Source](https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/problem_sets/ps_example_r.qmd) and [Output](./ps_example_r.pdf)
+  
+  - `python`-focused: [Source](https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/problem_sets/ps_example_py.qmd) and [Output](./ps_example_py.pdf)
 
 You may work with as many classmates as you wish, but please note the names of
 classmates with whom you collaborated.
