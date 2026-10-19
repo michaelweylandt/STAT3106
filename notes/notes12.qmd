@@ -8,4 +8,178 @@ notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Clas
 
 Outline: 
 
+- Review of Regression
+  - What is regression?
+  - Loss Functions
+  - Regularization
+    - Why? 
+    - Ridge
+      - Most explicit BV gambit
+      - Helps with collinearity
+      - Prediction focused
+      - _Everywhere_ in ML
+    - Lasso
+      - Sparsity
+      - _Interpretation_ more than conviction
+      - Tractable alternative to best subsets
+      - When does it get 'the right answer'?
+        - Applications to EE
+    - Non-Linear Methods
+      - Why not just high-order polynomials?
+      - Lots of little models
+      - Local polynomials
+      - Splines
+      - Additive Models
+
 --- 
+
+Our goal today is to _review_ everything we have discussed to date about
+regression. After a brief run of the conceptual issues listed above, I'll
+open the floor for questions and then start working through some examples. 
+Let's start with a relatively simple data set: 
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+births <- read_csv("https://michael-weylandt.com/STAT3106/data/births.csv")
+```
+
+```{r}
+#| message: false
+births <- read_csv("data/births.csv")
+```
+
+This is a relatively simple data set, where the variable of interest is
+the number of children born (or at least reported to the SSA) in the US
+every day from the beginning of `r min(births$year)` to the end of
+`r max(births$year)`, for a total of `r NROW(births)` days. To make the
+analysis a bit easier, I have separated year, month, day into variables, 
+as well as setting up different "day of week" and "day of year" variables.
+
+```{r}
+skimr::skim(births)
+```
+
+Before we get to modeling, let's do some visual EDA: 
+
+```{r}
+births |> 
+    mutate(date = make_date(year, month, day)) |> 
+    ggplot(aes(x=date, y=births)) + 
+    geom_line() + 
+    scale_x_date() + 
+    xlab("Date") + 
+    ylab("Number of Reported Births") + 
+    theme_bw()
+```
+
+We immediately see that the time (date) effect isn't _linear_ but there is
+nevertheless an upwards trend that a linear model might capture: 
+
+```{r}
+births |> 
+    mutate(date = make_date(year, month, day)) |> 
+    ggplot(aes(x=date, y=births)) + 
+    geom_line() + 
+    scale_x_date() + 
+    xlab("Date") + 
+    ylab("Number of Reported Births") + 
+    theme_bw() + 
+    stat_smooth(method="lm", 
+                se=FALSE)
+```
+
+Not great, but about as good as we might expect. If we use `ggplot2`'s 
+default `gam` smoother, we definitely see a better fit. 
+
+```{r}
+births |> 
+    mutate(date = make_date(year, month, day)) |> 
+    ggplot(aes(x=date, y=births)) + 
+    geom_line() + 
+    scale_x_date() + 
+    xlab("Date") + 
+    ylab("Number of Reported Births") + 
+    theme_bw() + 
+    stat_smooth(se=FALSE)
+```
+
+We see here the end of the baby boom, a small decrease, and then a smoother
+rise as the US population grew (more people, more parents, more babies). 
+
+The regular 'jagged' patterns to this data suggest we might want to look
+at a day of year effect and a day of week effect: 
+
+```{r}
+births |> 
+    mutate(date = make_date(year, month, day), 
+           wday = wday(date, label=TRUE)) |> 
+    group_by(wday) |> 
+    summarize(births = mean(births)) |>
+    ggplot(aes(x=wday, y=births)) + 
+    geom_col() + 
+    theme_bw() + 
+    xlab("Day of Week") + 
+    ylab("Average Number of Births")
+```
+
+Similarly, 
+
+```{r}
+births |> 
+    mutate(date = make_date(year, month, day), 
+           month_name = month(date, label=TRUE)) |> 
+    group_by(month_name) |> 
+    summarize(births = mean(births)) |>
+    ggplot(aes(x=month_name, y=births)) + 
+    geom_col() + 
+    theme_bw() + 
+    xlab("Month") + 
+    ylab("Average Number of Births")
+```
+
+If we plot by day of year, we see a hint of some holiday effects:
+
+```{r}
+births |> 
+    group_by(day_of_year) |> 
+    summarize(births = mean(births)) |>
+    ggplot(aes(x=day_of_year, y=births)) + 
+    geom_line() + 
+    theme_bw() + 
+    xlab("Day of Year") + 
+    ylab("Average Number of Births")
+```
+
+Though day of year will not be a perfect proxy due to certain moving 
+holidays and leap year effects. 
+
+That's pretty much all the structure we can get from this data set, so let's
+start modeling it. As seen above, we see several _non-linear_ effects, so
+let's break out our non-linear toolkit, _additive models_ from `mgcv`. 
+
+```{r}
+#| message: false
+library(mgcv)
+library(broom)
+gam(births ~ year, data=births)
+```
+
+By default, a GAM is just a linear model, so we get the simple fit we 
+saw before: 
+
+```{r}
+gam(births ~ year, data=births) |> 
+    broom::augment(newdata=births) |> 
+    mutate(date=make_date(year, month, day)) |> 
+    ggplot(aes(x=date)) + 
+    geom_line(aes(y=births), color="black") + 
+    geom_line(aes(y=.fitted), color="red4")
+```
+
+(Test yourself: why is this 'step pattern' an artifact? How might we 
+avoid it?)
+
+More in class
+

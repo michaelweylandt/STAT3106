@@ -301,6 +301,8 @@ we'd really like to use terms more like:
 
 ```{r}
 #| echo: false
+library(splines)
+x <- seq(-3, 3, length.out=201)
 bs(x, df=10) |> 
     as_tibble() |> 
     mutate(x=x) |> 
@@ -692,6 +694,15 @@ for(k in 1:5){
 ```
 
 Definitely some rough edges here - particularly in the areas between our buckets, but we're on a good path. The `locfit` package will help us with the details:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(locfit)
+conflicted::conflicts_prefer(locfit::lp)
+```
+
 
 ```{r}
 library(locfit)
