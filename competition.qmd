@@ -1,5 +1,9 @@
 ---
 title: "{{< var course.short >}} - Course Prediction Competition"
+resources: 
+  - "data/competition_fall_2026/students/fall_2026_training.csv.gz"
+  - "data/competition_fall_2026/students/fall_2026_test_X.csv.gz"
+  - "data/competition_fall_2026/students/fall_2026_additional_improvements.csv.gz"
 ---
 
 ```{r}
@@ -40,8 +44,12 @@ In lieu of a final exam, {{< var course.short >}} has a prediction competition
 worth 40% of your final grade. The 400 total points associated with this 
 competition will be awarded as:
 
-- 300 points: Prediction Accuracy
-- 100 points: Final report 
+- 200 Points: Prediction Accuracy
+- 100 Points: In-Class Presentation
+- 100 Points: Final report 
+
+Your task in this competition is to predict residential property valuations in
+a major US city (not NYC). 
 
 ::: {.callout-important title="Use only Provided Information"}
 
@@ -51,25 +59,327 @@ Students found to use data outside instructor-provided files will receive
 a zero on _all_ grades related to the course competition and will likely fail
 the course as a result.
 
-You may read published research about predictors of student success to gain
-*qualitative* background information, but you may not access their data. 
+You may read published research about residential real estate to gain
+*qualitative* background information, but you **may not access their data**. 
 You will be required to cite all background reading in your final report.
 
 :::
 
 ## Background
 
-Relevant background for the competition will be posted by `r COMPETITION_START`.
+In the United States, local taxes are typically collected using an *ad valorem*
+tax on real property (land and buildings). *Ad valorem* means that the tax
+amount is determined as a fixed percentage of the value of the property, almost
+always taken to be the fair market value.[^ny] Hence, to determine taxes,
+government authorities must undertake an annual *assessment* process. 
+
+[^ny]: Unsurprisingly, New York makes this [more complicated](https://www.tax.ny.gov/pit/property/assess/local/). 
+
+Typically, assessment procedes as follows: 
+
+i) Early in the year, the local assessment authority estimates the fair market
+   value of each property in the relevant area and informs the owner
+ii) The owner then has the option to _contest_ (variously called "grieve",
+    "protest", or "challenge") the assessment in front of a neutral party
+iii) The neutral party then assigns an updated valuation to contested properties
+iv) The local assessment authority collects unchallenged and new assessment
+    values and uses them to create property tax bills
+v) The assessment authority sends tax bills to the relevant tax collector who
+   then collects taxes from property owners
+   
+For large regions, this assessment process typically relies (at least in part)
+on some sort of automated process. In this task, you will be predicting the 
+(finalized) assessment values of residential properties for 2024. You will be
+provided with various details about the underlying land and improvements (built
+structures). 
+
+While assessment values are typically relatively constant over time (growing
+at a rate proportional to local housing prices), large assessment shifts can
+occur if the property is remodeled, rebuilt, or otherwise significantly altered.
+In the region of interest, assessments are the sum of a building assessment and
+a land assessment, which may not move in lockstep. 
 
 ## Data
 
-Data files for the competition will be posted by `r COMPETITION_START`.
+### Training Data
+
+Your primary training set can be found at: 
+
+- [`fall_2026_training.csv.gz`](./data/competition_fall_2026/students/fall_2026_training.csv.gz)
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyverse)
+library(skimr)
+STUDENT_TRAINING_DATA <- read_csv("data/competition_fall_2026/students/fall_2026_training.csv.gz")
+```
+
+This data set has `r NROW(STUDENT_TRAINING_DATA)` rows and 
+`r NCOL(STUDENT_TRAINING_DATA)` columns, which are briefly summarized below. 
+
+```{r}
+#| echo: false
+skim(STUDENT_TRAINING_DATA)
+```
+
+Of these, two are particularly important: 
+
+- `Y`. This is final assessed value and the *target* variable you are being 
+  asked to predict. 
+- `KAGGLE_ID`: A unique identifier you will use to upload your predictions to
+  Kaggle. 
+  
+Most of the other columns should be relatively self explanatory: the logical
+columns indicate whether a home has a feature (spa, pool, deck, *etc*) or not; 
+the 'geographic' indicators like `city`, `schools`, *etc* are taken from the 
+original data source, but have been encoded to obscure the underlying data. 
+While these boundaries _roughly_ track political boundaries, city and school
+district boundaries rarely coincide. `zoning` describes (in brief) the relevant
+zoning laws for each property. Please ask if you have questions about other
+variables. 
+
+Perhaps not surprisingly, this data exhibits a meaningful right tail: 
+
+```{r}
+#| echo: false
+ggplot(STUDENT_TRAINING_DATA, aes(x=Y)) + 
+   geom_density() + 
+   scale_x_log10(labels=scales::dollar) + 
+   theme_bw() + 
+   xlab("Assessed Value") + 
+   ylab(NULL) + 
+   theme(axis.text.y = element_blank(), 
+         axis.ticks.y = element_blank()) + 
+   ggtitle("Assessed Values")
+```
+
+We see some expected patterns, such as a positive area-price correlation: 
+
+```{r}
+ggplot(STUDENT_TRAINING_DATA, 
+       aes(x=TOT_LIVING_AREA_SF, y=Y)) +
+   geom_point(alpha=0.1) + 
+   stat_smooth() + 
+   scale_y_log10(labels=scales::dollar) + 
+   theme_bw() + 
+   xlab("Living Area Square Footage") + 
+   ylab("Assessed Value") 
+```
+
+and a positive relationship between the number of high-end
+amenities (pools, decks, and the like) and the assessed value:
+
+```{r}
+#| echo: false
+STUDENT_TRAINING_DATA |> 
+   mutate(amenities = POOL + SPA + DECK + SAUNA) |>
+   group_by(amenities) |> 
+   summarize(Y = mean(Y)) |> 
+   ggplot(aes(x=amenities, y=Y)) + 
+   geom_col() + 
+   scale_y_continuous(labels=scales::dollar) +
+   xlab("Number of High-End Amenities") + 
+   ylab("Assessed Value") + 
+   theme_bw() +
+   labs(caption="Counted Amenities: Pools, Spas, Decks, Saunas")
+```
+
+More usefully, we note that the average assessed value is
+`r scales::dollar(mean(STUDENT_TRAINING_DATA$Y))` with a
+standard deviation of `r scales::dollar(sd(STUDENT_TRAINING_DATA$Y))`. 
+
+### Test Data
+
+The test set is structured similarly to the training set, but the `Y` (target) 
+column has been removed. 
+
+- [`fall_2026_test_X.csv.gz`](./data/competition_fall_2026/students/fall_2026_test_X.csv.gz)
+
+### Additional Info
+
+The underlying data source captures additional improvements (buildings) added
+on each property: these are not primary dwellings, but include things like
+detached garages, decks, greenhouses, *etc.* that that contribute to the value 
+of the property. 
+
+This information is recorded in 
+
+- [`fall_2026_additional_improvements.csv.gz`](./data/competition_fall_2026/students/fall_2026_additional_improvements.csv.gz)
+
+This data contains only a few features, but they are likely to be quite
+valuable in your analysis:
+
+```{r}
+#| echo: false
+#| message: false
+read_csv("data/competition_fall_2026/students/fall_2026_additional_improvements.csv.gz", 
+         show_col_types = FALSE) |>
+   skim()
+```
 
 ## Example Predictions {#example_submission}
 
-Example scripts illustrating the use of the training data to create predictions
-and suitable formatting for Kaggle submission will be posted 
-by `r COMPETITION_START`. 
+To submit your predictions, you need to upload them to Kaggle through the web
+interface. A link to register for the course competition will be distributed
+through Brightspace. Note that you must use your **@columbia.edu** email so that
+I can match your Kaggle ID with your student records. If this is a problem,
+please contact the instructor directly. 
+
+You will submit your predictions as a two-column CSV with columns: 
+
+- `KAGGLE_ID`: Taken directly from the test set
+- `Y`: Your predictions
+
+Kaggle will use the `KAGGLE_ID` to align your submissions with the test set,
+so your rows do not need to be in the same order as the test set file.
+
+A (comically simple) model would simply use the average property value for
+for all predictions. In `R`, 
+
+```{r}
+library(tidyverse)
+MEAN_Y <- read_csv(
+   "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_training.csv.gz", 
+   show_col_types = FALSE) |> 
+   pull(Y) |> 
+   mean()
+
+KAGGLE_SUBMISSION <-  read_csv(
+   "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_test_X.csv.gz", 
+   show_col_types = FALSE) |> 
+   select(KAGGLE_ID) |> 
+   mutate(Y = MEAN_Y)
+
+write_csv(KAGGLE_SUBMISSION, "intercept_model_for_kaggle_r.csv")
+```
+
+Or, in Python, 
+
+```{python}
+import pandas as pd
+
+TRAINING_SET = pd.read_csv(
+   "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_training.csv.gz"
+)
+
+TEST_SET = pd.read_csv(
+   "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_test_X.csv.gz"
+)
+
+MEAN_Y =  TRAINING_SET["Y"].mean()
+
+TEST_SET[["KAGGLE_ID"]].\
+    assign(Y=MEAN_Y).\
+    to_csv("intercept_model_for_kaggle_py.csv", 
+           index=False)
+```
+
+When advertising homes, real estate agents and data platforms regularly advertise
+homes by 'price per square foot.' This is obviously a very simplified model
+(essentially univariate linear regression), but it does capture the very rough
+truth that, *ceteris paribus*, a larger home will sell for me. We can implement
+this in `R` as follows: 
+
+```{r}
+library(tidyverse)
+library(broom)
+
+TRAINING_DATA <- read_csv(
+   "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_training.csv.gz", 
+   show_col_types = FALSE)
+
+TEST_DATA <- read_csv(
+   "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_test_X.csv.gz", 
+   show_col_types = FALSE)
+
+OLS_SQFT_MODEL <- lm(Y ~ TOT_MAIN_SF, data=TRAINING_DATA)
+
+augment(OLS_SQFT_MODEL, newdata=TEST_DATA) |> 
+   select(.fitted, KAGGLE_ID) |> 
+   rename(Y=.fitted) |> 
+   write_csv("sqft_model_for_kaggle_r.csv")
+```
+
+Python can be implemented similarly: 
+   
+```{python}
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+training_data = pd.read_csv(
+    "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_training.csv.gz"
+)
+
+test_data = pd.read_csv(
+    "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_test_X.csv.gz"
+)
+
+# Note: scikit-learn expects features (X) to be a 2D array/DataFrame, 
+# hence the double brackets even though we're only using a single column
+X_train = training_data[["TOT_MAIN_SF"]]
+y_train = training_data["Y"]
+
+ols_sqft_model = LinearRegression().fit(X_train, y_train)
+
+X_test = test_data[["TOT_MAIN_SF"]]
+test_data["Y"] = ols_sqft_model.predict(X_test)
+
+# Extract just the two columns Kaggle expects
+submission = test_data[["Y", "KAGGLE_ID"]]
+submission.to_csv("sqft_model_for_kaggle_py.csv", index=False)
+```
+
+On the public leaderboard, these models give an RMSE of around \$667K (constant)
+\$443K (linear using only area), which is not great in view of the scores above.[^mean]
+
+[^mean]: The 'realtor' model is on average off by around 'one average house'.
+
+```{r}
+#| echo: false
+#| message: false
+
+# Some basic checks of consistency between R, python
+
+# Baseline model
+library(tidyverse)
+TEST_SET <- read_csv(
+    "https://michael-weylandt.com/STAT3106/data/competition_fall_2026/students/fall_2026_test_X.csv.gz"
+    )
+
+MODEL_1_R <- read_csv("intercept_model_for_kaggle_r.csv")
+MODEL_1_PY <- read_csv("intercept_model_for_kaggle_py.csv")
+
+stopifnot(NROW(TEST_SET) == NROW(MODEL_1_R))
+stopifnot(NROW(TEST_SET) == NROW(MODEL_1_PY))
+
+MODEL_1_DELTA <- inner_join(MODEL_1_R,
+                            MODEL_1_PY, 
+                            join_by(KAGGLE_ID == KAGGLE_ID), 
+                            suffix = c(".r", ".py")) |> 
+   mutate(DELTA_PREDS = abs(Y.r - Y.py)) |> 
+   pull(DELTA_PREDS) |>
+   max()
+
+stopifnot(MODEL_1_DELTA < 1e-8)
+
+MODEL_2_R <- read_csv("sqft_model_for_kaggle_r.csv")
+MODEL_2_PY <- read_csv("sqft_model_for_kaggle_py.csv")
+
+stopifnot(NROW(TEST_SET) == NROW(MODEL_2_R))
+stopifnot(NROW(TEST_SET) == NROW(MODEL_2_PY))
+
+MODEL_2_DELTA <- inner_join(MODEL_2_R,
+                            MODEL_2_PY, 
+                            join_by(KAGGLE_ID == KAGGLE_ID), 
+                            suffix = c(".r", ".py")) |> 
+   mutate(DELTA_PREDS = abs(Y.r - Y.py)) |> 
+   pull(DELTA_PREDS) |>
+   max()
+
+stopifnot(MODEL_2_DELTA < 1e-5) # A bit looser here since OLS
+```
 
 ## Grading
 
@@ -87,24 +397,180 @@ so use them wisely. At the end of the competition, you will be able to select
 **two** sets of predictions to be used for your final evaluation (taking the
 better of the two) so track your submissions carefully. 
 
-**Kaggle will close for submissions at 11:55pm on `r COMPETITION_ENDS` 
+**Kaggle will close for submissions at 11:59pm on `r COMPETITION_ENDS` 
 for this class. Make sure your final submissions have been made in time.**
 
 #### Grading
 
 Grades for this portion will be assigned based on your performance relative
 to both the instructor provided baselines and the best score obtained by
-your fellow students.[^curve]
+your fellow students.[^curve] Specifically, grades for this portion will be 
+computed as: 
 
-In particular, the top score in the class will get a score of 200 automatically.
-More details about the scoring formula will be provided when the competition
-opens on `r COMPETITION_START`.
+$$\text{Grade} = 20\% + 80\%\left(\frac{\text{Your Best RMSE} - \text{Baseline Model RMSE} }{\text{Class Best RMSE} - \text{Baseline Model RMSE} }\right)$$
+Depending on the final distribution of scores, a more generous grading
+formula may be used.[^grading]
+
+[^grading]: If one student performs _significantly_ above the rest of the
+class, the above might be re-centered to the highest 'non-outlier' student,
+but in my experience, the final few marginal improvements are quite hard-won
+and student grades tend to concentrate neatly around the B+/A- range from
+formulas like the above.
+
+That is, your grade will essentially be a 'rescaled' $R^2$ where the best 
+performance in the class is 100% and everyone else is some fraction thereof. 
+(Note that the specific formula used means the top performance automatically 
+gets 100% on this component and that any submission beating the instructor's
+baseline will get at least a 20.) 
+
+You will be allowed to submit only *two* sets of predictions to Kaggle per day
+so use them wisely. At the end of the competition, you will be able to select
+**two** sets of predictions to be used for your final evaluation (taking the
+better of the two) so track your submissions carefully. 
 
 [^curve]: Note that this is essentially the same as 'curving' the scores so that
 the top-performing student automatically gets a perfect score and other grades
 are raised accordingly. By judging against the best student score, rather than
 an absolute benchmark like '0 error', all students' grades are implicitly 
 raised.
+
+
+### Final Presentation (100 Points)
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+library(tidyverse); library(glue)
+final_report_due <- function(){
+    read_csv("key_dates.csv") |>
+        filter(`Course Element` == "Prediction Competition") |>
+        filter(str_detect(`Details`, "Report")) |>
+        mutate(dt = paste(Date, Time)) |>
+        pull(dt)
+}
+
+class_date <- function(n, details=FALSE){
+    c <- read_csv("key_dates.csv") |>
+        filter(`Course Element` == "Class Session") |>
+        filter(`Item Number` == n)
+    
+    if(details){
+        c |> pull(Details)
+    } else {
+        c |> pull(Date) |>
+             as.Date() |>
+             format("%Y-%m-%d")
+    }
+}
+```
+
+During the last full week of class, each competition unit (either 
+an individual or a team) will give a **6** minute presentation, primarily 
+focused on the *models and methods* they used to build their predictions. This
+presentation should include discussion of: 
+
+- What 'off-the-shelf' models were found to be the most useful?
+- What (if any) extensions to standard models were developed for this project?
+  (These need not be *truly novel* - if you take an idea from a pre-existing
+  source and adapt it for use in this problem, *e.g.* because it does not appear
+  in `sklearn`, this is a contribution worth discussing.)
+- What (if any) ensembling techniques did you apply? 
+- What features or feature engineering techniques were important for the 
+  success of your model? 
+- What techniques for data splitting / model validation / test set hygiene
+  did you use in your model development process? 
+  
+Presentations must be submitted as PDF slides by midnight the night before 
+Tuesday's class. The instructor will aggregate slides into a single 'deck' to be
+used by all students. (Teams of two should both submit a copy of their slides. The
+instructor will de-duplicate submissions.) The instructor will assign students
+to present in a **randomized** order and cannot guarantee whether any particular
+presentation will fall on Tuesday or Thursday, so plan to attend both days. 
+  
+Students will be graded according to the following rubric: 
+
+::: {.list-table width="1,1,1,1,1,1" aligns="c,c,c,c,c,c" header-rows=1 .hover}
+
+ * - Report Element
+   - Excellent. <br> "A-" to "A" (`90% to 100%`)
+   - Great. <br> "B-" to "B+" (`80% to 89%`)
+   - Average. <br> "C" to "C+" (`73% to 79%`)
+   - Poor. <br> "D" to "C-" (`60% to 72%`)
+   - Failure. <br> "F" (`0% to 59%`)
+   
+ * - Quality of Presentation (40 points)
+   - Excellent and Engaging Presentation. Visualizations and script
+     clearly convey content in detail without obscuring the 
+     bigger picture.
+   - Great presentation. Visualizations and script convey content
+     well with only minor flaws. Balance of detailed and big-picture
+     exposition is lost. 
+   - Solid presentation. Visualizations or script have one to two
+     notable flaws. Insufficient discussion of details OR big-picture.
+   - Poor presentation. Visualizations or script have 3 or more
+     notable flaws. Underwhelming discussion of both details AND
+     big-picture. 
+   - Unacceptable presentation. Significant weaknesses in visualization
+     and script. Significant omissions in details or big-picture 
+     analysis.
+ * - Pipeline Design (20 points)
+   - Excellent pipeline design. Allows for effective re-use of training
+     data without risk of overfitting. Allows for more detailed queries
+     than overall RMSE. 
+   - Great pipeline design. Allows for effective re-use of training
+     data without risk of overfitting, but only allows queries of RMSE.
+   - Solid pipeline design. Takes active steps to minimize chance of 
+     'leakage' but may allow issues. 
+   - Poor pipeline design. Attempts made at avoiding leakage and overfitting,
+     but approach is fundamentally flawed. 
+   - Unacceptable pipeline design. Little or no attention paid to 
+     data hygiene. 
+ * - ML Methodology (20 points)
+   - Excellent Methodology. Uses advanced methodologies not covered in class
+     in a way that is well-suited for the prediction task. Methodology uses
+     features and time structure in interesting and  creative ways. 
+   - Great Methodology. Uses 'black box' methodologies not covered in class,
+     but with little specialization for the prediction task. OR Applies and
+     combines methods covered in class with particularly insightful approaches
+     to tuning and specialization for the prediction task. 
+   - Solid Methodology. Applies and combines methods covered in class with 
+     moderate attempts to tune and specialize for task at hand. 
+   - Poor Methodology. Applies methods covered in class without any attempt to
+     improve or specialize for task at hand. 
+   - Unacceptable Methodology. Fails to apply any advanced methodology (*e.g.*,
+     only uses linear regression and/or basic ARMA-type time series models). 
+ * - Feature Engineering and Analysis[^fea] (10 points)
+   - Excellent FEA. Impressive feature engineering creating significant
+     improvements in predictive performance. Careful analysis of feature
+     importance comparing and contrasting 'model-specific' importance and 
+     'model-agnostic' importance.
+   - Great FEA. Meaningful feature engineering leading to non-trivial
+     improvements in predictive performance. Analysis of feature importance
+     compared across multiple models. 
+   - Solid FEA. Features are treated appropriately, with elementary
+     analysis of feature importance for the model(s) used. 
+   - Poor FEA. Features are treated appropriately for their modality, but
+     little to no feature analysis or engineering. 
+   - Unacceptable FEA. No attempt to analyze features. 
+ * - Timing (10 points)
+   - Presentation lasts between 5:45 and 6:15
+   - Presentation lasts between 5:25 and 5:45 or between
+     6:15 and 6:35
+   - Presentation lasts between 5:00 and 5:25 or between
+     6:35 and 7:00
+   - Presentation lasts between 4:30 and 5:00 or between
+     7:00 and 7:30
+   - Presentation runs shorter than 4:30 or longer than 7:30
+
+:::
+
+Students will also vote on an "Audience Choice" award; the winning presentation
+will automatically receive a score of 100. 
+
+[^fea]: Feature Engineering and Analysis includes 'classical' feature engineering
+and analysis to identify key features (*e.g.* feature importance rankings or
+variable selection). 
 
 ### Final Report (100 Points)
 
@@ -166,7 +632,7 @@ Teams of two should both submit a copy of their final report. The instructor
 will de-duplicate submissions.
 
 The report will *roughly* be assessed acccording to the following rubric though
-the instructor may deviate as necessary. 
+the instructor may deviate as necessary. (This rubric will likely be made more precise later in the semester.)
 
 ::: {.list-table width="1,1,1,1,1,1" aligns="c,c,c,c,c,c" header-rows=1 .hover}
 
@@ -176,7 +642,7 @@ the instructor may deviate as necessary.
    - Average. <br> "C" to "C+" (`73% to 79%`)
    - Poor. <br> "D" to "C-" (`60% to 72%`)
    - Failure. <br> "F" (`0% to 59%`)
- * - Quality of Report (15 points)
+ * - Quality of Report (30 points)
    - Excellent Report. Report has excellent writing and formatting, with 
      particularly effective tables and figures. Tables and Figures are
      "publication-quality" and clearly and succinctly support claims made in 
@@ -199,7 +665,7 @@ the instructor may deviate as necessary.
    - Unacceptable Report. Written communication is far below standard, possibly
      bordering on unintelligible. Formatting prohibits or significantly impairs
      reader understanding.
- * - Analysis of Predictive Accuracy (10 points)
+ * - Analysis of Predictive Accuracy (20 points)
    - Excellent Analysis. Team is able to clearly identify strengths and 
      weaknesses of their model and to propose extensions / next steps that
      could use de-anonymized structure to further improve model performance. 
@@ -211,7 +677,7 @@ the instructor may deviate as necessary.
      but fails to distinguish _systematic_ error from randomness. 
    - Unacceptable Analysis. Accuracy analysis is superficial and does not
      take advantage of data structure in a meaningful way. 
- * - Model-Driven Insights into Data Generating Process (10 points)
+ * - Model-Driven Insights into Data Generating Process (20 points)
    - Excellent Insights. Modeling process creates significant new insights into
      the economics of real property assessment. Insights are then used to 
      further improve predictive modelling in a virtuous cycle. 
@@ -229,7 +695,7 @@ the instructor may deviate as necessary.
      smaller houses *ceteris paribus*).
    - Unacceptable Insights. No attempt is made at generating meaningful insights
      from models. 
- * - Reflection on Competition Workflow (10 points)
+ * - Reflection on Competition Workflow (20 points)
    - Excellent Reflection. Clear identification of all important good and bad
      decisions made over the course of the competition, with insightful 'take 
      aways' that can be used by self and other teams to significantly improve
@@ -252,7 +718,7 @@ the instructor may deviate as necessary.
      'Take away' messages are of limited general applicability.
    - Unacceptable Reflection. Minimal or shallow reflection. 'Take away' 
      messages are trivial or misleading. 
- * - Reproduction Code (5 points)
+ * - Reproduction Code (10 points)
    - Excellent Reproduction Code. Code is easy to read and execute, with excellent
      commenting, formatting, *etc.* and clearly reproduces submitted predictions.
    - Great Reproduction Code. Code is easy to read, but requires some effort
