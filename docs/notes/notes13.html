@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
-<title>Notes for Lecture #13: Introduction to Course Competition &amp; Unit I. Classification: Introduction to Classification – STAT 3106</title>
+<meta name="dcterms.date" content="2026-10-21">
+<title>Notes for Lecture #13: Introduction to Course Competition &amp; Unit III. Classification: Introduction to Classification – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,47 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#a-taxonomy-of-classification" id="toc-a-taxonomy-of-classification" class="nav-link active" data-scroll-target="#a-taxonomy-of-classification">A Taxonomy of Classification</a></li>
+  <li>
+<a href="#metrics-of-classification-accuracy" id="toc-metrics-of-classification-accuracy" class="nav-link" data-scroll-target="#metrics-of-classification-accuracy">Metrics of Classification Accuracy</a>
+  <ul class="collapse">
+<li><a href="#combining-metrics" id="toc-combining-metrics" class="nav-link" data-scroll-target="#combining-metrics">Combining Metrics</a></li>
+  <li><a href="#trade-off-of-recall-and-precision" id="toc-trade-off-of-recall-and-precision" class="nav-link" data-scroll-target="#trade-off-of-recall-and-precision">Trade-Off of Recall and Precision</a></li>
+  <li><a href="#scoring-functions" id="toc-scoring-functions" class="nav-link" data-scroll-target="#scoring-functions">Scoring Functions</a></li>
+  </ul>
+</li>
+  <li><a href="#types-of-classification-methods" id="toc-types-of-classification-methods" class="nav-link" data-scroll-target="#types-of-classification-methods">Types of Classification Methods</a></li>
+  <li><a href="#building-mutliclass-classifiers-from-binary-classifiers" id="toc-building-mutliclass-classifiers-from-binary-classifiers" class="nav-link" data-scroll-target="#building-mutliclass-classifiers-from-binary-classifiers">Building Mutliclass Classifiers from Binary Classifiers</a></li>
+  <li>
+<a href="#generative-classifiers" id="toc-generative-classifiers" class="nav-link" data-scroll-target="#generative-classifiers">Generative Classifiers</a>
+  <ul class="collapse">
+<li><a href="#mixture-models" id="toc-mixture-models" class="nav-link" data-scroll-target="#mixture-models">Mixture Models</a></li>
+  <li><a href="#inference-from-a-mixture-distribution" id="toc-inference-from-a-mixture-distribution" class="nav-link" data-scroll-target="#inference-from-a-mixture-distribution">Inference from a Mixture Distribution</a></li>
+  </ul>
+</li>
+  <li><a href="#building-generative-classifiers" id="toc-building-generative-classifiers" class="nav-link" data-scroll-target="#building-generative-classifiers">Building Generative Classifiers</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes13.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes13.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Notes for Lecture #13: Introduction to Course Competition &amp; Unit I. Classification: Introduction to Classification</h1>
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Notes for Lecture #13: Introduction to Course Competition &amp; Unit III. Classification: Introduction to Classification</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">October 21, 2026</p>
     </div>
   </div>
   
@@ -164,15 +222,461 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<p>Having (temporarily) finished our discussion of regression, we now turn our focus to <em>classification</em>.</p>
+<section id="a-taxonomy-of-classification" class="level2"><h2 class="anchored" data-anchor-id="a-taxonomy-of-classification">A Taxonomy of Classification</h2>
+<p>Recall from before that we defined <em>regression</em> as the subset of supervised learning where the response (<span class="math inline">\(\by\)</span>) was a <em>quantitative</em> variable, or at least one that is appropriate to model as such.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> By contrast, <em>classification</em> considers <span class="math inline">\(\by\)</span> to take <strong>qualitative</strong> or <strong>categorical</strong> values from a discrete set. Though this restriction may feel limiting, it is actually quite powerful. We consider several different forms of classification, based on the <em>support</em> of <span class="math inline">\(\by\)</span><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
+<ul>
+<li>
+<p><em>Binary</em> classification: in this simplest case, <span class="math inline">\(\by\)</span> takes one of two values, which we conventionally code as <span class="math inline">\(\{0, 1\}\)</span> or <span class="math inline">\(\{-1, +1\}\)</span>, depending on which makes the math easier. Note that these numbers are not the actual content of the response; they are simply a mathematical convenience, because it’s far easier to multiply by <span class="math inline">\(\pm 1\)</span> than cat/dog. (This is the same <em>encoding</em> process we used to prepare our data for regression models.)</p>
+<p>Examples of binary classification include:</p>
+<ul>
+<li>Does an incoming student graduate within the next 6 years or no?</li>
+<li>Does a patient have a given disease?</li>
+<li>Is there a dog present in an image?</li>
+<li>Is this applicant qualified for a job?</li>
+</ul>
+<p>Note that, in at least two of these, the underlying question is (arguably) not quite so binary, but we may choose to treat it as such. In particular, when assessing onset of a disease, the actual impairment to the patient is continuous, but it is common in medical practice to “binarize” the outcome. Any of you with aging family members know that cognitive decline occurs long before it’s ‘officially’ Alzheimer’s. Similarly, qualification for a job is perhaps best understood as a continuous (or even purely comparative) quantity “Is A more qualified than B?” but we choose to binarize it when deciding to whom a job offer should be made.</p>
+<p>Recalling your probability theory, there is (essentially) only one distribution on <span class="math inline">\(\{0, 1\}\)</span>, the Bernoulli, so this scenario typically has the cleanest and simplest mathematics.</p>
+</li>
+<li>
+<p><em>Multiclass</em> classification: in this case, <span class="math inline">\(\by\)</span> takes values in a set of finite and known, but potentially large, set of outcomes, which we will call <span class="math inline">\(\Ycal\)</span>. Before about 20 years ago, multiclass problems took <span class="math inline">\(|\Ycal|\)</span> to be not much larger than 2, <em>e.g.</em>, which blood type does a sample match or what language is a text sample written in, but much of the modern practical success of machine learning comes from the ability to treat <em>very large</em> outcome sets <span class="math inline">\(\Ycal\)</span>.</p>
+<p>For instance, modern computer vision (CV) has moved beyond far simple binary classification:</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/ACmydtFDTGs" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>The famed<a href="https://en.wikipedia.org/wiki/ImageNet"><code>ImageNet</code></a> benchmark data set has over 20,000 classes (arranged with additional structure) and modern data sets include even more. This can be contrasted with the older <a href="https://en.wikipedia.org/wiki/MNIST_database"><code>MNIST</code></a> data set which collects only ten handwritten digits.</p>
+<p>Beyond CV, large multiclass classification has also revolutionized text modeling: when a chatbot generates text, it selects the next word from a large but finite set of English words.</p>
+<p>Just like binary classification is rooted in the Bernoulli distribution, multiclass classification is rooted in the <a href="https://en.wikipedia.org/wiki/Categorical_distribution">categorical distribution</a>. When applied to a large class of outcomes, the categorical distribution becomes a <a href="https://en.wikipedia.org/wiki/Multinomial_distribution">multinomial</a>, <em>cf</em> Bernoulli to binomial, so multiclass classification is also frequently called <em>multinomial</em> classification.</p>
+</li>
+</ul>
+<p>While our main focus is on <em>binary</em> and <em>multiclass</em> problems, it is worth noting some additional “modes” of classification exist.</p>
+<ul>
+<li>
+<p><em>Ordinal</em> classification: in this case, <span class="math inline">\(\Ycal\)</span> is an <em>ordered</em> set. The most common form of ordinal classification is the ubiquitous <a href="https://en.wikipedia.org/wiki/Likert_scale"><em>Likert scale</em></a> which you have certainly encountered any time you have filled out a customer survey:</p>
+<ul>
+<li><em>Strongly Agree</em></li>
+<li><em>Agree</em></li>
+<li><em>Neutral</em></li>
+<li><em>Disagree</em></li>
+<li><em>Strongly Disagree</em></li>
+</ul>
+<p>In this case, the categories clearly have an order and a ranking, but we can’t quite treat them as ‘numerical’ in the usual sense: <em>Strongly Agree</em> is not just <em>Agree</em> + <em>Disagree</em>.</p>
+<p>Proper analysis of <em>ordinal</em> data is tricky and often poorly done. Complexities include the inappropriateness of statisticians’ most beloved tool, averaging<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, and a fundamental ‘subjectiveness.’ Another common ordinal classification problem is the assignment of grades (A &gt; B &gt; C …). In this case, students and professors may agree that one piece of work may be better than another, but a student may feel their assignment deserves an A while the professor may judge it B work. It is quite difficult to infer each individual’s personal threshold for each category without extensive analysis.</p>
+<p>We will not discuss ordinal data much in this course as it requires specialized methods. Typically ordinal data is modeled by treating the response as a rounded version of some underlying continuous variable: <em>e.g.</em>, when grading hurricanes the classes (Category 1, Category 2, …) are derived from the underlying continuous variable of wind speed. This ‘hidden regression’ structure makes analysis of ordinal classification much closer to regression than binary classification.</p>
+</li>
+</ul>
+<ul>
+<li>
+<p><em>Probabilistic</em> classification: we noted above that binary classification can be thought of as modeling a Bernoulli random variable. If we shift our focus to modeling the Bernoulli parameter (the probability <span class="math inline">\(p \in [0, 1]\)</span>) than the outcome (<span class="math inline">\(y \in \{0, 1\}\)</span>), we have the paradigm of <em>probabilistic</em> classification.</p>
+<p>As a general rule, <em>statistically</em>-grounded classification methods have a natural probabilistic output built-in while methods coming from the CS tradition are not always probabilistic. Because probabilistic estimates are often quite useful, there exist several <a href="https://en.wikipedia.org/wiki/Platt_scaling">useful methods</a> to ‘bolt-on’ probabilistic outputs to pure binary classifiers.</p>
+<p>If you want to think of <em>probabilistic</em> classification as a regression task, that’s quite reasonable. It occupies a liminal position between the two.</p>
+</li>
+</ul></section><section id="metrics-of-classification-accuracy" class="level2"><h2 class="anchored" data-anchor-id="metrics-of-classification-accuracy">Metrics of Classification Accuracy</h2>
+<p>In the regression context, we had a relatively small number of loss functions:</p>
+<ul>
+<li>Mean Squared Error (MSE): mathematically convenient, easy interpretation, natural for OLS, optimizes for mean</li>
+<li>Mean Absolute Error (MAE): mathematically a bit tricky, most practical in many circumstances, gives rise to <em>robust</em> regression, optimizes for median</li>
+<li>Mean Absolute Percent Error (MAPE)</li>
+<li>Checkmark/Pinball Loss: gives rise to <em>quantile</em> estimation</li>
+<li>Huber loss: interpolates MSE and MAE</li>
+</ul>
+<p>By contrast, in the classification context, we have <em>many</em> loss functions to work with. To get into them, it’s worth thinking back to the formalism of <em>statistical hypothesis testing</em>. Recall that, in hypothesis testing, we have a 2-by-2 table of possible outcomes:</p>
+<table class="caption-top table">
+<caption>Hypothesis Testing Table</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 23%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th colspan="2" style="text-align: center;"><strong>Truth</strong></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Decision</strong></td>
+<td style="text-align: center;"><strong>Null</strong></td>
+<td style="text-align: center;"><strong>Alternative</strong></td>
+</tr>
+<tr class="even">
+<td>
+<strong>Retain</strong> <strong>Null</strong>
+</td>
+<td style="text-align: center;">True Negative</td>
+<td style="text-align: center;">False Negative (Type II Error)</td>
+</tr>
+<tr class="odd">
+<td>
+<strong>Reject</strong> <strong>Null</strong>
+</td>
+<td style="text-align: center;">False Positive (Type I Error)</td>
+<td style="text-align: center;">True Positive</td>
+</tr>
+</tbody>
+</table>
+<p>Suppose that we have a large number (<span class="math inline">\(n\)</span>) of binary classification points. If we let <span class="math inline">\(\hat{y}_i\)</span> be our prediction and <span class="math inline">\(y^*_i\)</span> be the actual outcome, we can construct a similar table:</p>
+<table class="caption-top table">
+<caption>Classification Outcome Table</caption>
+<colgroup>
+<col style="width: 23%">
+<col style="width: 25%">
+<col style="width: 37%">
+</colgroup>
+<thead><tr class="header">
+<th></th>
+<th colspan="2" style="text-align: center;">
+<strong>Truth</strong> (Second index)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<strong>Prediction</strong> (First Index)</td>
+<td style="text-align: center;"><span class="math inline">\(y_i^* = 0\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(y_i^* = 1\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{y}_i=0\)</span></td>
+<td style="text-align: center;">
+<span class="math inline">\(n_{00}\)</span> True Negatives</td>
+<td style="text-align: center;">
+<span class="math inline">\(n_{01}\)</span> False Negative (Type II Errors)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{y}_i=1\)</span></td>
+<td style="text-align: center;">
+<span class="math inline">\(n_{10}\)</span> False Positives (Type I Errors)</td>
+<td style="text-align: center;">
+<span class="math inline">\(n_{11}\)</span> True Positives</td>
+</tr>
+</tbody>
+</table>
+<p>From this structure, we get several useful ideas:</p>
+<ul>
+<li><p>A <em>confusion matrix</em> is a 2x2 (or <span class="math inline">\(K\)</span>-by-<span class="math inline">\(K\)</span> for <span class="math inline">\(K\)</span>-multiclass problems) table comparing the right answer (here “Truth” on the columns) with our guess (here “Decision” on the rows). A good classifier will have large values “on diagonal” (<span class="math inline">\(n_{00} + n_{11}\)</span>) and small values “off diagonal” (<span class="math inline">\(n_{01} + n_{10}\)</span>)</p></li>
+<li>
+<p>The notion of <em>true/false</em> <em>positive/negatives</em>. These can be a bit tricky to remember, but the convention is:</p>
+<ul>
+<li>The <em>noun</em> (positive/negative) captures the <em>prediction</em>
+</li>
+<li>The <em>adjective</em> (true/false) assesses the prediction</li>
+</ul>
+<p>So a “false positive” means that we guessed the positive (+1) class, but that we were wrong and the truth was the negative (-1 or 0) class.</p>
+</li>
+</ul>
+<p>From this simple count table, we can create <em>many</em> different ratios. I find the statistical terminology a bit more intuitive than the ML terminology:</p>
+<ul>
+<li>True Positive Rate: Of the actual positives (<span class="math inline">\(y^*=1\)</span>), what fraction are predicted correctly (truly) positives (<span class="math inline">\(\hat{y} = 1\)</span>)? <span class="math inline">\(\text{TPR} = n_{11}/(n_{01} + n_{11})\)</span>
+</li>
+<li>False Negative Rate: Of the actual positives (<span class="math inline">\(y^*=1\)</span>), what fraction are predicted incorrectly (falsely) as negatives (<span class="math inline">\(\hat{y} = 0\)</span>)? <span class="math inline">\(\text{FNR} = n_{01}/(n_{01} + n_{11})\)</span>
+</li>
+<li>True Negative Rate: Of the actual negatives (<span class="math inline">\(y^*=0\)</span>), what fraction are predicted correctly (truly) as negatives (<span class="math inline">\(\hat{y} = 0\)</span>)?<br><span class="math inline">\(\text{FNR} = n_{00}/(n_{00} + n_{10})\)</span>
+</li>
+<li>False Positive Rate: Of the actual negatives (<span class="math inline">\(y^*=0\)</span>), what fraction are predicted incorrectly (falsely) as positives (<span class="math inline">\(\hat{y} = 1\)</span>)? <span class="math inline">\(\text{FPR} = n_{10} / (n_{00} + n_{10})\)</span>
+</li>
+</ul>
+<p>These clearly satisfy some useful relationships:</p>
+<p><span class="math display">\[\text{TPR} = 1 - \text{FNR} \Leftrightarrow \text{FNR} = 1 - \text{TPR}\]</span></p>
+<p>and</p>
+<p><span class="math display">\[\text{FPR} = 1 - \text{TNR} \Leftrightarrow \text{TNR} = 1 - \text{FPR}\]</span></p>
+<p>In this scenario, we recognize the <em>false positive rate</em> as the <em>size</em> (or <em>level</em>) associated with a statistical test (5% for a 95% confidence test) and the true positive rate as the <em>power</em>. Again, the statistical definitions can help us navigate the confusing terminology here: the confidence of a test, and therefore its false positive rate, are defined <em>assuming the null</em> (<em>i.e.</em>, in a “true” negative scenario).</p>
+<p>The “other direction” of rates – where we condition on the prediction instead of the truth – are less common, except for the <em>false discovery rate</em>:</p>
+<p><span class="math display">\[\text{FDR} = \frac{n_{10}}{n_{10} + n_{11}}\]</span></p>
+<p>The FDR is commonly used in scientific settings and it answers this question: if a scientist makes <span class="math inline">\(K\)</span> discoveries, what fraction <em>of those claimed discoveries</em> are correct?</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that the convention used to define <em>rates</em> can be quite confusing and is perhaps opposite the convention used to define <em>counts</em>.</p>
+<p>To compute the number of <em>true positives</em>, we look at predicted positives and count the number of “truths”, while to compute the <em>true positive rate</em>, our denominator is the number of <em>actual</em> positives and we count the fraction of correct predictions.</p>
+<p>To me, the FDR is actually the most clearly named rate; I try to remember the definition of FDR and ‘work backwards’ to FPR since it must be something different than FDR.</p>
+</div>
+</div>
+<p>In ML context, you will commonly hear reference to <em>precision</em> and <em>recall</em>. With our definitions above, we have</p>
+<ul>
+<li>Precision = <span class="math inline">\(1 - \text{FDR}\)</span>
+</li>
+<li>Recall = <span class="math inline">\(\text{FNR} = 1 - \text{TPR}\)</span>
+</li>
+</ul>
+<p>so, by maximizing precision, we ensure that all of our predicted positives are true positives and, by maximizing recall, we ensure that we have no false negatives (that is, we truly identify all of the real positives).</p>
+<p>In the medical context, you may encounter alternative metrics of</p>
+<ul>
+<li>Sensitivity, equal to TPR</li>
+<li>Specificity, equal to TNR</li>
+</ul>
+<p>This zoo of terms is admittedly quite confusing, but the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Precision_and_recall#Definition">Precision and Recall</a> has an excellent table.</p>
+<section id="combining-metrics" class="level3"><h3 class="anchored" data-anchor-id="combining-metrics">Combining Metrics</h3>
+<p>If you look at the 2x2 table above, you can convince yourself that it has two “degrees of freedom:” having a high TPR implies nothing about the TNR (or equivalent metrics). That is, it is possible to have a classifier with arbitrarily good TPR (equivalently, small FNR) and terrible TNR (equivalently, small FPR).</p>
+<p>In fact, we can construct one trivially:</p>
+<p><span class="math display">\[\hat{f}(\cdot) = 1\]</span></p>
+<p>That is, the function that predicts <span class="math inline">\(1\)</span> <em>always</em>. This classifier has zero false negatives, because it has no negatives whatsoever, but it necessarily has many false positives.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>Conversely,</p>
+<p><span class="math display">\[\hat{f}(\cdot) = 0\]</span></p>
+<p>has no false positives, but many false negatives.</p>
+<p>Clearly, we need a ‘combination’ metric that combines both degrees of freedom into a single score. Popular choices include:</p>
+<ul>
+<li>Accuracy: the fraction of correct predictions (<span class="math inline">\((n_{00}+n_{11})/n\)</span>)</li>
+<li>Balanced Accuracy: <span class="math inline">\(\frac{\text{TPR} + \text{TNR}}{2}\)</span>
+</li>
+<li>
+<span class="math inline">\(F_1\)</span> Score: <span class="math inline">\(2 *(1 - \text{FDR}) / (\text{TPR} - \text{FDR} +1)\)</span>
+</li>
+</ul>
+<p>While these choices are popular, none of them are actually all that suitable for a real application. To properly evaluate a classifier, we need to know the real cost of false positives and false negatives, as well as the population base rates, and balance things accordingly.</p>
+<p>For instance, if we are designing a ‘baseline’ medical diagnostic to be used as part of annual physicals, we need to think about what happens with false negatives and false positives.</p>
+<ul>
+<li>If we give a false positive, patients will undergo a better test that costs $1,000 but gives an accurate answer in all circumstances (a “gold standard”).</li>
+<li>If we give a false negative, patients will leave a condition untreated until it becomes far worse, requiring expensive surgery costing $50,000.</li>
+</ul>
+<p>In this case, we might desire a classifier that minimizes <span class="math display">\[n_{10} + 50 n_{01}\]</span>, not any of the of the ‘standard’ metrics. Note also that the particular FPR, FNR of this classifier will depend on the rate of the condition in the population, so we can’t actually find the best procedure by looking at FPR, FNR in isolation.</p>
+<p>While this <em>decision-theoretic</em> approach is optimal, it is often quite difficult to characterize in practice. In the example above, for instance, we made the choice to only minimize cost, without seeking to minimize suffering. (What if the untreated condition is <em>incredibly</em> painful? Should we intervene more often?) This sort of decision-making is ultimately very problem-specific and too often ignored in the academic literature. In practice, designing (and optimizing) the correct loss function is far more relevant to practical outcomes than finding the best classifier to optimize an irrelevant cost function.</p>
+<p>Let’s work through a simple example which you might recall from <a href="../notes/notes02.html">earlier notes</a>: when designing a medical test for cancer, there are two bad outcomes: ‘false positive’ when you tell someone they might have cancer, cause them significant mental anguish, and send them for unnecessary expensive follow-up tests; and ‘false negative’ when you tell them they don’t have cancer and leave their tumors untreated and let them metastasize. Both bad, but here ‘false negative’ is much worse and clinical guidelines should reflect that.</p>
+<p>Let’s put some basic numbers on it: let’s suppose that, among all people similar to the patient (based on age, lifestyle, family history, co-morbidities, initial screenings, <em>etc.</em>), we expect the patient to have only a 5% chance of having cancer. Let’s assume the cost of letting the cancer grow to the point where it is undeniable and requires surgical intervention is $500,000, while the cost of doing a perfect test (sometimes called ‘gold-standard’) now is $1,000; if the gold-standard test confirms cancer, we can perform a smaller surgery at a cost of only $100,000. What should we tell the patient?</p>
+<p>Working through the expected values:</p>
+<ul>
+<li>
+<strong>No Follow-Up</strong>: Expected cost is <span class="math inline">\(5\% * \$500\text{K} + 95\% * \$0 = \$25\text{K}\)</span>
+</li>
+<li>
+<strong>Send for Follow-Up</strong>: Expected cost is <span class="math inline">\(\$1\text{K} + 5\% * \$100\text{K} + 95\% * \$0 = \$6\)</span>
+</li>
+</ul>
+<p>In this case, it is <em>clearly</em> more cost effective to send the patient for follow-up gold-standard screening.</p>
+<p>Extending this example, we see that the threshold probability is not 50% but:</p>
+<p><span class="math display">\[\begin{align*}
+500\hat{p} + 0(1 - \hat{p}) &amp;= 1 + 100\hat{p} + 0(1-\hat{p}) \\
+400\hat{p} &amp;= 1 \\
+\hat{p} &amp;= 0.25\%
+\end{align*}\]</span></p>
+<p>So we would tell a patient they need to be scanned for cancer if they have even a 0.25% probability of cancer. Note that our <em>decision</em> (or action) is not just our ‘most likely’ - the much higher cost of a false negative (eventual expensive and dangerous surgery) pushes us towards lowering the false negative rate by decreasing our threshold probability and outputting more positive labels.</p>
+<p>In actual practice, these decision trees can be much more complicated (multiple tests, multiple stage decisions, <em>etc.</em>).</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Value of a Human Life">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Value of a Human Life
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A key question in medical economics is how much is a <em>human life</em> actually <em>worth</em>? While we would in a perfect world want everyone to receive all possible care, in a finite world decisions have to be made about how to ration finite medical resources. (In the US, we do this through infinitely-complicated health insurance markets; in more centralized systems like the UK, this decision is made by NHS analysts and economists.) As societies become richer, they can generally put a higher dollar value on human life.</p>
+<ul>
+<li><p>What do you expect this to do to the false negative/false positive balance associated with cancer tests? Why?</p></li>
+<li><p>Richer patients are less concerned about money. Why they likely to get more medical tests? (Think about <em>utility</em>.)</p></li>
+</ul>
+<p>This can all feel very cold and clinical. Unfortunately, it often is.</p>
+</div>
+</div>
+</section><section id="trade-off-of-recall-and-precision" class="level3"><h3 class="anchored" data-anchor-id="trade-off-of-recall-and-precision">Trade-Off of Recall and Precision</h3>
+<p>Our discussion of ‘trivial’ classifiers that focus on one metric while completely ignoring the other may remind you of the way this is typically solved in statistical testing procedures. We specify a maximum acceptable false positive rate (level or 1 - confidence) and then minimize the false negative rate subject to that constraint; in statistical speak, we seek a test with <em>maximal power</em>.</p>
+<p>As we have seen with ridge and lasso regression, there is typically a ‘knob’ (hyperparameter) we can pick to tune a particular classifier. It is common to apply the classifier at all values of this knob, measure the TPR and TNR at all levels, and plot them in a trade-off curve. This curve is, for historical reasons, known as the receiver operating characteristic (ROC)<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> curve and it looks something like:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/yardstick">yardstick</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co"># Example from ?roc_curve</span></span>
+<span><span class="fu"><a href="https://yardstick.tidymodels.org/reference/roc_curve.html">roc_curve</a></span><span class="op">(</span><span class="va">two_class_example</span>, <span class="va">truth</span>, <span class="va">Class1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">specificity</span>, y <span class="op">=</span> <span class="va">sensitivity</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_path</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_abline</a></span><span class="op">(</span>lty <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_equal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes13_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we see that, for this particular classifier, increased specificity is associated with decreased sensitivity or, in the alternative terms, increased TNR is associated with decreased TPR. As illustrated by our example of constant predictors above, this is a quite typical trade-off.</p>
+<p>Curves like this can be used in a few ways, none of which are fully satisfying:</p>
+<ul>
+<li>If we have two curves, we can plot their ROCs on the same set of axes. If one classifier is <em>uniformly</em> above the other, it is said to <em>dominate</em> the other and is better for all applications. Sadly, this is rarely the case.</li>
+<li>If we have two curves and plot their ROCs, but the ROCs cross, we don’t have strong guidance on which model to prefer, but if one is <em>almost always</em> above the other, we will likely still use it.</li>
+</ul>
+<p>A commonly reported metric is the <em>area under the ROC curve</em> (AUC), which ranges from 0.0 to 1.0, with higher values being better. This is a bit unsatisfying compared to the full decision theoretic analysis, but it is an improvement over some other metrics as it at least addresses the fact there is a trade-off.</p>
+<div class="callout-info" title="Pause for Reflection">
+<p>What does an AUC less than 0.5 imply? If you get an AUC less than 0.5, what should you do? Why is AUC near 0 actually a good thing?</p>
+</div>
+<p>While the ROC is typically motivated by presence of a ‘tuning knob’, even methods like logistic regression (which have no obvious knobs) have an implicit knob we can choose to tune: the <em>classification threshold</em>. (Recall our discussion above) There is no law of nature that says that a predicted probability of 55% has to correspond to a prediction of the positive class.</p>
+<!-- If false positives are very expensive, we
+may want to reduce the fraction of positives predicted and only predict 
+the positive class when the estimated probability is over 80\%. Similarly, 
+if false negatives are very bad, we may want to predict positive even when
+the probability of a positive is in the 40\% range: this is particularly 
+common in medical contexts where the impact of a missed diagnosis is quite
+substantial, so doctors order extra diagnostic work 'just to be sure' even
+if the test does not strongly suggest a disease. -->
+</section><section id="scoring-functions" class="level3"><h3 class="anchored" data-anchor-id="scoring-functions">Scoring Functions</h3>
+<p><em>Scoring</em> functions are loss functions particularly suited for evaluation of probabilistic classifiers. Unlike our confusion-matrix set of metrics, it’s less clear how we should evaluate probabilistic classifiers.</p>
+<p>It is clear that, if we predict something with 80% probability and it doesn’t happen, this is a ‘worse’ mistake than if we only had a 51% probability, but how can we measure this formally?</p>
+<ul>
+<li>Calibration and Tightness</li>
+<li>Log Scores</li>
+</ul></section></section><section id="types-of-classification-methods" class="level2"><h2 class="anchored" data-anchor-id="types-of-classification-methods">Types of Classification Methods</h2>
+<p>In this course, we will consider two main types of classifiers:</p>
+<ol type="i">
+<li><p>Generative classifiers, which attempt to jointly model <span class="math inline">\((\bX, \by)\)</span> and use probabilistic mathematics (mainly Bayes’ Rule) to infer <span class="math inline">\(\by | \bX\)</span> from the joint model.</p></li>
+<li><p>Discriminative classifiers, which directly attempt to estimate the ‘boundary’ between the classes.</p></li>
+</ol>
+<p>As you will see, the terminology around these methods is <em>particularly</em> terrible.</p>
+</section><section id="building-mutliclass-classifiers-from-binary-classifiers" class="level2"><h2 class="anchored" data-anchor-id="building-mutliclass-classifiers-from-binary-classifiers">Building Mutliclass Classifiers from Binary Classifiers</h2>
+<p>As we introduce methods, we will typically derive them for the binary classification task. If we want to apply them to the multiclass task, how can we extend them? It would be quite cumbersome if we needed <em>brand new</em> methods each time.</p>
+<p>In general, there are two main strategies we might use:</p>
+<ul>
+<li>One vs Rest</li>
+<li>Each vs Each</li>
+</ul>
+<p>For simplicity, assume we are predicting <span class="math inline">\(K\)</span> classes. In the “one-vs-rest” strategy, we will build <span class="math inline">\(K\)</span> binary classifiers, of the form:</p>
+<ul>
+<li>Class 1 vs Not Class 1 (<em>i.e.</em>, Class 2, 3, 4, <span class="math inline">\(\dots\)</span>, <span class="math inline">\(K\)</span>)</li>
+<li>Class 2 vs Not Class 2 (<em>i.e.</em>, Class 1, 3, 4, <span class="math inline">\(\dots\)</span>, <span class="math inline">\(K\)</span>)</li>
+<li><em>etc.</em></li>
+<li>Class <span class="math inline">\(K\)</span> vs Not Class <span class="math inline">\(K\)</span> (<em>i.e.</em>, Class 1, 2, 3, <span class="math inline">\(\dots\)</span>, <span class="math inline">\(K-1\)</span>)</li>
+</ul>
+<p>To make an actual prediction, we take the <em>highest</em> score of each of these classifiers. <em>E.g.</em>, if <span class="math inline">\(K=3\)</span> for categories “Red”, “Green” and “Blue”, we might predict:</p>
+<ul>
+<li>
+<span class="math inline">\(\P(\text{Red}) = 0.8\)</span> and <span class="math inline">\(\P(\text{Not Red}) = 0.2\)</span>
+</li>
+<li>
+<span class="math inline">\(\P(\text{Green}) = 0.4\)</span> and <span class="math inline">\(\P(\text{Not Red}) = 0.6\)</span>
+</li>
+<li>
+<span class="math inline">\(\P(\text{Blue}) = 0.2\)</span> and <span class="math inline">\(\P(\text{Not Red}) = 0.8\)</span>
+</li>
+</ul>
+<p>Our final prediction would then be the maximizer, “Red.”</p>
+<p>This strategy is relatively simple and intuitive, but for very large <span class="math inline">\(K\)</span>, the maximum can be far less than 50%, so it may feel a bit funny. (Why is this not an issue for <span class="math inline">\(K=2\)</span>?)</p>
+<p>Conversely, in the “each vs each” (sometimes called “one vs one”) setting, we train <span class="math inline">\(\binom{K}{2} = K(K-1)/2\)</span> classifiers for every possible <em>pair</em> of classes. To get the prediction, we then take a ‘majority vote’ of the classifiers.</p>
+<p>In our <span class="math inline">\(K=3\)</span> example above, we would have three classifiers:</p>
+<ul>
+<li>Red vs Blue, which we fit after throwing out the “Green” points</li>
+<li>Red vs Green, which we fit after throwing out the “Blue” points</li>
+<li>Green vs Blue, which we fit after throwing out the “Red” points</li>
+</ul>
+<p>If we make predictions for a single point, our binary classifications might be</p>
+<ul>
+<li>Red vs Blue: Red</li>
+<li>Red vs Green: Red</li>
+<li>Green vs Blue: Blue</li>
+</ul>
+<p>In this case, we would take a majority vote to get “Red” as our final prediction.</p>
+<p>I find this strategy a bit counterintuitive, but it is sometimes faster than the one-vs-rest strategy since each individual model is fit to a subset of the entire data set.</p>
+<p>Certain modern ML strategies, in particular deep neural networks, predict the probability of all <span class="math inline">\(K\)</span> classes from a single model. In this case, we typically select the single most probable class as our prediction.</p>
+<p>In applications where there are multiple contenders and the difference between them is small, it is common to randomly select a class in proportion to its predicted probability. This strategy is one of the things that gives ChatGPT its randomness; it usually predicts the <em>most likely</em> next word, but sometimes it does something a little bit weird.</p>
+<p>Note that it is actually usually pretty hard to make a model that predicts a large set of probabilities simultaneously: in particular, it’s hard to get a vector that sums to one (like probabilities should). To address this, a <a href="https://en.wikipedia.org/wiki/Softmax_function">softmax</a> normalization is applied. This is essentially nothing more than i) making sure each predicted value is positive; and ii) dividing them all by the sum so they add to 1.</p>
+<p>Specifically, if we give a unitless score of 2 to ‘cat’, 4 to ‘dog’ and -1 to ‘bird’ as the final word in the sentence ‘The best pet is a _____’, we can construct a vector of probabilities as:</p>
+<p><span class="math display">\[\begin{align*}
+(5, 10, -1) &amp;\to (e^5, e^{10}, e^{-1}) \\
+&amp;\to \left(\frac{e^5}{e^5 + e^{10} + e^{-1}}, \frac{e^{10}}{e^5 + e^{10} + e^{-1}}, \frac{e^{-1}}{e^5 + e^{10} + e^{-1}}\right) \\
+&amp;\approx  (11.8, 87.5, 0.7)
+\end{align*}\]</span></p>
+<p>(There are some additional ‘knobs’ here; rather than looking at the <em>whole</em> set of possible outcomes and the very long tail of small probabilities, models are often sampled from just the top-<span class="math inline">\(K\)</span> possible outputs. An additional parameter known as ‘temperature’ is often also used to make things more-or-less random as the problem requires.)</p>
+</section><section id="generative-classifiers" class="level2"><h2 class="anchored" data-anchor-id="generative-classifiers">Generative Classifiers</h2>
+<p>We begin our study of classifiers with an analysis of <em>generative</em> classifiers. While many generative classifiers have appeared in the literature, they can essentially all be derived from a standard approach We will discuss this general strategy first and then turn our attention to specific named instances.</p>
+<section id="mixture-models" class="level3"><h3 class="anchored" data-anchor-id="mixture-models">Mixture Models</h3>
+<p>You may recall from your probability courses that a (discrete) mixture model is a distribution of the form:</p>
+<p><span class="math display">\[X \sim \begin{cases} X_1 &amp; Z = 1 \\ X_2 &amp; Z = 2 \\ \dots \\ X_K &amp; Z=K \end{cases} \text{ where } \textsf{supp}(Z) = \{1,\dots, K\} \text{ and } X_i \sim \Pcal_i \text{ for all $i$ and } Z \perp X_i, X_i \perp X_j\, (i\neq j)\]</span></p>
+<p>That’s quite a bit to unpack, so let’s take it piece by piece: the random variable <span class="math inline">\(X\)</span> has a <span class="math inline">\(K\)</span>-component <em>mixture</em> distribution if we can sample <span class="math inline">\(X\)</span> by generating <span class="math inline">\(K\)</span> independent random variables <span class="math inline">\(\{X_1, \dots, X_K\}\)</span> (with <em>different</em> distributions) and then selecting one of them at random.</p>
+<p>Let’s look at a concrete version of this: suppose we have a population of male and female basset hounds that is 60% female. The weight of male basset hounds follows a <span class="math inline">\(\Ncal(65, 10)\)</span> distribution while females have weight distributed as <span class="math inline">\(\Ncal(55, 10)\)</span>. The weight of a randomly selected basset can be sampled as</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rbasset</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="va">Z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span><span class="op">(</span><span class="va">n</span>, size<span class="op">=</span><span class="fl">1</span>, prob<span class="op">=</span><span class="fl">0.6</span><span class="op">)</span> <span class="co"># Z=1 &lt;- Female</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">Z</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n</span>, mean<span class="op">=</span><span class="fl">55</span>, sd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>              <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">n</span>, mean<span class="op">=</span><span class="fl">65</span>, sd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">rbasset</span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 56.35875</code></pre>
+</div>
+</div>
+<p>If we collect the weights of many basset hounds, we see that the resulting distribution is not normally distributed:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu">rbasset</span><span class="op">(</span><span class="fl">10000</span><span class="op">)</span>, breaks<span class="op">=</span><span class="fl">50</span>, main<span class="op">=</span><span class="st">"Distribution of Basset Hound Weights"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes13_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In fact, this is a <em>bimodal</em> distribution with each ‘lump’ representing males or females.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> Distributions of this form can often be written more compactly using a ‘convex combination’ notation:</p>
+<p><span class="math display">\[\text{Basset} \sim \frac{2}{5}\Ncal(65, 10) + \frac{3}{5}\Ncal(55, 10)\]</span></p>
+<p>The above notation can be interpreted as specifying a draw from the first distribution with probability <span class="math inline">\(2/5 = 40\%\)</span> and from the second with probability <span class="math inline">\(3/5 = 60\%\)</span>; that is, it’s a particular 2-component mixture of normals.</p>
+<p>In specifying this mixture, the probabilities of each component must be non-negative and must sum to 1; these are exactly the same restrictions we put on a convex combination of points earlier in the course. In fact, the set of mixture distributions can be consider the ‘convex set’ containing all of its individual components.</p>
+</section><section id="inference-from-a-mixture-distribution" class="level3"><h3 class="anchored" data-anchor-id="inference-from-a-mixture-distribution">Inference from a Mixture Distribution</h3>
+<p>Now suppose you are on a walk and you meet a very friendly 62 pound basset hound. You of course want to pet this marvelous dog, but you need to ask the owner’s permission first: in doing so, should you ask “may I pet him?” or “may I pet her?”</p>
+<p>While the basset hound may not care if you misgender it,<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> you still want to be polite, recall that you can use <a href="https://en.wikipedia.org/wiki/Bayes%27_theorem"><em>Bayes’ Rule</em></a> to ‘invert’ the mixture distribution. That is, while the mixture distribution normally goes <em>from sex to weight</em>, Bayes’ rule will let us go <em>from weight back to sex</em>.</p>
+<p>Specifically, in this case, Bayes’ rule tells us:</p>
+<p><span class="math display">\[\P(\text{Female}|\text{Weight=62}) = \frac{\P(\text{Weight=62}|\text{Female})\P(\text{Female})}{\P(\text{Weight=62}|\text{Female})\P(\text{Female}+\P(\text{Weight=62}|\text{Male})\P(\text{Male}))}\]</span></p>
+<p>The math here is a bit nasty numerically, but we can do it in <code>R</code> quite simply:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_female</span> <span class="op">&lt;-</span> <span class="fl">0.6</span></span>
+<span><span class="va">p_male</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">-</span><span class="va">p_female</span></span>
+<span></span>
+<span><span class="va">p_62_female</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">dnorm</a></span><span class="op">(</span><span class="fl">62</span>, mean<span class="op">=</span><span class="fl">55</span>, sd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_62_male</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">dnorm</a></span><span class="op">(</span><span class="fl">62</span>, mean<span class="op">=</span><span class="fl">65</span>, sd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p_female_62</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">p_62_female</span> <span class="op">*</span> <span class="va">p_female</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">p_62_female</span> <span class="op">*</span> <span class="va">p_female</span> <span class="op">+</span></span>
+<span>                                           <span class="va">p_62_male</span> <span class="op">*</span> <span class="va">p_male</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"There is a "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">p_female_62</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"% chance that basset is a female."</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>There is a  16.87 % chance that basset is a female.</code></pre>
+</div>
+</div>
+<p>Given that calculation, you take a chance and ask whether you can pet <em>him</em>.</p>
+<p>What have we done here? We have <em>built</em> a basset-sex classifier from a combination of the population distribution and Bayes’ rule. This is the essence of generative classifiers - <em>if</em> we know the distribution, accurate probabilistic classification is a straightforward application of Bayes’ rule. In practice, we don’t know the distribution <em>a priori</em> and it must be estimated from data. Different generative classifiers essentially are just different ways of estimating the population (mixture) distribution.</p>
+</section></section><section id="building-generative-classifiers" class="level2"><h2 class="anchored" data-anchor-id="building-generative-classifiers">Building Generative Classifiers</h2>
+<p>Let’s formalize our approach for a two-class classifier though the extension to multi-class is simple enough. Given a training set</p>
+<p><span class="math display">\[\Dcal_{\text{Train}} = \{(\bx_1, y_1), (\bx_2, y_2), \dots, (\bx_n, y_n)\}\]</span></p>
+<p>we assume <span class="math inline">\(\bX\)</span> follows a two-component mixture where <span class="math inline">\(Y\)</span> is the mixing variable:</p>
+<p><span class="math display">\[\bX | Y=0 \sim \Pcal_0 \text{ and } \bX | Y=1 \sim \Pcal_1\]</span></p>
+<p>Clearly to fully specify this distribution, we need three things:</p>
+<ul>
+<li>To know the distribution of <span class="math inline">\(Y\)</span>
+</li>
+<li>To know the distribution <span class="math inline">\(\Pcal_0\)</span>
+</li>
+<li>To know the distribution <span class="math inline">\(\Pcal_1\)</span>
+</li>
+</ul>
+<p>The distribution of <span class="math inline">\(Y\)</span> is relatively straightforward: since it only takes values <span class="math inline">\(\{0, 1\}\)</span> it <em>must</em> have a Bernoulli distribution and hence the only thing we need to estimate is the probability, <span class="math inline">\(\pi_1\)</span>, that <span class="math inline">\(Y=1\)</span>. The simplest approach to estimating the Bernoulli probability is to simply take the empirical probability from the training data set, <em>i.e.</em>, the fraction of observations where <span class="math inline">\(Y=1\)</span>, but this can also be estimated using knowledge of a broader data set or a different population than the training data. For instance, if a data set is known to overindex on <span class="math inline">\(Y=1\)</span>, <em>e.g.</em>, because it contains patients who self-reported some disease, it may be more appropriate to estimate <span class="math inline">\(p\)</span> based on the population-wide prevalance of the disease. These concerns are typically rather problem specific.</p>
+<p>Estimation of <span class="math inline">\(\Pcal_0, \Pcal_1\)</span> may be more difficult. If the training data is <em>extremely</em> large, we may use a <em>non-parametric</em> estimator, <em>e.g.</em>, a multivariate histogram, but in general we will need to use some sort of restrictive (parametric) model. The most commonly used generative classifiers assume some sort of multivariate normal structure, but you can create ‘custom’ classifiers appropriate to specific domains.</p>
+<p>For now, let us assume <span class="math inline">\(\Pcal_{0}, \Pcal_1\)</span> have been estimated and that they have PDFs <span class="math inline">\(p_0(\cdot), p_1(\cdot)\)</span>. Applying Bayes’ rule as before, with prior (baseline) probabilities <span class="math inline">\(\pi_0, \pi_1 = 1-\pi_0\)</span>, we get the following probabilities</p>
+<p><span class="math display">\[\begin{align*}
+\P(Y = 1 | \bx) &amp;= \frac{\P(\bx | Y = 1)\P(Y=1)}{\P(\bx | Y = 0)\P(Y=0)+\P(\bx | Y = 1)\P(Y=1)} \\
+&amp;= \frac{p_1(\bx)\pi_1}{p_0(\bx)\pi_0 + p_1(\bx)\pi_1}
+\end{align*}\]</span></p>
+<p>If we are happy with a <em>probabilistic</em> classifier, we are essentially done. If we want a true binary classifier, <em>i.e.</em>, a <span class="math inline">\(\{0, 1\}\)</span> valued ‘point predictor’, we also need to set a classification threshold, <span class="math inline">\(\overline{p}\)</span>, to obtain:</p>
+<p><span class="math display">\[\delta(\bx) = \begin{cases} 0 &amp; \frac{p_1(\bx)\pi_1}{p_0(\bx)\pi_0 + p_1(\bx)\pi_1} &lt; \overline{p} \\ 1 &amp; \text{ otherwise} \end{cases}\]</span></p>
+<p><span class="math inline">\(\overline{p}\)</span> can be chosen to optimize a relevant performance metric (if you practice good sample splitting hygiene) or via a full decision theoretic analysis.</p>
+<p>That’s basically it! As we will see next time, things get much trickier when we want to incorporate data from <em>multiple</em> features and we don’t actually know the underlying distributions that we would want to put into our Bayes’ Rule math.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>Recall that regression problems need to be <em>truly</em> numeric. A good proxy is whether taking averages makes sense (as it will for wealth or height) or not (ZIP codes).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The <em>support</em> of a random variable is the set of values it can take. So the support of a normal distribution is <span class="math inline">\(\R\)</span>, the support of a Poisson variable is the set of non-negative integers, <em>etc.</em><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Even though it doesn’t make sense to average ordinal data, University administrators are <em>notorious</em> for averaging Likert data to evaluate faculty. This is a nigh-universal grievance of numerically-minded faculty, but getting universities to change their established procedures to something statistically reasonable is only slightly less impossible than drawing blood from a turnip.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>In this case, the FPR is exactly equal to the negative rate in the population.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Don’t confuse this with <em>Rate of Change</em>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Note that a mixture of normals is not <em>always</em> multimodal (<em>e.g.</em>, if the two means are very close together), but a mixture of normals is a common model for multimodal data.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Among their many notable qualities, Basset hounds are quite slow to anger. They also don’t speak English.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +1080,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes13.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes13.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes13.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes13.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
