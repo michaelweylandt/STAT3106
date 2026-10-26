@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-10-26">
 <title>Notes for Lecture #14: Unit III. Classification &amp; Ensemble Methods: Review of Logistic Regression – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,31 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#logistic-regression-and-glms" id="toc-logistic-regression-and-glms" class="nav-link active" data-scroll-target="#logistic-regression-and-glms">Logistic Regression and GLMs</a></li>
+  <li><a href="#classification-boundaries" id="toc-classification-boundaries" class="nav-link" data-scroll-target="#classification-boundaries">Classification Boundaries</a></li>
+  <li><a href="#scoring-and-calibration" id="toc-scoring-and-calibration" class="nav-link" data-scroll-target="#scoring-and-calibration">Scoring and Calibration</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes14.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes14.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #14: Unit III. Classification &amp; Ensemble Methods: Review of Logistic Regression</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">October 26, 2026</p>
     </div>
   </div>
   
@@ -164,15 +206,211 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
+<ul>
+<li>Review of Logistic Regression</li>
+<li>Selecting Classification Thresholds</li>
+<li>Scoring and Calibration</li>
+<li>Multi-Class Classification</li>
+</ul>
 <hr>
+<section id="logistic-regression-and-glms" class="level2"><h2 class="anchored" data-anchor-id="logistic-regression-and-glms">Logistic Regression and GLMs</h2>
+<p>Today, we begin with a review of a classification method you may have seen before <em>logistic regression</em>. Before getting into the guts of logistic regression, let’s look back at (one of) our motivations for (normal) linear regression.</p>
+<p>Linear regression typically assumes the world works something like:</p>
+<p><span class="math display">\[ Y = \bx^{\top}\bbeta + \epsilon = \epsilon + \sum_{i=1}^p x_i \beta_i\]</span></p>
+<p>That is, <span class="math inline">\(Y\)</span> is the sum of a ‘noise’ term <span class="math inline">\(\epsilon\)</span> and a linear signal term <span class="math inline">\(\bx^{\top}\bbeta\)</span>. When we make predictions, we can’t predict <span class="math inline">\(Y\)</span> directly because of the, by definition, unpredictable <span class="math inline">\(\epsilon\)</span> term, so we really aim for the <em>conditional mean</em>, <span class="math inline">\(\E[Y | \bX = \bx] = \bx^{\top}\bbeta\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> (Recall that MSE aims for the conditional mean.) This motivates breaking the model into two distinct parts:</p>
+<p><span class="math display">\[ \begin{align*}
+\mu &amp;= \bx^{\top}\bbeta \\
+Y &amp;\sim \mathcal{N}(\mu, \sigma^2)
+\end{align*}\]</span></p>
+<p>That is, we combine a linear <em>mean model</em> and then a <em>noise</em> or <em>sampling</em> model taken from the normal (Gaussian) distribution. We see here that this is a (continuous-valued) model not so much because of the mean model, but really because we used a Gaussian noise distribution. Even if <span class="math inline">\(\bx\)</span> is discrete and <span class="math inline">\(\bbeta\)</span> are all integers, we could still get any real value out because the normal distribution can produce any real value (albeit mainly with vanishingly small probabilities) regardless of the specific mean and standard deviation.</p>
+<p>So how might we extend this set-up to <em>classification</em>? Well, the linear mean model seems fine - just like with regression, it’s appealing to start with linear models - so we really just need to change up the second part, the <em>sampling</em> model. For the binary classification context this is quite simple. We only know one <span class="math inline">\(\{0, 1\}\)</span>-distribution, the <em>Bernoulli</em>, so let’s just sub that in for the Gaussian.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p><span class="math display">\[ \begin{align*}
+\mu &amp;= \bx^{\top}\bbeta \\
+Y &amp;\sim \text{Bernoulli}(\mu)
+\end{align*}\]</span></p>
+<p>This is close, but there are two things that should make us tread gingerly. The first is the fact that we’ve swapped out the ‘mean’ from the Gaussian with the ‘probability’ parameter from the Bernoulli. This is actually a non-issue because the <em>mean</em> of a Bernoulli is exactly its probability of being <span class="math inline">\(1\)</span>:</p>
+<p><span class="math display">\[Z \sim \text{Bernoulli}(p) \implies \E[Z] = 0 * (1-p) + 1 * p = p\]</span></p>
+<p>As an aside, this is an <em>incredibly</em> common trick in statistical computing. We use the ‘mean of 0/1 gives a probability’ trick all the time with logical (TRUE/FALSE) values to estimate probabilities. For instance, in the <code>penguins</code> data set, if we want to estimate the fraction of female penguins in the survey area:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>is_female <span class="op">=</span> <span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"female"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Construct a logical/Boolean value</span></span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>p_female <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">is_female</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   p_female
+1 0.4954955</code></pre>
+</div>
+</div>
+<p>Similarly, if we want to estimate the fraction of <code>chinstrap</code> penguins (those cute little fellows):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>is_chinstrap <span class="op">=</span> <span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"Chinstrap"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>p_chinstrap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">is_chinstrap</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  p_chinstrap
+1   0.1976744</code></pre>
+</div>
+</div>
+<p>If we’re being very formal about this, we might write <span class="math inline">\(\E[1_A] = \P(A)\)</span>, but we’re not going in this direction in this course. (Self-check: why is the mean always guaranteed to fall in the <span class="math inline">\([0, 1]\)</span> range and hence be a valid probability?)</p>
+<p>Ok - so equating means with probabilities for the Bernoulli is harmless. The other issue is a bit nastier: while the mean can be used as the probability parameter, we can’t use <em>any</em> mean as a probability. In particular, if we have <span class="math inline">\(\bbeta = -2\)</span> and <span class="math inline">\(\bx = 1\)</span>, we get quickly to <span class="math inline">\(Y \sim \text{Bernoulli} (-2)\)</span> and a ‘probability’ of <span class="math inline">\(-2\)</span> is clearly not good news. So we need one more piece to make this good idea actually work.</p>
+<p>Our problem is that <span class="math inline">\(\bx^{\top}\bbeta\)</span> can take any real value unless we put <em>very</em> strong restrictions on <span class="math inline">\(\bx\)</span> and <span class="math inline">\(\bbeta\)</span>, but we only want to put <span class="math inline">\([0, 1]\)</span> values into the Bernoulli. So let’s introduce an ‘adapter’ that will ‘squish’ <span class="math inline">\(\R\)</span> into the <span class="math inline">\([0, 1]\)</span> range. Once we do this, we’ll certainly have a workable probability parameter and we should hopefully be good to go.</p>
+<p>Where can we find a function <span class="math inline">\(f: \R \to [0, 1]\)</span>? There are many, but the easiest to work with turns out to be <span class="math display">\[f(z) = \frac{e^z}{1 + e^z} = \frac{1}{1 + e^{-z}}\]</span> This combines two nice parts: the exponential guarantees us we don’t get anything negative out and because <span class="math inline">\(1 + e^z &gt; e^z\)</span> for all <span class="math inline">\(z\)</span>, we’re guaranteed to be in the <span class="math inline">\((0, 1)\)</span> range. Graphically, this function looks like:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes14_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As you might have guessed, this <em>logistic</em> function is the one that gives <em>logistic</em> regression its name. Functions of this shape are generally called <em>sigmoidal</em> (roughly ‘s-shaped’): they take <span class="math inline">\(-\infty\)</span> to 0, <span class="math inline">\(0\)</span> to <span class="math inline">\(1/2\)</span>, <span class="math inline">\(\infty\)</span> to 1, and monotonically and smoothly map between.</p>
+<p>So this gives us the last piece of our construction:</p>
+<p><span class="math display">\[\begin{align*}
+\R \ni \eta &amp;= \bx^{\top}\bbeta = \sum_{i=1}^p x_i \beta_i \tag{Linear Predictor} \\
+(0, 1) \ni \mu  &amp;= \frac{1}{1 + e^{-\eta}} \tag{Logistic 'Adapter'} \\
+Y &amp;\sim \text{Bernoulli}(\mu) \tag{Bernoulli Sampling Distribution}
+\end{align*}\]</span></p>
+<p>Because the last term in this model is still Bernoulli, it’s still a <span class="math inline">\(0/1\)</span>-type of model and suitable for binary classification. This is <em>logistic regression</em> we know and love. Returning to the ever-cited penguins, let’s build a logistic regression model to predict <code>sex</code> from body measurements and species info, using <span class="math inline">\(0\)</span> for male and <span class="math inline">\(1\)</span> for female:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>is_female <span class="op">=</span> <span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"female"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">sex</span>, <span class="op">-</span><span class="va">island</span>, <span class="op">-</span><span class="va">year</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">is_female</span> <span class="op">~</span> <span class="va">.</span>, data<span class="op">=</span><span class="va">_</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = is_female ~ ., family = binomial, data = select(mutate(penguins, 
+    is_female = (sex == "female")), -sex, -island, -year))
+
+Coefficients:
+                  Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)      79.025008  12.115328   6.523 6.90e-11 ***
+speciesChinstrap  6.980329   1.574297   4.434 9.25e-06 ***
+speciesGentoo     8.353895   2.523542   3.310 0.000932 ***
+bill_len         -0.613782   0.131008  -4.685 2.80e-06 ***
+bill_dep         -1.622861   0.332403  -4.882 1.05e-06 ***
+flipper_len      -0.020774   0.047829  -0.434 0.664046    
+body_mass        -0.005865   0.001083  -5.414 6.15e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 461.61  on 332  degrees of freedom
+Residual deviance: 127.11  on 326  degrees of freedom
+  (11 observations deleted due to missingness)
+AIC: 141.11
+
+Number of Fisher Scoring iterations: 7</code></pre>
+</div>
+</div>
+<p>A few things to note here:</p>
+<ol type="1">
+<li>Note that we create our 0/1 (FALSE/TRUE) variable for use in the response spot.</li>
+<li>Note that we specify the <code>family</code> argument as <code>binomial</code> here to indicate we are doing <em>logistic</em> regression. <code>R</code> allows us to ‘aggregate’ 0/1 values into a binomial (sum of IID Bernoulli) response - this is sometimes useful for things like surveys where you ask many (similar) people the same yes/no question. Still, we’re really using a “1-count binomial” / Bernoulli here, consistent with our derivation.</li>
+<li>We used an iterative fitting process that took 7 iterations to converge. This is quite fast if you are used to first-order methods, but <code>R</code> actually uses a <em>second order</em> method (using the first and second derivatives) here to solve the problem more rapidly.</li>
+</ol>
+<p>Beyond that, this all looks quite similar to regular linear regression. We have a series of coefficients that tell us the <em>ceteris paribus</em> effect of changes. For instance, as the body measurements gets bigger, we are less likely to have a female penguin.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>So why do we call this model <em>linear</em>? Clearly the first part is linear–the linear predictor–but we ‘squish’ it through our logistic adapter so we don’t get a ‘one-to-one’ change in predicted outputs. (In fact, because we have bounded <span class="math inline">\([0,1]\)</span> outputs, we can’t have a <em>fully linear</em> input/output sort of response.) Two reasons:</p>
+<ol type="1">
+<li>
+<p>If we represent things on the ‘log-odds’ scale, so we look not at <span class="math inline">\(\hat{p}\)</span>, the predicted probability but instead <span class="math inline">\(\log\frac{p}{1-p}\)</span>, things are actually linear.</p>
+<p>I personally don’t find this too compelling because I don’t think in terms of log odds.</p>
+</li>
+<li><p>We can compute a ‘map’ of classifications and see that the boundary is actually linear.</p></li>
+</ol>
+<p>To actually visualize the latter, let’s simplify our model to work with only 2 input variables:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/">broom</a></span><span class="op">)</span></span>
+<span><span class="va">penguins_logistic_2d</span> <span class="op">&lt;-</span> <span class="va">penguins</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>is_female <span class="op">=</span> <span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"female"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">is_female</span> <span class="op">~</span> <span class="va">body_mass</span> <span class="op">+</span> <span class="va">flipper_len</span>, data<span class="op">=</span><span class="va">_</span>, family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="va">penguins_prediction_grid</span> <span class="op">&lt;-</span> <span class="fu">expand_grid</span><span class="op">(</span></span>
+<span>    body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">2700</span>, <span class="fl">6300</span>, by<span class="op">=</span><span class="fl">25</span><span class="op">)</span>, </span>
+<span>    flipper_len<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">172</span>, <span class="fl">231</span>, by<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span> </span>
+<span></span>
+<span><span class="va">penguins_predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">penguins_logistic_2d</span>,</span>
+<span>                                newdata<span class="op">=</span><span class="va">penguins_prediction_grid</span>, </span>
+<span>                                type.predict<span class="op">=</span><span class="st">"response"</span><span class="op">)</span> <span class="co"># Return hat{mu}</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">penguins_predictions</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">body_mass</span>, </span>
+<span>                                 y<span class="op">=</span><span class="va">flipper_len</span>, </span>
+<span>                                 color<span class="op">=</span><span class="va">.fitted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="st">"Body Mass"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Flipper Length"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">scale_color_distiller</span><span class="op">(</span>type<span class="op">=</span><span class="st">"div"</span>, palette<span class="op">=</span><span class="fl">3</span>, name<span class="op">=</span><span class="st">"Probability of Female"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes14_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We see here that the ‘decision boundary’ - the points where we are truly on the edge and predict <span class="math inline">\(\hat{p}\)</span> - is <em>linear</em>. This most fundamentally is why we call logistic regression a <em>linear</em> model: the ‘decision rule’ that comes out of the model is linear. Specifically, we might use something like</p>
+<p><span class="math display">\[\hat{Y} = \text{Female} \text{ if and only if } 0.03 * \text{Body Mass} - \text{Flipper Length} &gt; -75\]</span></p>
+<p>(Numbers are approximate)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">penguins_predictions</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">body_mass</span>, </span>
+<span>                                 y<span class="op">=</span><span class="va">flipper_len</span>, </span>
+<span>                                 color<span class="op">=</span><span class="va">.fitted</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">xlab</span><span class="op">(</span><span class="st">"Body Mass"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">ylab</span><span class="op">(</span><span class="st">"Flipper Length"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">scale_color_distiller</span><span class="op">(</span>type<span class="op">=</span><span class="st">"div"</span>, palette<span class="op">=</span><span class="fl">3</span>, name<span class="op">=</span><span class="st">"Probability of Female"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_abline</span><span class="op">(</span>slope<span class="op">=</span><span class="fl">0.03</span>, intercept<span class="op">=</span><span class="fl">75</span>, color<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes14_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="classification-boundaries" class="level2"><h2 class="anchored" data-anchor-id="classification-boundaries">Classification Boundaries</h2>
+<p>In our example above, we saw that the boundary line at <span class="math inline">\(\hat{p} = 0.5\)</span> was linear. But why did we set the line at <span class="math inline">\(\hat{p} = 0.5\)</span>? In this case (penguin sex guessing), it seems harmless enough, but for more important problems, we might want to set our boundaries elsewhere.</p>
+<p>We do so by picking up an idea you might have seen in an economics class: utility maximization (or equivalently, loss minimization). We know from our ‘2x2 table’ that there are 4 possible outcomes: True/False Positive/Negative.</p>
+<p>We can assign a cost or a reward for each outcome and try to determine the classification rule that maximizes our reward / minimizes our cost. Let’s suppose I see a Dali etching for sale at a local auction house. The chain of custody / provenance isn’t quite clear, so I don’t know if it’s a ‘true’ Dali or not. I know that if I buy it (let’s say for $500) and get it reviewed by a proper art authenticator (for another $1000), I will know if it is a real Dali or not. If it is a real Dali, I know have a painting I could re-sell (now authenticated) for $5000; if it’s not real, I have an attractive print I could sell for $50. How confident that the painting is real should I be before I purchase it?</p>
+<p>Let’s work out our four scenarios:</p>
+<ul>
+<li>True Positive: it is a Dali and I buy it (thinking it is a Dali). I pay $1500 and gain a $5000 painting, netting me $3500.</li>
+<li>False Positive: I buy it (thinking it is a Dali), but it is not authentic. I still have to pay $1500, but now I only have a $50 print, so I effectively lose $1450.</li>
+<li>True Negative: I don’t think it is a Dali, don’t purchase, and spend no money on the fake. While I might be proud of myself for loss avoidance, this is a wash.</li>
+<li>False Negative: I don’t think it is a Dali, don’t purchase it, but it actually is! I might feel sad, but financially, this is still a wash.</li>
+</ul>
+<p>So let’s balance these out: if the probability of being a real Dali (based on my model) is <span class="math inline">\(\hat{p}\)</span>, purchasing has an expected value of:</p>
+<p><span class="math display">\[\E[V_{\text{Buy}}] = \hat{p} * 3500 + (1-\hat{p}) * (-1450) = 5000 \hat{p} -1450\]</span></p>
+<p>Compare this to not purchasing, which always costs me $0 in this scenario. The ‘breakeven’ point is:</p>
+<p><span class="math display">\[0 = 5000 * \hat{p} - 1450 \implies \hat{p} = 29\%\]</span></p>
+<p>In this case, I shouldn’t actually set my ‘buy’ decision at 50%, but at the more modest level of 29%. (Conveniently, this is still a linear boundary, now shifted, in logistic regression.)</p>
+<p>It is easy to come up with scenarios that produce ‘breakeven’ points at almost any <span class="math inline">\(\hat{p}\)</span> by simply playing around with the relevant costs. In general, as the payoffs become more positive, we are willing to ‘bet’ more often, while larger costs make us less likely to ‘bet’.</p>
+</section><section id="scoring-and-calibration" class="level2"><h2 class="anchored" data-anchor-id="scoring-and-calibration">Scoring and Calibration</h2>
+<p>The analysis above relies on a bit of slight of hand: we used it to select a decision rule based on our <em>model probability</em>, but we computed the rewards under ‘actual probability’. These need not be the same!</p>
+<p>Put another way, if our model probabilities are not very accurate, a 30% predicted probability doesn’t mean a 30% chance in real life and our decision rule might not be set properly.</p>
+<p>We want our model probabilities to be ‘correct’ in the following sense:</p>
+<ul>
+<li>If the model says something should happen 10% of the time for a set of predictions, it should happen 10% of the time (in the long run).</li>
+<li>If the model says something should happen 15% of the time for a set of predictions, it should happen 15% of the time (in the long run).</li>
+<li>If the model says something should happen 20% of the time for a set of predictions, it should happen 20% of the time (in the long run).</li>
+</ul>
+<p>and so on for <em>every</em> <span class="math inline">\(p\)</span>. A model that has this property is called <em>well-calibrated</em> and it is a very nice thing to have!</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>We use a <em>conditional</em> mean here because we aren’t going for the ‘grand average’ <span class="math inline">\(Y\)</span>, but the <span class="math inline">\(Y\)</span> we expect <em>with those particular <span class="math inline">\(\bx\)</span> values</em>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Recall that the <em>Bernoulli</em> distribution takes only two values, <span class="math inline">\(1\)</span> and <span class="math inline">\(0\)</span>, with probabilities <span class="math inline">\(p\)</span> and <span class="math inline">\(q = 1-p\)</span>. That is <span class="math display">\[Z \sim \text{Bernoulli}(p) \implies Z = \begin{cases} 0 &amp; \text{ with probability } 1-p \\ 1 &amp; \text{ with probability } p \end{cases}.\]</span><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>This model is to be interpreted <em>like</em> a linear regression model, but the actual values are quite tricky here because of some of the implicit correlations between species and body morphology and the more obvious correlations between pairs of body measurements. Linear-type models are not quite so easy as we might hope…<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +814,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes14.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes14.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes14.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes14.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
