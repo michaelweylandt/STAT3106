@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-10-28">
 <title>Notes for Lecture #15: Unit III. Classification &amp; Ensemble Methods: Other Linear Classifiers – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,30 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#discriminative-vs-generative" id="toc-discriminative-vs-generative" class="nav-link active" data-scroll-target="#discriminative-vs-generative">Discriminative vs Generative</a></li>
+  <li><a href="#generative-classifiers" id="toc-generative-classifiers" class="nav-link" data-scroll-target="#generative-classifiers">Generative Classifiers</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes15.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes15.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #15: Unit III. Classification &amp; Ensemble Methods: Other Linear Classifiers</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">October 28, 2026</p>
     </div>
   </div>
   
@@ -164,15 +205,170 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<p>Today we are going to consider <em>alternate</em> linear classifiers. Recall that, in regression, we defined a method by a combination of loss function (MSE, MAE, <em>etc</em>) and function class (linear, polynomial, <em>etc.</em>). As a result, we would fit many different linear models to the same data set and they were all optimal / correct under some different set of assumptions.</p>
+<p>The same phenomenon will hold here for <em>linear</em> classifiers as well: for each of the methods discussed in these notes, we will still have a <em>linear</em> decision boundary, like logistic regression, but they will be defined by different objective functions. A key difference from the regression context is that we don’t typically truly care about these loss functions; the things we might care about (minimizing FNR subject to a FPR constraint) don’t really play nicely with optimization. Instead, we use a surrogate loss function and tune parameters (both the decision threshold and more traditional things like a <span class="math inline">\(\lambda\)</span> regularization strength parameter) to optimize for the downstream things we actually care about.</p>
+<p>That is to say, it is perfectly reasonable and indeed quite common to do something like this for ‘ridge logistic regression’</p>
+<ul>
+<li><p>Split data into three parts–<span class="math inline">\(\Dcal_1, \Dcal_2, \Dcal_3\)</span>–for parameter fitting, hyperparemeter selection, and final accuracy estimation respectively.</p></li>
+<li>
+<p>Fit ridge logistic regression at a variety of <span class="math inline">\(\lambda\)</span> values on <span class="math inline">\(\Dcal_1\)</span>, recording <span class="math inline">\(\hat{\bbeta}_{\lambda}\)</span> for each <span class="math inline">\(\lambda\)</span>:</p>
+<p><span class="math display">\[\begin{align*}
+\hat{\bbeta}_{\lambda_1} &amp;= \argmin_{\bbeta} \text{LogisticLoss}(\bbeta; \Dcal_1) + \frac{\lambda_1}{2} \|\bbeta\|_2^2 \\
+\hat{\bbeta}_{\lambda_2} &amp;= \argmin_{\bbeta} \text{LogisticLoss}(\bbeta; \Dcal_1) + \frac{\lambda_K}{2} \|\bbeta\|_2^2\\
+\dots \\
+\hat{\bbeta}_{\lambda_K} &amp;= \argmin_{\bbeta} \text{LogisticLoss}(\bbeta; \Dcal_1) + \frac{\lambda_K}{2} \|\bbeta\|_2^2
+\end{align*}\]</span></p>
+</li>
+<li><p>For each <span class="math inline">\(\hat{\bbeta}_{\lambda_k}\)</span>, compute a false positive rate and false negative rate on <span class="math inline">\(\Dcal_2\)</span>: call these <span class="math inline">\(\text{FPR}_{\lambda_k}, \text{FNR}_{\lambda_k}\)</span> respectively</p></li>
+<li>
+<p>Pick the <span class="math inline">\(\lambda\)</span> that minimizes FNR subject to a FPR constraint:</p>
+<p><span class="math display">\[\lambda_* = \argmin_{\lambda \in \{\lambda_1, \dots, \lambda_K\}} \begin{cases} \text{FNR}_{\lambda_k} &amp; \text{ if } \text{FPR}_{\lambda_k} &lt; \alpha \\ \infty &amp; \text{ otherwise } \end{cases}\]</span></p>
+</li>
+<li><p>Estimate final FNR, FPR on <span class="math inline">\(\Dcal_3\)</span></p></li>
+</ul>
+<p>Here we have <em>tuned</em> for something that wasn’t actually the loss function used to define our method. This is totally reasonable! While ‘direct’ optimization of the thing we care about is nice, when its not possible, strategies like this are perfectly fine.</p>
+<p>(Aside: we always had this option in regression as well: we could have optimized ridge-OLS to minimize MAE, but just as a practical matter, it’s faster, easier, and better to just fit LAD directly.)</p>
+<p>So with all of this said, what are the different methods we might choose to create?</p>
+<section id="discriminative-vs-generative" class="level2"><h2 class="anchored" data-anchor-id="discriminative-vs-generative">Discriminative vs Generative</h2>
+<p>Historically, linear classifiers have been divided into two broad camps:</p>
+<ul>
+<li>Generative Classifiers</li>
+<li>Discriminative Classifiers</li>
+</ul>
+<p>Here ‘discriminative’ doesn’t refer to bias or prejudice; just the older sense of ‘able to tell things apart’. Both of these will ultimately result in linear decision boundaries, but they get there from different starting points.</p>
+<p>Discriminative classifiers are more similar to what we saw in the regression context:</p>
+<ul>
+<li>We take <span class="math inline">\(\bX\)</span> as a given, assume that <span class="math inline">\(Y\)</span> depends on it somehow, and directly minimize a loss function to ‘fit’ that relationship.</li>
+</ul>
+<p>The only modeling choice here is how we relate <span class="math inline">\(\bX\)</span> and <span class="math inline">\(Y\)</span> or, equivalently, the loss function we use in our optimization problem.</p>
+<p>As we saw last time, logistic regression is an instance of this type of classifier. In particular, recall that we built logistic regression out of a tripartite <em>generalized</em> linear model.</p>
+<p><span class="math display">\[\begin{align*}
+\eta &amp;= \bx^{\top}\bbeta \tag{Linear Predictor} \\
+\mu  &amp;= \text{logistic adapter}(\eta) \tag{Link/Adapter Term}\\
+     &amp;= \frac{e^{\eta}}{1+e^{\eta}} \\
+     &amp;= \frac{1}{1+e^{-\eta}} \\
+     &amp;= \textsf{SoftMax}(\eta, 0) \\
+Y    &amp;\sim \text{Bernoulli}(\mu) \tag{Sampling/Observation Model}
+\end{align*}\]</span></p>
+<p>But how can we actually build an optimization problem here? Well, let’s first ‘collapse’ terms so that we can put this whole model on one line:</p>
+<p><span class="math display">\[Y \sim \text{Bernoulli}\left(\frac{1}{1+e^{-\bx^{\top}\bbeta}}\right)\]</span></p>
+<p>When faced with a statistical model like this, a common strategy is to use a <em>maximum likelihood</em> estimation procedure. That is, we pick the <span class="math inline">\(\bbeta\)</span> that ‘fit our data best’ in the sense of giving us the <em>highest</em> probability of seeing what we saw.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Note that we can write the general Bernoulli probability mass function (PMF) as:</p>
+<p><span class="math display">\[Z\sim\text{Bernoulli}(p) \Leftrightarrow \P(Z = z) = p^z(1-p)^{1-z} =\begin{cases} p &amp; z = 1 \\ 1- p &amp; z = 0 \end{cases}\]</span></p>
+<p>With the above, this gives us:</p>
+<p><span class="math display">\[\begin{align*}
+\P(Y = y_i | \bX = \bx_i) &amp;= \left(\frac{1}{1+e^{-\bx_i^{\top}\bbeta}}\right)^{y_i}\left(1 - \frac{1}{1+e^{-\bx_i^{\top}\bbeta}}\right)^{1-y_i} \\
+&amp;= \left(\frac{1}{1+e^{-\bx_i^{\top}\bbeta}}\right)^{y_i}\left( \frac{e^{-\bx_i^{\top}\bbeta}}{1+e^{-\bx_i^{\top}\bbeta}}\right)^{1-y_i} \\
+&amp;= \frac{(e^{-\bx_i^{\top}\bbeta})^{1-y_i}}{1+e^{-\bx_i^{\top}\bbeta}} \\
+&amp;= \frac{e^{-\bx_i^{\top}\bbeta(1-y_i)}}{1+e^{-\bx_i^{\top}\bbeta}} \\
+\end{align*}\]</span></p>
+<p>If we multiply this across <span class="math inline">\(n\)</span> IID observations, we get a joint PMF of</p>
+<p><span class="math display">\[\P(\bbeta) = \prod_{i=1}^n \frac{e^{-\bx_i^{\top}\bbeta(1-y_i)}}{1+e^{-\bx_i^{\top}\bbeta}}\]</span></p>
+<p>so we can fit logistic regression by just solving the following problem:</p>
+<p><span class="math display">\[\hat{\bbeta}_{\text{Logistic}} = \argmax_{\bbeta}\prod_{i=1}^n \frac{e^{-\bx_i^{\top}\bbeta(1-y_i)}}{1+e^{-\bx_i^{\top}\bbeta}}\]</span></p>
+<p>Easy, right?</p>
+<p>No, not really. This is <em>conceptually</em> complete, but practically it’s a huge pain. When we multiply many probabilities together, we get <em>very</em> small numbers which can make a computer struggle. We like the ‘average’ look of ERMs, not this weird product structure. And we like to think about <em>minimizing loss</em> instead of maximizing probability.</p>
+<p>Thankfully, a little bit of mathematical slight of hand here will help us out:</p>
+<p><span class="math display">\[\argmax_{x} f(x) \Leftrightarrow \argmin_{x} -\frac{1}{n}\log f(f)\]</span></p>
+<p>(Convince yourself that this is true!)</p>
+<p>Applying this to our problem above, we get:</p>
+<p><span class="math display">\[\begin{align*}
+\hat{\bbeta}_{\text{Logistic}} &amp;= \argmax_{\bbeta}\prod_{i=1}^n \frac{e^{-\bx_i^{\top}\bbeta(1-y_i)}}{1+e^{-\bx_i^{\top}\bbeta}} \\
+&amp;= \argmax_{\bbeta}\log \prod_{i=1}^n \frac{e^{-\bx_i^{\top}\bbeta(1-y_i)}}{1+e^{-\bx_i^{\top}\bbeta}} \\
+&amp;=\argmax_{\bbeta}\sum_{i=1}^n \log\left[ \frac{e^{-\bx_i^{\top}\bbeta(1-y_i)}}{1+e^{-\bx_i^{\top}\bbeta}}\right] \\
+&amp;=\argmax_{\bbeta}\sum_{i=1}^n -\bx_i^{\top}\bbeta(1-y_i) - \log\left[ 1+e^{-\bx_i^{\top}\bbeta}\right] \\
+&amp;=\argmin_{\bbeta}\sum_{i=1}^n \bx_i^{\top}\bbeta(1-y_i) + \log\left[ 1+e^{-\bx_i^{\top}\bbeta}\right] \\
+&amp;=\argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n \bx_i^{\top}\bbeta(1-y_i) + \log\left[ 1+e^{-\bx_i^{\top}\bbeta}\right] \\
+&amp;=\argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n -y_i\bx_i^{\top}\bbeta + \bx_i^{\top}\bbeta + \log\left[ 1+e^{-\bx_i^{\top}\bbeta}\right] \\
+&amp;= \argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n -y_i\bx_i^{\top}\bbeta + \log[e^{\bx_i^{\top}\bbeta}] + \log\left[ 1+e^{-\bx_i^{\top}\bbeta}\right] \\
+&amp;= \argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n -y_i\bx_i^{\top}\bbeta + \log\left[e^{\bx_i^{\top}\bbeta}*(1+e^{-\bx_i^{\top}\bbeta})\right] \\
+&amp;= \argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n -y_i\bx_i^{\top}\bbeta + \log\left[e^{\bx_i^{\top}\bbeta}+e^{\bx_i^{\top}\bbeta-\bx_i^{\top}\bbeta}\right] \\
+&amp;= \argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n -y_i\bx_i^{\top}\bbeta + \log\left[1 + e^{\bx_i^{\top}\bbeta}\right] \\
+&amp;= \argmin_{\bbeta}\E_{\text{Training Data}} \text{Logistic Loss}(\bbeta; y_i, \bx_i) \\
+\end{align*}\]</span></p>
+<p>Whew… So we see that logistic regression is (after quite some work!) just another ERM with a funny loss. This particular loss is sometimes known as <em>binomial deviance</em> or <em>cross entropy loss</em>, but I just like to call it the logistic loss as that makes the original source the most clear.</p>
+<p>This loss function can seem a bit opaque - what is it actually doing? Let’s take it case by case:</p>
+<ul>
+<li>when <span class="math inline">\(y_i=0\)</span>, the first term is zero, so we just want to <em>minimize</em> <span class="math inline">\(\log(1 + e^{\bx_i^{\top}\bbeta})\)</span>. Note that <span class="math inline">\(\log(1+e^x)\approx x\)</span> for <span class="math inline">\(x\)</span> not too small, so this is really just minimizing <span class="math inline">\(\bx_i^{\top}\bbeta\)</span>. Hence, the optimization problem tries to push <span class="math inline">\(\bx_i^{\top}\bbeta\)</span> smaller for observations where <span class="math inline">\(y_i=0\)</span>
+</li>
+<li>when <span class="math inline">\(y_i=1\)</span>, the first term is bigger, and <em>minimizing</em> <span class="math inline">\(-\bx_i^{\top}\bbeta\)</span> encourages us to make <span class="math inline">\(\bx_i^{\top}\bbeta\)</span> larger for observations where <span class="math inline">\(y_i=1\)</span>
+</li>
+</ul>
+<p>Hence, under all the funny math and weird signs, the directions really do work out the way we’d expect.</p>
+<p>In some other contexts, if we use <span class="math inline">\(y = \pm 1\)</span> instead of <span class="math inline">\(y \in \{0, 1\}\)</span>, the same math can be shown to work out to</p>
+<p><span class="math display">\[\argmin_{\bbeta}\frac{1}{n}\sum_{i=1}^n \log\left[1 + e^{-y_i\bx_i^{\top}\bbeta}\right]\]</span></p>
+<p>which is maybe a bit cleaner, even if it leaves the ‘Bernoulli’-structure less evident.</p>
+<p>But this is still a bit opaque: graphing things make it even clearer. Let’s plot <span class="math inline">\(\alpha = \hat{y}y\)</span>. So <span class="math inline">\(\alpha \to 1\)</span> when <span class="math inline">\(y = 1\)</span> and our probability is large (‘confident and correct’) or <span class="math inline">\(y=-1\)</span> and our probability is small; in the case where <span class="math inline">\(y=1\)</span> but our ‘score’ is close to <span class="math inline">\(-1\)</span>, we get a negative number (‘confidently wrong’). Graphically this looks something like this:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes15_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is interesting! We see that the loss function we might ‘really’ care about (pure accuracy) has the ‘flatness’ problem we previously saw with <span class="math inline">\(\ell_0\)</span> penalties and best subsets; that’s why we can’t really just say ‘maximize accuracy’ directly. But the logistic loss is sort of a nice convex (everywhere upwards facing) approximation.</p>
+<p>Are there others we could use? Clearly yes, we could use a sort of ‘one-sided’ absolute value like this:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out<span class="op">=</span><span class="fl">201</span><span class="op">)</span></span>
+<span><span class="va">acc</span>     <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">alpha</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">lr_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">alpha</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">hinge_loss</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">-</span><span class="va">alpha</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">alpha</span>, <span class="fu">acc</span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"l"</span>,</span>
+<span>     xlab<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">alpha</span> <span class="op">==</span> <span class="va">y</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/influence.measures.html">hat</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>     ylab<span class="op">=</span><span class="st">"Loss"</span>, </span>
+<span>     main<span class="op">=</span><span class="st">"Classification Losses"</span>, </span>
+<span>     ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">alpha</span>, <span class="fu">lr_loss</span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"red4"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span><span class="op">(</span><span class="va">alpha</span>, <span class="fu">hinge_loss</span><span class="op">(</span><span class="va">alpha</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"green4"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, </span>
+<span>       col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"red4"</span>, <span class="st">"green4"</span><span class="op">)</span>, </span>
+<span>       lwd<span class="op">=</span><span class="fl">2</span>, </span>
+<span>       legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Accuracy"</span>, <span class="st">"Logistic Regression"</span>, <span class="st">"Hinge Loss"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes15_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>where here the green line is given by <span class="math display">\[(1 - \alpha)_+ = \begin{cases} 1 - \alpha &amp; \text{ when } 1 - \alpha &gt; 0 \\ 0 &amp; \text{ when } 1 - \alpha \leq 0 \end{cases}\]</span> Here, <span class="math inline">\((x)_+ = \max\{0, x\}\)</span> is known as the <em>positive part</em> operator.</p>
+<p>Where does this <em>hinge loss</em> come from?</p>
+<p><strong>TODO</strong> Geometric viewpoint on SVMs</p>
+</section><section id="generative-classifiers" class="level2"><h2 class="anchored" data-anchor-id="generative-classifiers">Generative Classifiers</h2>
+<p>Our other big set of classifiers are so called <em>generative</em> classifiers. These start for a model for <span class="math inline">\(\bX\)</span> from <span class="math inline">\(y\)</span> – the ‘reverse’ of our usual model – and then uses Bayes’ Rule to ‘invert the reverse’ and get a forward model. (You might remember that Bayes rule was referred to as the <em>Law of Inverse Probability</em> in the early days as it does exactly this.) We actually already saw a toy generative classifier in our earlier notes, so let’s talk about what these might look like in a more significant application.</p>
+<p>If we fit a bivariate normal distribution to the body mass and flipper length of each of our three penguin species, we might get something like this:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes15_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s ignore Chinstrap penguins for a bit and focus on a binary Adelie <em>vs</em> Gentoo classifier:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes15_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Clearly, points closer to the ‘core’ of the Adelie region (bottom-left, green) are more likely to be Adelie and points closer to the top-right are more likely to be the larger Gentoo penguins. Can we build this into a formal classification rule? Indeed, we can!</p>
+<p>TODO: Write more</p>
+<p>Key idea: normal distribution probabilities are based on <em>distances</em> (norms) so being ‘closer’ to the core of one set increases our confidence for that class. Different normal distributions just screw around with how we actually measure distance.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p><em>Many</em> statistical procedures you have seen before are instances of this sort of MLE with a suitable model. The sample mean is the MLE for estimating the mean of a normal distribution, OLS is the MLE for a Gaussian linear model, <em>etc.</em><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +772,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes15.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes15.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes15.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes15.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
