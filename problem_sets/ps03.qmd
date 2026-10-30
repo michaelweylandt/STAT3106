@@ -1,6 +1,588 @@
 ---
-lab_num: "`r ps <- 3; ps`"
+ps_num: "`r ps <- 3; ps`"
+ps_title: "Classification & Ensemble Methods"
 ---
 
 {{< include _setup.qmd >}}
 
+## Introduction  {.unnumbered}
+
+In this problem set, you will consider a wide variety of tools for 
+_classification_. In addition to comparing different classifiers, you will also
+examine the _calibration_ of different predictions, see how post-processing 
+techniques can be used to improve calibration, and see how classifiers can be 
+used to perform anti-bias audits in large data sets. 
+
+## Data Files  {.unnumbered}
+
+For this data set, we introduce a data taken from the 
+[Federal HMDA Dataset](https://ffiec.cfpb.gov/data-browser/data/2025). Under
+the Home Mortgage Disclosure Act, lenders are required to report details of 
+all mortgage applications they process to the federal government to ensure
+compliance with the Fair Housing Act (and related rules and regulations).
+I have taken the full data set of approximately 13.5 million mortgage 
+applications and focused on a smaller set of around 2.3 million applications for
+which all data was clean and easily interpreted. The reduced data set can
+be found [here](./data/ps03_hdma.csv.gz). 
+
+Most of the features of this data set are self-explanatory: 
+
+```{r}
+#| eval: false
+library(readr)
+hdma_data <- read_csv("https://michael-weylandt.com/STAT3106/problem_sets/data/ps03_hdma.csv.gz")
+```
+
+```{r}
+#| echo: false
+library(readr)
+hdma_data <- read_csv("./problem_sets/data/ps03_hdma.csv.gz")
+```
+
+```{r}
+library(skimr)
+skim(hdma_data)
+```
+
+Note that three features in this data set refer to protected classes under 
+US antidiscrimination law (race, sex, and ethnicity, here reported as 
+"Hispanic/Latino" or "Not Hispanic/Latino" following relevant [Federal
+Guidance](https://www.census.gov/topics/population/hispanic-origin/about.html).)
+You should not use these 'sensitive' features in your initial analysis until you
+reach the anti-discrimination study in the final question. 
+
+The `tract` quantities return to the census tract in which the property to be
+purchased is located. `ltv` refers to `loan-to-value`, the fraction of the 
+property's total value to be paid *via* the mortgage.[^ltv] 
+
+The (binary) response of interest is the `approved` flag, indicating whether
+the application was ultimately approved. This data is reasonably well-balanced
+with approximately 66% approvals and 33% disapprovals.
+
+[^ltv]: If I am buying an $800,000 property and putting a conventional 20% down.
+I will pay \$160,000 up front and take out a mortgage on the remaining \$640,000,
+yielding a 80% loan to value. 
+
+## Review: ML Foundations and Regression (12 points) {#q1}
+
+Answer the following short answer questions, worth two points each: 
+
+1. When fitting a model via a first-order (stochastic gradient) methods, 
+   the choice of *(mini-)batch size* is an important parameter; machine learners
+   typically choose the mini-batch size to balance the pros and cons of 
+   full batch and one-at-a-time (online) gradient methods. 
+   
+   Explain these pros and cons and why a moderate mini-batch size is typically
+   used (32, 128, 512, *etc*). 
+   
+   You do not need to argue for a specific amount, as the optimal batch size is
+   often model, data, and hardware specific. Just explain what the pros and cons
+   of each extreme end of the spectrum are.
+   
+2. Rank the following models from highest to lowest (statistical) complexity:
+
+   - Ridge Regression
+   - OLS
+   - $3$-Nearest Neighbor Regression
+   - 4th Order Polynomial Regression (fourth order expansions across all 
+     combinations of features)
+   - A spline model with 4 knots in one feature and no non-linearity in any other
+     features
+   - $n-2$-Nearest Neighbor Regression
+   
+3. What are the practical trade-offs when deciding the proportion of data to 
+   allocate to the validation set versus the training set in a data-scarce 
+   environment? How does cross-validation attempt to navigate these tradeoffs?
+4. *(Multi-)collinearity* is an oft-cited boogeyman when applying regression
+   models. Explain why this is not actually a problem if you are only interested
+   in prediction and what sort of techniques can be used to mitigate any adverse
+   effects. 
+5. To predict the number of rare birds observed in a given region, enterprising
+   ornithologists will build a model that incorporates weather, time of year,
+   migration patterns, food availability, and proximity to humans. What type
+   of *generalized linear model* would be appropriate for this task? Note 
+   both the link function and the sampling distribution? 
+6. LASSO regression and Additive Models both attempt to provide a high degree
+   of *interpretability*. Compare and contrast these two methods, taking care to
+   specifically contrast the *type of interpretability* each method provides
+   and the different regimes in which they may be used. 
+
+## Practice of Machine Learning (12 points) {#q2}
+
+Consider the scenario below in which I describe a hypothetical application of
+ML. There are (at least) 4 issues in how the ML system is developed, tested, 
+and deployed. Identify **three** distinct issues and, for each issue you identify,
+describe: 
+
+- The mistake that was made (1 points)
+- The likely adverse impact arising from the mistake (1 points)
+- What should have been done instead (2 points)
+
+(This is what lawyers might call an "Issue Spotter" question.)
+
+**Scenario**: Following your helpful feedback in [Problem Set #02](./ps02.qmd#q1),
+the good folks at Hamilton, Butler and Low (HBL) Consulting have decided to 
+rework their automated talent interview pipeline. The People Analytics team
+were asked to develop a (probabilistic) talent recruitment classifier that can
+be used to perform resume scans; the result was Project CROWN (Candidate Ranking
+for Onboarding and Welcoming Newcomers). 
+
+CROWN's objective was to predict whether an applicant represents an 
+"Elite Associate" ($Y = 1$), defined as finishing in the top 5% of their cohort 
+across billable impact and annual reviews. Training on 4,000 historical applicant
+files from 2018 to 2023 (yielding exactly 200 positive and 3,800 negative cases),
+the engineers extracted hundreds of resume keywords (tokens), problem-solving 
+scores, and behavior records from things like participation in sponsored recruiting
+events and alumni network recommendations. Because partner interview slots were 
+strictly limited, the HBL management committee established a simple decision 
+rule: any candidate whose predicted probability of eliteness (PPE) $\hat{p}$ 
+exceeded 50% would automatically receive an invitation to final-round interviews
+with firm leadership, while those below 50% would be rejected without further 
+review.
+
+The CROWN team initially benchmarked linear classifiers before moving to 
+considering tree-based methods and ensembles. When fitting a Support Vector 
+Machine (SVM) the model achieved a 95.0% accuracy with minimal tuning. Eager to 
+extend this already highly performant model to capture non-linear credential 
+combinations, the team transitioned to `xgboost`. They fit the boosted tree
+ensemble with a max tree depth of 12, a high learning rate of $0.99$, 
+and disabled all row and column sub-sampling to make sure all features were
+well captured by the model. After running the algorithm for 3000 rounds, 
+`xgboost` had an in-sample cross-entropy (logistic loss) of 0.001% and
+a cross-validated AUC of 93%. These strong performance scores convinced the
+People Analytics team that the `xgboost` predictions were accurate and 
+well-calibrated and that CROWN was ready to go live for the upcoming recruiting
+season. 
+
+## Short Answer Questions (12 points) {#q3}
+
+Answer the following short answer questions, worth two points each: 
+
+1.  Determine the optimal classification threshold for the following problem:
+
+    You are a pirate captain sailing the seas in search of buried treasure
+    (gold doubloons!). You work with a mysterious old witch who can only 
+    estimate the probability of treasure on an abandoned island. (She claims
+    to have been perfectly accurate in her younger days, but time claims us all.)
+    She informs you that Isla Probabilita has a 34% chance of buried treasure. 
+    
+    It will cost you 50 dubloons to pay your crew to dig for treasure. If 
+    you find buried treasure, you expect it to be a chest of 500 dubloons. 
+    (Treasure ain't what it used to be...) If
+    you choose not to dig and the treasure is there, your crew will eventually 
+    hear about it and stage a mutiny, costing you command of your 
+    1000 dubloon vessel. 
+    
+    Should you order a dig? What probability would the mysterious old witch have
+    to predict to encourage you to dig? What is the expected payoff of your 
+    decision on Isla Probabilita?
+
+2.  What is the connection between boosting methods (especially gradient 
+    boosting) and first order optimization? 
+3.  A scientist is performing a genome-wide association study (GWAS) to identify
+    genes that may be related to a rare disease. After performing the appropriate
+    statistical modeling, she reports a list of 48 candidate genes with a
+    False Discovery Rate (FDR) of 20%. 
+    
+    Explain in non-technical terms what this means and why the scientist might
+    choose to report an FDR instead of a more traditional false positive rate. 
+4.  When using a *bagging* ensemble, why is it more-or-less impossible to 
+    'over bag'? That is, why does excessive bagging not lead towards 
+    overfitting in the absence of a new data split?
+    
+    Why does the same argument fail to hold for stacking (combining more and more
+    base learners) or boosting (adding more and more slow learners)?
+5.  The AI Detection Software [`pangram`](https://www.pangram.com/blog/third-party-pangram-evals)
+    advertises the following performance metrics: 
+    
+    - False Positive Rate (FPR): 0.1%
+    - False Negative Rate (FNR): 1%
+    - Classification Accuracy: 97.5%
+    
+    Which of these is the most important to a potential user and why? (If your
+    answer depends on your assumed user's primary usage patterns, please 
+    specify them.)
+6.  What are the challenges associated with building a model on an 
+    *unbalanced* data set? Why is pure *accuracy* particularly problematic
+    in this context? 
+    
+## Comparing Predictive Performance: Linear, Non-Linear, and Ensemble Classifiers (9 points) {#q4}
+
+**For this problem, do not use 'sensitive' attributes like race, sex or
+Hispanic/Latino ethnicity. We will return to those below.**
+
+Analyze the HDMA data introduced above, trying at least 5 different classifiers.
+In selecting the classifiers to compare, please make sure to try: 
+
+- At least 2 different linear classifiers
+- At least 1 non-linear method (like a GAM or a decision tree)
+- At least 2 different ensemble-based classifiers
+- At least 2 different 'highly interpretable' methods
+
+Which methods perform the best? Does it depend on which accuracy measures you
+use? For the interpretable models, which features are the most important? Does
+this make economic sense? 
+
+*NB*: This is a somewhat large data set. While it doesn't have high cardinality
+categorical features, you may still need to simplify or remove some
+categorical features to ensure things run in a reasonable amount of time. I
+recommend writing your analysis code on a small subset of the entire data set 
+and only applying it to the entire data set once it is (almost) finalized. 
+
+
+## Calibration (9 points) {#q5}
+
+When building a (binary) classifier, the property of _calibration_ ensures
+that the model's predicted (output) probabilities match the actual
+probabilities. (You can think of this as a 'holistic' accuracy measure for
+probabilistic classifiers that looks at all points on the curve, not just
+at a single point defining the decision boundary.)
+
+For a model to be calibrated, we want $\P(Y | X) = \hat{p}(X)$ for all
+possible inputs $X$. While easily stated, this is not actually quite so 
+simple to check in practice. We need 'repeated' $X$ to get a good estimate
+of the real probabilities $\P(Y|X)$ and outside of designed scenarios, exact
+replicates in $X$ are hard to find. 
+
+This motivates the use of a _binning_ strategy: we find several points
+where $\hat{p}(X)$ is around 10% and hope that 10% of the true labels for 
+those points are positive. Let's see this in action for our simple penguin
+sex model:
+
+```{r}
+library(broom)
+penguins_ece <- penguins |> 
+    mutate(is_female = (sex == "female")) |> 
+    glm(is_female ~ body_mass + flipper_len, 
+        data=_, 
+        family=binomial) |>
+    augment(type.predict="response") |>
+    mutate(bucket=ntile(.fitted, n=10)) |>
+    group_by(bucket) |>
+    summarize(bucket_mean_model=mean(.fitted), 
+              bucket_mean_label=mean(is_female), 
+              bucket_min_model=min(.fitted), 
+              bucket_max_model=max(.fitted),
+              bucket_error=bucket_mean_model - bucket_mean_label,
+              n=n()) |>
+    mutate(ece = weighted.mean(abs(bucket_error), n))
+```
+
+yielding
+
+```{r}
+#| echo: false
+library(gt)
+library(glue)
+penguins_ece |>
+  gt(id="tbl_penguins_ece") |>
+    cols_hide(c(ece)) |>
+    fmt_percent(c(starts_with("bucket_"))) |>
+    tab_style(
+        style=cell_text(color="#aa0000"), 
+        locations=cells_body(
+            columns=bucket_error,
+            rows=bucket_error < 0)) |>
+    cols_merge(c(bucket_min_model, bucket_max_model), 
+               pattern="[{1}-{2}]") |>
+    cols_label(bucket="Bucket Number", 
+               bucket_error="Calibration Error",
+               bucket_min_model="Range of Predicted Probabilities",
+               bucket_mean_model="Average Predicted Probability",
+               bucket_mean_label="True Fraction", 
+               n="Number of Observations") |>
+    tab_header("Calibration Analysis of Penguins 2 Factor Sex-Prediction Model", 
+               glue("Expected Calibration Error {scales::percent(first(penguins_ece$ece), accuracy=0.01)}"))
+```
+
+This is decent - particularly in some parts of the model - but in other parts
+of the curve our probabilities may be off by 15% or more. Taking the (bin-size
+weighted) average of the bucket-wise calibration errors, we get a measure
+called *Expected Calibration Error* (ECE), which is around 
+`r scales::percent(mean(penguins_ece$ece), accuracy=0.01)` for this particular
+set of forecasts.[^in_sample] [^l1]
+
+[^in_sample]: Properly, it's best to assess ECE on out-of-sample (test) 
+predictions, but I'm being a bit sloppy here to simplify exposition. 
+
+[^l1]: Note that ECE as defined here is the $\ell_1$ (taxicab / Manhattan) norm
+of the calibration errors for each bucket. $\ell_2$ (root mean squared calibration
+error) and $\ell_{\infty}$ (maximum calibration error) versions exist and work
+essentially the same way. 
+
+ECE is a good measure, but it is a bit unstable in practice. Selecting different
+numbers of buckets or even just 'shifting' the bucket endpoints around can change
+your results, sometimes quite dramatically. Despite this, we'll use it as our
+primary metric for this question. 
+
+Here, seeing that calibration isn't all that great (we're off by 8% on average)
+we might want to _adjust_ our model to improve calibration. One approach is to
+consider a different family of models: alternatively we can take the output
+of the model we already have and _post-process_ it to improve calibration. 
+In situations where the probabilities are too low (red) we might want to 'bump'
+them up a bit and where they are too high (black) we might want to similarly 
+adjust them downwards. 
+
+Naively, we might do this by pushing probabilities for the 'true' outcomes
+all the way to 1 and to 0 for the 'false' outcomes, but this essentially destroys
+the shape of our predictor and functionally reduces us to fitting $1$-nearest
+neighbors. A better approach is to adjust probabilities *while maintaining
+ordering*: so if we have two observations, with $\hat{p} = (0.3, 0.4)$, we
+could post proces to $(0.2, 0.4)$ or $(0.4, 0.5)$ or maybe even $(0.45, 0.45)$,
+but not to $(0.4, 0.2)$ because we'd break the existing ordering. This sounds
+like it might be hard, but thankfully there's a classical statistical technique
+called *isotonic regression* that does exactly this. 
+
+The details of isotonic regression are beyond this course, but the below image
+should get the main idea across: 
+
+```{r}
+#| echo: false
+penguins |> 
+    drop_na() |> 
+    select(flipper_len, body_mass) |> 
+    arrange(flipper_len) |> 
+    mutate(iso_body_mass = isoreg(flipper_len, body_mass)$yf) |> 
+    ggplot(aes(x=flipper_len)) + 
+    geom_point(aes(y=body_mass)) + 
+    geom_line(aes(y=iso_body_mass), color="red4", lwd=2) + 
+    theme_bw() + 
+    xlab("Flipper Length") + 
+    ylab("Body Mass") + 
+    ggtitle("Isotonic Prediction of Body Mass from Flipper Length")
+```
+
+Here, the isotonic regression curve (red) minimizes the MSE to the observed
+values (black dots) among all *non-decreasing* curves. 
+
+(Make sure you understand why this is exactly the type of constraint we might
+want to apply when post-processing a set of predictions to improve calibration.)
+
+If we apply this to our penguin model from above, we could get the following
+*post-processed* predictions. 
+
+```{r}
+penguins_logistic_iso <- penguins |> 
+    mutate(is_female = (sex == "female")) |> 
+    glm(is_female ~ body_mass + flipper_len, 
+        data=_, 
+        family=binomial) |>
+    augment(type.predict="response") |>
+    arrange(.fitted) |> 
+    mutate(.fitted.iso = isoreg(.fitted, is_female)$yf, 
+           sex=if_else(is_female, "Female", "Male")) 
+```
+
+```{r}
+#| echo: false
+penguins_logistic_iso |>
+    slice_sample(n=20) |>
+    arrange(.fitted) |>
+    select(sex, body_mass, flipper_len, .fitted, .fitted.iso) |>
+    gt(id="tbl_penguins_iso") |>
+    fmt_percent(starts_with(".fitted"), 
+                decimals=2) |>
+    cols_label(body_mass="Body Mass (g)", 
+               flipper_len="Flipper Len (mm)", 
+               sex="Sex",
+               .fitted="Logistic Regression Prediction",
+               .fitted.iso="Isotonically Recalibrated Logistic Prediction")
+```
+
+These recalibrated predictions no longer have the linear structure of logistic
+regression, but they exhibit far better calibration: 
+
+```{r}
+#| echo: false
+penguins_ece_iso <- penguins_logistic_iso |> 
+    mutate(bucket=ntile(.fitted.iso, n=10)) |>
+    group_by(bucket) |>
+    summarize(bucket_mean_model=mean(.fitted.iso), 
+              bucket_mean_label=mean(is_female), 
+              bucket_min_model=min(.fitted), 
+              bucket_max_model=max(.fitted),
+              bucket_error=bucket_mean_model - bucket_mean_label,
+              n=n()) |>
+    mutate(ece = weighted.mean(abs(bucket_error), n))
+
+penguins_ece_iso |>
+  gt(id="tbl_penguins_ece_iso") |>
+    cols_hide(c(ece)) |>
+    fmt_percent(c(starts_with("bucket_"))) |>
+    tab_style(
+        style=cell_text(color="#aa0000"), 
+        locations=cells_body(
+            columns=bucket_error,
+            rows=bucket_error < 0)) |>
+    cols_merge(c(bucket_min_model, bucket_max_model), 
+               pattern="[{1}-{2}]") |>
+    cols_label(bucket="Bucket Number", 
+               bucket_error="Calibration Error",
+               bucket_min_model="Range of Predicted Probabilities",
+               bucket_mean_model="Average Predicted Probability",
+               bucket_mean_label="True Fraction", 
+               n="Number of Observations") |>
+    tab_header("Calibration Analysis of Penguins 2 Factor Sex-Prediction Model After Isotonic Recalibration", 
+               glue("Expected Calibration Error {scales::percent(first(penguins_ece_iso$ece), accuracy=0.01)}"))
+```
+
+**As shown, overfitting is a serious danger of this workflow. When doing this
+properly, you should make sure to train your model on one split, recalibrate
+on another, and compute test calibration on a third.**
+
+### Assessing Calibration (3 points)
+
+The (dearly departed) political forecasting site
+[FiveThirtyEight](https://en.wikipedia.org/wiki/FiveThirtyEight) produced
+probabilistic forecasts for a wide range of sporting and political outcomes.
+A full set of probabilistics forecasts, alongside actual outcomes, can be found
+online at <https://github.com/fivethirtyeight/checking-our-work-data/raw/refs/heads/master/raw_forecasts.zip>. 
+
+Download this file and assess the calibration of 538's different forecast models.
+As you do so, make sure to compare calibration across: 
+
+- Different types of events (political vs sports)
+- Different events (presidential vs legislative elections, *etc.*)
+- Different years
+
+Overall, how well did 538's prediction models perform? Were they better in some
+domains than others? Did they improve or get worse over time? Do you observe any
+artifacts in 538's forecasts, *e.g.*, overconfidence in tails?
+
+### Post-Processing to Improve Calibration (6 points)
+
+Apply isotonic post-processing (as shown above) to the various 538 forecast
+probabilities. Does this improve calibration and, if so, by how much and
+under what circumstances? 
+
+**Make sure to use appropriate data splitting hygiene in your analysis.**
+
+
+## Comparing Regression & Classification on the Same Task (12 points) {#q6}
+
+In this question, we will take another look at the 
+[California drought prediction task](./data/ps02_ca_drought.csv) introduced in
+the previous problem set. 
+
+You originally considered this as a *regression* task in which
+you were attempting to predict the drought severity score. We're now going to 
+instead consider the *classification* task of determining simply whether we are
+in a drought or not. 
+
+Re-download the CA drought data and create a new response variable indicating
+when the PDSI is below 2 (moderate drought or worse). 
+
+Fit classification models to this data set, including (at a minimum): 
+
+- Ridge-Regularized Logistic Regression
+- Lasso-Regularized Logistic Regression
+- $K$-Nearest Neighbors Classification
+- A simple tree-based classifier
+- Random forest classifier
+- `xgboost` classifier
+
+Observe best practices (cross-validation and similar) for hyperparameter tuning 
+and estimating test performance. Which of these has the best performance and why?
+(Make sure to omit the original PDSI variable from these models and use only the
+SST variables; the PDSI variable is clearly 'too good' a predictor.)
+
+Next, repeat your analysis using the _regression_ versions of each method on 
+the original data set. Compare your results to the classification versions. 
+
+- On which task do you achieve better performance?
+- How would you compare regression and classification performance measures? 
+- Is the 'shape' of the predictions the same across all 10 models? (*I.e.*,
+  even if the values differ, do they consistently identify the same 'high' and
+  'low' years?)
+- For models that allow you to calculate feature importance measures, are the
+  same features important?
+  
+When comparing 'paired' classification and regression tasks (like those
+considered here), there are two countervailing forces: 
+
+- Regression provides more information per observation 
+- Classification limits the amount by which one can be wrong (0/1), so the task
+  is fundamentally 'easier' in some sense. 
+  
+In general, it is hard to say which effect will win out for a particular problem.
+Which effect seems to have been stronger in this comparison? Justify your answer. 
+
+## Fairness in Machine Learning (9 points) {#q7}
+
+In many situations, when applying a classifier as an automated decision rule, 
+there are important *non-discrimination* laws that must be followed.[^regr] In
+this question, we're going to *audit* the HDMA data for signs of discrimination.
+As we will see, there are *many* different mathematical formalisms for bias and
+they do not always (or even often!) agree. 
+
+### Demographic Parity (4 points)
+
+The simplest measure of bias in classification is known as *(deviation from) 
+demographic parity*. Demographic parity is the idea that the percentage of
+'positives' from each sub-population should match the percentage of
+that sub-population in the broader population: *e.g.*, if a state has a 
+population that is 30% African-American, its elected officials should be
+(approximately) 30% African-American as well.[^baseline_pop]
+For our population, we're going to use the total population of mortgage 
+applicants as the reference population: so if female mortgage applicants are
+30% of all applicants, they should also hold (approximately) 30% of all 
+_approved_ mortgages. 
+
+Examine the HDMA data. Do you see any signs that demographic parity is 
+systematically violated by any bank against any groups? 
+
+Note that this is a rather unrealistic analysis. Other fairness measures such
+as _equality of opportunity_ would likely be more appropriate here, but we don't
+have actual repayment records for this data so this would not be feasible for us
+to calculate. 
+
+[^baseline_pop]: Selecting the _right_ baseline population to compare against
+is a bit tricky: when looking at, *e.g.*, the composition of a corporate board,
+should it reflect America as a whole, American adults, American adults over
+the age of 50 (plausible 'senior executives'), the shareholders of that 
+corporation, the customer population of the business, *etc*?
+
+
+### An Audit Construction (5 points)
+
+One way to _audit_ this type of data for signs of bias is to via a carefully
+constructed `LOCO` analysis. Specifically: we would like to consider two models: 
+
+$$f_1: \text{Race} \approx f(\text{Features Other Than Approval})$$
+
+and 
+
+$$f_2: \text{Race} \approx f(\text{All Features})$$
+
+If $f_2$ is signifcantly more accurate than $f_1$ -- *i.e.*, if knowing the
+approval status helps to predict the applicant's race more than just knowing
+their baseline economic info -- that is evidence that there may be a systematic
+racial difference in approval rates.[^condition]
+
+Use a powerful classifier of your choosing[^rf] to conduct this type of audit
+study on the sensitive attributes of race, sex, and Hispanic/Latino ethnicity.
+(This should be 3 distinct studies. You don't need to consider any sort of
+'intersectionality' for this problem unless you want to go deeper.)
+
+[^condition]: The `LOCO` behavior is important here. We want to compare 
+"Everything" *vs.* "Everything except Race". It is not enough to simply see 
+if Race is predictive of approval rates, because that may be a (permissible)
+indirect relationship. If, due to historical biases, one group has systematically
+lower incomes, banks may approval their applications at a lower rates due to
+the (permissible) lower incomes and higher chance of payment issues, not
+racial bias. Not surprisingly, this is a rather contentious topic: in essence, 
+we are asking whethere disperate outcomes are *per se* evidence of bias. While
+many arguments can be made on both sides, this construct of 'impact over and
+above just economics' is my current best understanding of the law and will
+suffice for this problem.
+
+
+
+See <https://fairmlbook.org/> for *much* more on this topic. 
+
+[^regr]: Non-discrimination laws apply to 'regression-type' systems as well, but
+the mathematical formalisms for fairness in regression are not nearly as well
+developed.
+
+[^rf]: I default to Random Forests for things like this, but the 'cool kids' 
+might reach for `xgboost`. 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>STAT 3106 Problem Set #3 – STAT 3106</title>
+<title>STAT 3106 Problem Set #3: Classification &amp; Ensemble Methods – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -22,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -67,7 +102,32 @@ ul.task-list li input[type="checkbox"] {
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script>
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="floating nav-fixed quarto-light">
 
@@ -110,18 +170,43 @@ ul.task-list li input[type="checkbox"] {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#data-files" id="toc-data-files" class="nav-link" data-scroll-target="#data-files">Data Files</a></li>
+  <li><a href="#q1" id="toc-q1" class="nav-link" data-scroll-target="#q1"><span class="header-section-number">1</span> Review: ML Foundations and Regression (12 points)</a></li>
+  <li><a href="#q2" id="toc-q2" class="nav-link" data-scroll-target="#q2"><span class="header-section-number">2</span> Practice of Machine Learning (12 points)</a></li>
+  <li><a href="#q3" id="toc-q3" class="nav-link" data-scroll-target="#q3"><span class="header-section-number">3</span> Short Answer Questions (12 points)</a></li>
+  <li><a href="#q4" id="toc-q4" class="nav-link" data-scroll-target="#q4"><span class="header-section-number">4</span> Comparing Predictive Performance: Linear, Non-Linear, and Ensemble Classifiers (9 points)</a></li>
+  <li>
+<a href="#q5" id="toc-q5" class="nav-link" data-scroll-target="#q5"><span class="header-section-number">5</span> Calibration (9 points)</a>
+  <ul class="collapse">
+<li><a href="#assessing-calibration-3-points" id="toc-assessing-calibration-3-points" class="nav-link" data-scroll-target="#assessing-calibration-3-points"><span class="header-section-number">5.1</span> Assessing Calibration (3 points)</a></li>
+  <li><a href="#post-processing-to-improve-calibration-6-points" id="toc-post-processing-to-improve-calibration-6-points" class="nav-link" data-scroll-target="#post-processing-to-improve-calibration-6-points"><span class="header-section-number">5.2</span> Post-Processing to Improve Calibration (6 points)</a></li>
+  </ul>
+</li>
+  <li><a href="#q6" id="toc-q6" class="nav-link" data-scroll-target="#q6"><span class="header-section-number">6</span> Comparing Regression &amp; Classification on the Same Task (12 points)</a></li>
+  <li>
+<a href="#q7" id="toc-q7" class="nav-link" data-scroll-target="#q7"><span class="header-section-number">7</span> Fairness in Machine Learning (9 points)</a>
+  <ul class="collapse">
+<li><a href="#demographic-parity-4-points" id="toc-demographic-parity-4-points" class="nav-link" data-scroll-target="#demographic-parity-4-points"><span class="header-section-number">7.1</span> Demographic Parity (4 points)</a></li>
+  <li><a href="#an-audit-construction-5-points" id="toc-an-audit-construction-5-points" class="nav-link" data-scroll-target="#an-audit-construction-5-points"><span class="header-section-number">7.2</span> An Audit Construction (5 points)</a></li>
+  </ul>
+</li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps03.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">STAT 3106 Problem Set #3</h1>
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">STAT 3106 Problem Set #3: Classification &amp; Ensemble Methods</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
   
@@ -132,12 +217,2346 @@ ul.task-list li input[type="checkbox"] {
 
 </header><ul>
 <li>Problem Set Assigned: Monday October 26</li>
-<li><strong>Due Date: Friday November 13 at 5:00PM on Canvas/Courseworks</strong></li>
+<li>
+<strong>Due Date: Friday November 13 at 5:00PM on Canvas/Courseworks</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+</li>
 </ul>
+<div class="callout callout-style-default callout-important callout-titled" title="Submission Instructions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Submission Instructions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Submit your assignment as a PDF on Canvas/Courseworks.</p>
+<p>Please observe the following guidelines when submitting an assignment:</p>
+<ol type="1">
+<li>Use 10-12 point font, 1.25 or 1.5-spaced.</li>
+<li>Each problem should start on a new page. It is allowed, but not required, for subparts to start a new page, <em>e.g.</em>, you do not need a page break before starting 2(b), but you do need a page break before starting 2(a).</li>
+<li>When including code alongside a submission, run it through a code formatting tool and keep lines to no more than 80 characters so they don’t run off the end of the page. Unintelligible code is presumtively incorrect.</li>
+<li>Figures and tables should have proper titles, axis labels, units, <em>etc.</em>
+</li>
+</ol>
+<p>You can use any formatting engine you prefer (<code>jupyter</code>, <code>R Markdown</code>, <em>etc</em>), but I recommend <a href="https://quarto.org/"><code>Quarto</code></a>.</p>
+<p>Examples:</p>
+<ul>
+<li><p><code>R</code>-focused: <a href="https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/problem_sets/ps_example_r.qmd">Source</a> and <a href="./ps_example_r.pdf">Output</a></p></li>
+<li><p><code>python</code>-focused: <a href="https://raw.githubusercontent.com/michaelweylandt/STAT3106/refs/heads/main/problem_sets/ps_example_py.qmd">Source</a> and <a href="./ps_example_py.pdf">Output</a></p></li>
+</ul>
+<p>You may work with as many classmates as you wish, but please note the names of classmates with whom you collaborated.</p>
+</div>
+</div>
+<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}} \newcommand{\P}{\mathbb{P}}\]</span></p>
+<section id="introduction" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this problem set, you will consider a wide variety of tools for <em>classification</em>. In addition to comparing different classifiers, you will also examine the <em>calibration</em> of different predictions, see how post-processing techniques can be used to improve calibration, and see how classifiers can be used to perform anti-bias audits in large data sets.</p>
+</section><section id="data-files" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="data-files">Data Files</h2>
+<p>For this data set, we introduce a data taken from the <a href="https://ffiec.cfpb.gov/data-browser/data/2025">Federal HMDA Dataset</a>. Under the Home Mortgage Disclosure Act, lenders are required to report details of all mortgage applications they process to the federal government to ensure compliance with the Fair Housing Act (and related rules and regulations). I have taken the full data set of approximately 13.5 million mortgage applications and focused on a smaller set of around 2.3 million applications for which all data was clean and easily interpreted. The reduced data set can be found <a href="./data/ps03_hdma.csv.gz">here</a>.</p>
+<p>Most of the features of this data set are self-explanatory:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span></span>
+<span><span class="va">hdma_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"https://michael-weylandt.com/STAT3106/problem_sets/data/ps03_hdma.csv.gz"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 2315497 Columns: 21
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (6): city, state, race, sex, loan_type, loan_size
+dbl (12): loan_amount, loan_term, property_value, income, debt_to_income_rat...
+lgl  (3): hispanic_or_latino, approved, prior_preapproval
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/skimr/">skimr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">hdma_data</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">hdma_data</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">2315497</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">21</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">logical</td>
+<td style="text-align: left;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 13%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 15%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">city</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">71</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">418</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">state</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">race</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sex</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">loan_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan_size</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: logical</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 6%">
+<col style="width: 35%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: left;">count</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">hispanic_or_latino</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: left;">FAL: 1988922, TRU: 326575</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">approved</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.67</td>
+<td style="text-align: left;">TRU: 1550060, FAL: 765437</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">prior_preapproval</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: left;">FAL: 2258537, TRU: 56960</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 4%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">loan_amount</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">266280.00</td>
+<td style="text-align: right;">365750.87</td>
+<td style="text-align: right;">5000</td>
+<td style="text-align: right;">85000.00</td>
+<td style="text-align: right;">195000.00</td>
+<td style="text-align: right;">345000.00</td>
+<td style="text-align: right;">150005000</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan_term</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">315.71</td>
+<td style="text-align: right;">85.74</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">300.00</td>
+<td style="text-align: right;">360.00</td>
+<td style="text-align: right;">360.00</td>
+<td style="text-align: right;">3660</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">property_value</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">564823.18</td>
+<td style="text-align: right;">4193910.10</td>
+<td style="text-align: right;">5000</td>
+<td style="text-align: right;">275000.00</td>
+<td style="text-align: right;">405000.00</td>
+<td style="text-align: right;">625000.00</td>
+<td style="text-align: right;">2147483647</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">income</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">305.61</td>
+<td style="text-align: right;">93331.02</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">70.00</td>
+<td style="text-align: right;">113.00</td>
+<td style="text-align: right;">190.00</td>
+<td style="text-align: right;">120000000</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">debt_to_income_ratio</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">41.85</td>
+<td style="text-align: right;">16.87</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">30.00</td>
+<td style="text-align: right;">30.00</td>
+<td style="text-align: right;">60.00</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: left;">▃▇▁▁▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tract_population</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4791.01</td>
+<td style="text-align: right;">2135.46</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3434.00</td>
+<td style="text-align: right;">4535.00</td>
+<td style="text-align: right;">5827.00</td>
+<td style="text-align: right;">30199</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tract_minority_population_percent</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">34.90</td>
+<td style="text-align: right;">25.35</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">14.73</td>
+<td style="text-align: right;">27.25</td>
+<td style="text-align: right;">49.57</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: left;">▇▆▃▂▂</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tract_to_msa_income_percentage</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">111.62</td>
+<td style="text-align: right;">41.78</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">85.00</td>
+<td style="text-align: right;">107.00</td>
+<td style="text-align: right;">132.00</td>
+<td style="text-align: right;">516</td>
+<td style="text-align: left;">▇▇▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tract_owner_occupied_units</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1241.31</td>
+<td style="text-align: right;">572.13</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">842.00</td>
+<td style="text-align: right;">1188.00</td>
+<td style="text-align: right;">1576.00</td>
+<td style="text-align: right;">6276</td>
+<td style="text-align: left;">▇▆▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tract_one_to_four_family_homes</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1664.34</td>
+<td style="text-align: right;">678.27</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1216.00</td>
+<td style="text-align: right;">1618.00</td>
+<td style="text-align: right;">2053.00</td>
+<td style="text-align: right;">8233</td>
+<td style="text-align: left;">▇▇▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tract_median_age_of_housing_units</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">36.18</td>
+<td style="text-align: right;">18.21</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">23.00</td>
+<td style="text-align: right;">36.00</td>
+<td style="text-align: right;">49.00</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: left;">▃▇▇▅▂</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ltv</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">154.18</td>
+<td style="text-align: right;">49361.87</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">52.31</td>
+<td style="text-align: right;">75.00</td>
+<td style="text-align: right;">89.90</td>
+<td style="text-align: right;">49000000</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Note that three features in this data set refer to protected classes under US antidiscrimination law (race, sex, and ethnicity, here reported as “Hispanic/Latino” or “Not Hispanic/Latino” following relevant <a href="https://www.census.gov/topics/population/hispanic-origin/about.html">Federal Guidance</a>.) You should not use these ‘sensitive’ features in your initial analysis until you reach the anti-discrimination study in the final question.</p>
+<p>The <code>tract</code> quantities return to the census tract in which the property to be purchased is located. <code>ltv</code> refers to <code>loan-to-value</code>, the fraction of the property’s total value to be paid <em>via</em> the mortgage.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>The (binary) response of interest is the <code>approved</code> flag, indicating whether the application was ultimately approved. This data is reasonably well-balanced with approximately 66% approvals and 33% disapprovals.</p>
+</section><section id="q1" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="q1">
+<span class="header-section-number">1</span> Review: ML Foundations and Regression (12 points)</h2>
+<p>Answer the following short answer questions, worth two points each:</p>
+<ol type="1">
+<li>
+<p>When fitting a model via a first-order (stochastic gradient) methods, the choice of <em>(mini-)batch size</em> is an important parameter; machine learners typically choose the mini-batch size to balance the pros and cons of full batch and one-at-a-time (online) gradient methods.</p>
+<p>Explain these pros and cons and why a moderate mini-batch size is typically used (32, 128, 512, <em>etc</em>).</p>
+<p>You do not need to argue for a specific amount, as the optimal batch size is often model, data, and hardware specific. Just explain what the pros and cons of each extreme end of the spectrum are.</p>
+</li>
+<li>
+<p>Rank the following models from highest to lowest (statistical) complexity:</p>
+<ul>
+<li>Ridge Regression</li>
+<li>OLS</li>
+<li>
+<span class="math inline">\(3\)</span>-Nearest Neighbor Regression</li>
+<li>4th Order Polynomial Regression (fourth order expansions across all combinations of features)</li>
+<li>A spline model with 4 knots in one feature and no non-linearity in any other features</li>
+<li>
+<span class="math inline">\(n-2\)</span>-Nearest Neighbor Regression</li>
+</ul>
+</li>
+<li><p>What are the practical trade-offs when deciding the proportion of data to allocate to the validation set versus the training set in a data-scarce environment? How does cross-validation attempt to navigate these tradeoffs?</p></li>
+<li><p><em>(Multi-)collinearity</em> is an oft-cited boogeyman when applying regression models. Explain why this is not actually a problem if you are only interested in prediction and what sort of techniques can be used to mitigate any adverse effects.</p></li>
+<li><p>To predict the number of rare birds observed in a given region, enterprising ornithologists will build a model that incorporates weather, time of year, migration patterns, food availability, and proximity to humans. What type of <em>generalized linear model</em> would be appropriate for this task? Note both the link function and the sampling distribution?</p></li>
+<li><p>LASSO regression and Additive Models both attempt to provide a high degree of <em>interpretability</em>. Compare and contrast these two methods, taking care to specifically contrast the <em>type of interpretability</em> each method provides and the different regimes in which they may be used.</p></li>
+</ol></section><section id="q2" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="q2">
+<span class="header-section-number">2</span> Practice of Machine Learning (12 points)</h2>
+<p>Consider the scenario below in which I describe a hypothetical application of ML. There are (at least) 4 issues in how the ML system is developed, tested, and deployed. Identify <strong>three</strong> distinct issues and, for each issue you identify, describe:</p>
+<ul>
+<li>The mistake that was made (1 points)</li>
+<li>The likely adverse impact arising from the mistake (1 points)</li>
+<li>What should have been done instead (2 points)</li>
+</ul>
+<p>(This is what lawyers might call an “Issue Spotter” question.)</p>
+<p><strong>Scenario</strong>: Following your helpful feedback in <a href="../problem_sets/ps02.html#q1">Problem Set #02</a>, the good folks at Hamilton, Butler and Low (HBL) Consulting have decided to rework their automated talent interview pipeline. The People Analytics team were asked to develop a (probabilistic) talent recruitment classifier that can be used to perform resume scans; the result was Project CROWN (Candidate Ranking for Onboarding and Welcoming Newcomers).</p>
+<p>CROWN’s objective was to predict whether an applicant represents an “Elite Associate” (<span class="math inline">\(Y = 1\)</span>), defined as finishing in the top 5% of their cohort across billable impact and annual reviews. Training on 4,000 historical applicant files from 2018 to 2023 (yielding exactly 200 positive and 3,800 negative cases), the engineers extracted hundreds of resume keywords (tokens), problem-solving scores, and behavior records from things like participation in sponsored recruiting events and alumni network recommendations. Because partner interview slots were strictly limited, the HBL management committee established a simple decision rule: any candidate whose predicted probability of eliteness (PPE) <span class="math inline">\(\hat{p}\)</span> exceeded 50% would automatically receive an invitation to final-round interviews with firm leadership, while those below 50% would be rejected without further review.</p>
+<p>The CROWN team initially benchmarked linear classifiers before moving to considering tree-based methods and ensembles. When fitting a Support Vector Machine (SVM) the model achieved a 95.0% accuracy with minimal tuning. Eager to extend this already highly performant model to capture non-linear credential combinations, the team transitioned to <code>xgboost</code>. They fit the boosted tree ensemble with a max tree depth of 12, a high learning rate of <span class="math inline">\(0.99\)</span>, and disabled all row and column sub-sampling to make sure all features were well captured by the model. After running the algorithm for 3000 rounds, <code>xgboost</code> had an in-sample cross-entropy (logistic loss) of 0.001% and a cross-validated AUC of 93%. These strong performance scores convinced the People Analytics team that the <code>xgboost</code> predictions were accurate and well-calibrated and that CROWN was ready to go live for the upcoming recruiting season.</p>
+</section><section id="q3" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="q3">
+<span class="header-section-number">3</span> Short Answer Questions (12 points)</h2>
+<p>Answer the following short answer questions, worth two points each:</p>
+<ol type="1">
+<li>
+<p>Determine the optimal classification threshold for the following problem:</p>
+<p>You are a pirate captain sailing the seas in search of buried treasure (gold doubloons!). You work with a mysterious old witch who can only estimate the probability of treasure on an abandoned island. (She claims to have been perfectly accurate in her younger days, but time claims us all.) She informs you that Isla Probabilita has a 34% chance of buried treasure.</p>
+<p>It will cost you 50 dubloons to pay your crew to dig for treasure. If you find buried treasure, you expect it to be a chest of 500 dubloons. (Treasure ain’t what it used to be…) If you choose not to dig and the treasure is there, your crew will eventually hear about it and stage a mutiny, costing you command of your 1000 dubloon vessel.</p>
+<p>Should you order a dig? What probability would the mysterious old witch have to predict to encourage you to dig? What is the expected payoff of your decision on Isla Probabilita?</p>
+</li>
+<li><p>What is the connection between boosting methods (especially gradient boosting) and first order optimization?</p></li>
+<li>
+<p>A scientist is performing a genome-wide association study (GWAS) to identify genes that may be related to a rare disease. After performing the appropriate statistical modeling, she reports a list of 48 candidate genes with a False Discovery Rate (FDR) of 20%.</p>
+<p>Explain in non-technical terms what this means and why the scientist might choose to report an FDR instead of a more traditional false positive rate.</p>
+</li>
+<li>
+<p>When using a <em>bagging</em> ensemble, why is it more-or-less impossible to ‘over bag’? That is, why does excessive bagging not lead towards overfitting in the absence of a new data split?</p>
+<p>Why does the same argument fail to hold for stacking (combining more and more base learners) or boosting (adding more and more slow learners)?</p>
+</li>
+<li>
+<p>The AI Detection Software <a href="https://www.pangram.com/blog/third-party-pangram-evals"><code>pangram</code></a> advertises the following performance metrics:</p>
+<ul>
+<li>False Positive Rate (FPR): 0.1%</li>
+<li>False Negative Rate (FNR): 1%</li>
+<li>Classification Accuracy: 97.5%</li>
+</ul>
+<p>Which of these is the most important to a potential user and why? (If your answer depends on your assumed user’s primary usage patterns, please specify them.)</p>
+</li>
+<li><p>What are the challenges associated with building a model on an <em>unbalanced</em> data set? Why is pure <em>accuracy</em> particularly problematic in this context?</p></li>
+</ol></section><section id="q4" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="q4">
+<span class="header-section-number">4</span> Comparing Predictive Performance: Linear, Non-Linear, and Ensemble Classifiers (9 points)</h2>
+<p><strong>For this problem, do not use ‘sensitive’ attributes like race, sex or Hispanic/Latino ethnicity. We will return to those below.</strong></p>
+<p>Analyze the HDMA data introduced above, trying at least 5 different classifiers. In selecting the classifiers to compare, please make sure to try:</p>
+<ul>
+<li>At least 2 different linear classifiers</li>
+<li>At least 1 non-linear method (like a GAM or a decision tree)</li>
+<li>At least 2 different ensemble-based classifiers</li>
+<li>At least 2 different ‘highly interpretable’ methods</li>
+</ul>
+<p>Which methods perform the best? Does it depend on which accuracy measures you use? For the interpretable models, which features are the most important? Does this make economic sense?</p>
+<p><em>NB</em>: This is a somewhat large data set. While it doesn’t have high cardinality categorical features, you may still need to simplify or remove some categorical features to ensure things run in a reasonable amount of time. I recommend writing your analysis code on a small subset of the entire data set and only applying it to the entire data set once it is (almost) finalized.</p>
+</section><section id="q5" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="q5">
+<span class="header-section-number">5</span> Calibration (9 points)</h2>
+<p>When building a (binary) classifier, the property of <em>calibration</em> ensures that the model’s predicted (output) probabilities match the actual probabilities. (You can think of this as a ‘holistic’ accuracy measure for probabilistic classifiers that looks at all points on the curve, not just at a single point defining the decision boundary.)</p>
+<p>For a model to be calibrated, we want <span class="math inline">\(\P(Y | X) = \hat{p}(X)\)</span> for all possible inputs <span class="math inline">\(X\)</span>. While easily stated, this is not actually quite so simple to check in practice. We need ‘repeated’ <span class="math inline">\(X\)</span> to get a good estimate of the real probabilities <span class="math inline">\(\P(Y|X)\)</span> and outside of designed scenarios, exact replicates in <span class="math inline">\(X\)</span> are hard to find.</p>
+<p>This motivates the use of a <em>binning</em> strategy: we find several points where <span class="math inline">\(\hat{p}(X)\)</span> is around 10% and hope that 10% of the true labels for those points are positive. Let’s see this in action for our simple penguin sex model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/">broom</a></span><span class="op">)</span></span>
+<span><span class="va">penguins_ece</span> <span class="op">&lt;-</span> <span class="va">penguins</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>is_female <span class="op">=</span> <span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"female"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">is_female</span> <span class="op">~</span> <span class="va">body_mass</span> <span class="op">+</span> <span class="va">flipper_len</span>, </span>
+<span>        data<span class="op">=</span><span class="va">_</span>, </span>
+<span>        family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span>type.predict<span class="op">=</span><span class="st">"response"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>bucket<span class="op">=</span><span class="fu">ntile</span><span class="op">(</span><span class="va">.fitted</span>, n<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">group_by</span><span class="op">(</span><span class="va">bucket</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">summarize</span><span class="op">(</span>bucket_mean_model<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">.fitted</span><span class="op">)</span>, </span>
+<span>              bucket_mean_label<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">is_female</span><span class="op">)</span>, </span>
+<span>              bucket_min_model<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">.fitted</span><span class="op">)</span>, </span>
+<span>              bucket_max_model<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">.fitted</span><span class="op">)</span>,</span>
+<span>              bucket_error<span class="op">=</span><span class="va">bucket_mean_model</span> <span class="op">-</span> <span class="va">bucket_mean_label</span>,</span>
+<span>              n<span class="op">=</span><span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>ece <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html">weighted.mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">bucket_error</span><span class="op">)</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>yielding</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl_penguins_ece" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tbl_penguins_ece table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#tbl_penguins_ece thead, #tbl_penguins_ece tbody, #tbl_penguins_ece tfoot, #tbl_penguins_ece tr, #tbl_penguins_ece td, #tbl_penguins_ece th {
+  border-style: none;
+}
+
+#tbl_penguins_ece p {
+  margin: 0;
+  padding: 0;
+}
+
+#tbl_penguins_ece .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#tbl_penguins_ece .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tbl_penguins_ece .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tbl_penguins_ece .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tbl_penguins_ece .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tbl_penguins_ece .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tbl_penguins_ece .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tbl_penguins_ece .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tbl_penguins_ece .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#tbl_penguins_ece .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#tbl_penguins_ece .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tbl_penguins_ece .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tbl_penguins_ece .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tbl_penguins_ece .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tbl_penguins_ece .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#tbl_penguins_ece .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_ece .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_ece .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_ece .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tbl_penguins_ece .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece .gt_left {
+  text-align: left;
+}
+
+#tbl_penguins_ece .gt_center {
+  text-align: center;
+}
+
+#tbl_penguins_ece .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tbl_penguins_ece .gt_font_normal {
+  font-weight: normal;
+}
+
+#tbl_penguins_ece .gt_font_bold {
+  font-weight: bold;
+}
+
+#tbl_penguins_ece .gt_font_italic {
+  font-style: italic;
+}
+
+#tbl_penguins_ece .gt_super {
+  font-size: 65%;
+}
+
+#tbl_penguins_ece .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#tbl_penguins_ece .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#tbl_penguins_ece .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#tbl_penguins_ece .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#tbl_penguins_ece .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#tbl_penguins_ece .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#tbl_penguins_ece .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#tbl_penguins_ece .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#tbl_penguins_ece div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="6" class="gt_heading gt_title gt_font_normal">Calibration Analysis of Penguins 2 Factor Sex-Prediction Model</td>
+</tr>
+<tr class="gt_heading even">
+<td colspan="6" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Expected Calibration Error 7.53%</td>
+</tr>
+<tr class="gt_col_headings header">
+<th id="bucket" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Bucket Number</th>
+<th id="bucket_mean_model" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Average Predicted Probability</th>
+<th id="bucket_mean_label" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">True Fraction</th>
+<th id="bucket_min_model" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Range of Predicted Probabilities</th>
+<th id="bucket_error" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Calibration Error</th>
+<th id="n" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Number of Observations</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">1</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">9.16%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">5.88%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[1.79%-14.40%]</td>
+<td class="gt_row gt_right" headers="bucket_error">3.28%</td>
+<td class="gt_row gt_right" headers="n">34</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">2</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">20.73%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">5.88%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[14.42%-25.33%]</td>
+<td class="gt_row gt_right" headers="bucket_error">14.84%</td>
+<td class="gt_row gt_right" headers="n">34</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">3</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">29.18%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">35.29%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[25.39%-32.97%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−6.11%</td>
+<td class="gt_row gt_right" headers="n">34</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">4</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">37.69%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">48.48%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[33.64%-42.25%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−10.79%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">5</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">45.93%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">63.64%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[42.44%-50.28%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−17.70%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">6</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">56.07%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">57.58%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[51.35%-59.57%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−1.51%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">7</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">62.50%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">57.58%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[59.61%-66.13%]</td>
+<td class="gt_row gt_right" headers="bucket_error">4.92%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">8</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">71.03%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">72.73%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[66.48%-74.71%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−1.69%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">9</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">78.32%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">66.67%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[74.74%-81.76%]</td>
+<td class="gt_row gt_right" headers="bucket_error">11.66%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">10</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">87.59%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">84.85%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[81.88%-96.47%]</td>
+<td class="gt_row gt_right" headers="bucket_error">2.75%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This is decent - particularly in some parts of the model - but in other parts of the curve our probabilities may be off by 15% or more. Taking the (bin-size weighted) average of the bucket-wise calibration errors, we get a measure called <em>Expected Calibration Error</em> (ECE), which is around 7.53% for this particular set of forecasts.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>ECE is a good measure, but it is a bit unstable in practice. Selecting different numbers of buckets or even just ‘shifting’ the bucket endpoints around can change your results, sometimes quite dramatically. Despite this, we’ll use it as our primary metric for this question.</p>
+<p>Here, seeing that calibration isn’t all that great (we’re off by 8% on average) we might want to <em>adjust</em> our model to improve calibration. One approach is to consider a different family of models: alternatively we can take the output of the model we already have and <em>post-process</em> it to improve calibration. In situations where the probabilities are too low (red) we might want to ‘bump’ them up a bit and where they are too high (black) we might want to similarly adjust them downwards.</p>
+<p>Naively, we might do this by pushing probabilities for the ‘true’ outcomes all the way to 1 and to 0 for the ‘false’ outcomes, but this essentially destroys the shape of our predictor and functionally reduces us to fitting <span class="math inline">\(1\)</span>-nearest neighbors. A better approach is to adjust probabilities <em>while maintaining ordering</em>: so if we have two observations, with <span class="math inline">\(\hat{p} = (0.3, 0.4)\)</span>, we could post proces to <span class="math inline">\((0.2, 0.4)\)</span> or <span class="math inline">\((0.4, 0.5)\)</span> or maybe even <span class="math inline">\((0.45, 0.45)\)</span>, but not to <span class="math inline">\((0.4, 0.2)\)</span> because we’d break the existing ordering. This sounds like it might be hard, but thankfully there’s a classical statistical technique called <em>isotonic regression</em> that does exactly this.</p>
+<p>The details of isotonic regression are beyond this course, but the below image should get the main idea across:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ps03_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here, the isotonic regression curve (red) minimizes the MSE to the observed values (black dots) among all <em>non-decreasing</em> curves.</p>
+<p>(Make sure you understand why this is exactly the type of constraint we might want to apply when post-processing a set of predictions to improve calibration.)</p>
+<p>If we apply this to our penguin model from above, we could get the following <em>post-processed</em> predictions.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">penguins_logistic_iso</span> <span class="op">&lt;-</span> <span class="va">penguins</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>is_female <span class="op">=</span> <span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"female"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">is_female</span> <span class="op">~</span> <span class="va">body_mass</span> <span class="op">+</span> <span class="va">flipper_len</span>, </span>
+<span>        data<span class="op">=</span><span class="va">_</span>, </span>
+<span>        family<span class="op">=</span><span class="va">binomial</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span>type.predict<span class="op">=</span><span class="st">"response"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">arrange</span><span class="op">(</span><span class="va">.fitted</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>.fitted.iso <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/isoreg.html">isoreg</a></span><span class="op">(</span><span class="va">.fitted</span>, <span class="va">is_female</span><span class="op">)</span><span class="op">$</span><span class="va">yf</span>, </span>
+<span>           sex<span class="op">=</span><span class="fu">if_else</span><span class="op">(</span><span class="va">is_female</span>, <span class="st">"Female"</span>, <span class="st">"Male"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl_penguins_iso" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tbl_penguins_iso table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#tbl_penguins_iso thead, #tbl_penguins_iso tbody, #tbl_penguins_iso tfoot, #tbl_penguins_iso tr, #tbl_penguins_iso td, #tbl_penguins_iso th {
+  border-style: none;
+}
+
+#tbl_penguins_iso p {
+  margin: 0;
+  padding: 0;
+}
+
+#tbl_penguins_iso .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#tbl_penguins_iso .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tbl_penguins_iso .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tbl_penguins_iso .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tbl_penguins_iso .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tbl_penguins_iso .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tbl_penguins_iso .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tbl_penguins_iso .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tbl_penguins_iso .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#tbl_penguins_iso .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#tbl_penguins_iso .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tbl_penguins_iso .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tbl_penguins_iso .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tbl_penguins_iso .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tbl_penguins_iso .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_iso .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#tbl_penguins_iso .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_iso .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_iso .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_iso .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_iso .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_iso .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tbl_penguins_iso .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_iso .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_iso .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_iso .gt_left {
+  text-align: left;
+}
+
+#tbl_penguins_iso .gt_center {
+  text-align: center;
+}
+
+#tbl_penguins_iso .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tbl_penguins_iso .gt_font_normal {
+  font-weight: normal;
+}
+
+#tbl_penguins_iso .gt_font_bold {
+  font-weight: bold;
+}
+
+#tbl_penguins_iso .gt_font_italic {
+  font-style: italic;
+}
+
+#tbl_penguins_iso .gt_super {
+  font-size: 65%;
+}
+
+#tbl_penguins_iso .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#tbl_penguins_iso .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#tbl_penguins_iso .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#tbl_penguins_iso .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#tbl_penguins_iso .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#tbl_penguins_iso .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#tbl_penguins_iso .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#tbl_penguins_iso .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#tbl_penguins_iso div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead><tr class="gt_col_headings header">
+<th id="sex" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Sex</th>
+<th id="body_mass" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Body Mass (g)</th>
+<th id="flipper_len" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Flipper Len (mm)</th>
+<th id="a.fitted" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Logistic Regression Prediction</th>
+<th id="a.fitted.iso" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Isotonically Recalibrated Logistic Prediction</th>
+</tr></thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4600</td>
+<td class="gt_row gt_right" headers="flipper_len">190</td>
+<td class="gt_row gt_right" headers=".fitted">10.29%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">0.00%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4600</td>
+<td class="gt_row gt_right" headers="flipper_len">191</td>
+<td class="gt_row gt_right" headers=".fitted">11.18%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">0.00%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">5700</td>
+<td class="gt_row gt_right" headers="flipper_len">225</td>
+<td class="gt_row gt_right" headers=".fitted">12.33%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">0.00%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Female</td>
+<td class="gt_row gt_right" headers="body_mass">5200</td>
+<td class="gt_row gt_right" headers="flipper_len">212</td>
+<td class="gt_row gt_right" headers=".fitted">14.40%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">10.26%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">5300</td>
+<td class="gt_row gt_right" headers="flipper_len">215</td>
+<td class="gt_row gt_right" headers=".fitted">14.42%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">10.26%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">5600</td>
+<td class="gt_row gt_right" headers="flipper_len">228</td>
+<td class="gt_row gt_right" headers=".fitted">19.73%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">10.26%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">5300</td>
+<td class="gt_row gt_right" headers="flipper_len">221</td>
+<td class="gt_row gt_right" headers=".fitted">22.76%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">10.26%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Female</td>
+<td class="gt_row gt_right" headers="body_mass">5000</td>
+<td class="gt_row gt_right" headers="flipper_len">216</td>
+<td class="gt_row gt_right" headers=".fitted">29.87%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">33.33%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4200</td>
+<td class="gt_row gt_right" headers="flipper_len">194</td>
+<td class="gt_row gt_right" headers=".fitted">33.64%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">33.33%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Female</td>
+<td class="gt_row gt_right" headers="body_mass">3700</td>
+<td class="gt_row gt_right" headers="flipper_len">181</td>
+<td class="gt_row gt_right" headers=".fitted">37.74%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4050</td>
+<td class="gt_row gt_right" headers="flipper_len">192</td>
+<td class="gt_row gt_right" headers=".fitted">38.97%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Female</td>
+<td class="gt_row gt_right" headers="body_mass">3600</td>
+<td class="gt_row gt_right" headers="flipper_len">181</td>
+<td class="gt_row gt_right" headers=".fitted">44.46%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4300</td>
+<td class="gt_row gt_right" headers="flipper_len">205</td>
+<td class="gt_row gt_right" headers=".fitted">51.70%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">3550</td>
+<td class="gt_row gt_right" headers="flipper_len">183</td>
+<td class="gt_row gt_right" headers=".fitted">52.57%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4050</td>
+<td class="gt_row gt_right" headers="flipper_len">200</td>
+<td class="gt_row gt_right" headers=".fitted">57.38%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4050</td>
+<td class="gt_row gt_right" headers="flipper_len">201</td>
+<td class="gt_row gt_right" headers=".fitted">59.64%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">4100</td>
+<td class="gt_row gt_right" headers="flipper_len">203</td>
+<td class="gt_row gt_right" headers=".fitted">60.78%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Female</td>
+<td class="gt_row gt_right" headers="body_mass">3250</td>
+<td class="gt_row gt_right" headers="flipper_len">178</td>
+<td class="gt_row gt_right" headers=".fitted">61.57%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="sex">Male</td>
+<td class="gt_row gt_right" headers="body_mass">3750</td>
+<td class="gt_row gt_right" headers="flipper_len">193</td>
+<td class="gt_row gt_right" headers=".fitted">61.76%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">57.89%</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="sex">Female</td>
+<td class="gt_row gt_right" headers="body_mass">3250</td>
+<td class="gt_row gt_right" headers="flipper_len">195</td>
+<td class="gt_row gt_right" headers=".fitted">88.66%</td>
+<td class="gt_row gt_right" headers=".fitted.iso">91.67%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>These recalibrated predictions no longer have the linear structure of logistic regression, but they exhibit far better calibration:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl_penguins_ece_iso" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tbl_penguins_ece_iso table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#tbl_penguins_ece_iso thead, #tbl_penguins_ece_iso tbody, #tbl_penguins_ece_iso tfoot, #tbl_penguins_ece_iso tr, #tbl_penguins_ece_iso td, #tbl_penguins_ece_iso th {
+  border-style: none;
+}
+
+#tbl_penguins_ece_iso p {
+  margin: 0;
+  padding: 0;
+}
+
+#tbl_penguins_ece_iso .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#tbl_penguins_ece_iso .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tbl_penguins_ece_iso .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tbl_penguins_ece_iso .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tbl_penguins_ece_iso .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tbl_penguins_ece_iso .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tbl_penguins_ece_iso .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tbl_penguins_ece_iso .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tbl_penguins_ece_iso .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#tbl_penguins_ece_iso .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#tbl_penguins_ece_iso .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tbl_penguins_ece_iso .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tbl_penguins_ece_iso .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tbl_penguins_ece_iso .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tbl_penguins_ece_iso .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece_iso .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#tbl_penguins_ece_iso .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_ece_iso .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_ece_iso .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece_iso .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#tbl_penguins_ece_iso .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece_iso .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tbl_penguins_ece_iso .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece_iso .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tbl_penguins_ece_iso .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tbl_penguins_ece_iso .gt_left {
+  text-align: left;
+}
+
+#tbl_penguins_ece_iso .gt_center {
+  text-align: center;
+}
+
+#tbl_penguins_ece_iso .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tbl_penguins_ece_iso .gt_font_normal {
+  font-weight: normal;
+}
+
+#tbl_penguins_ece_iso .gt_font_bold {
+  font-weight: bold;
+}
+
+#tbl_penguins_ece_iso .gt_font_italic {
+  font-style: italic;
+}
+
+#tbl_penguins_ece_iso .gt_super {
+  font-size: 65%;
+}
+
+#tbl_penguins_ece_iso .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#tbl_penguins_ece_iso .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#tbl_penguins_ece_iso .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#tbl_penguins_ece_iso .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#tbl_penguins_ece_iso .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#tbl_penguins_ece_iso .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#tbl_penguins_ece_iso .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#tbl_penguins_ece_iso .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#tbl_penguins_ece_iso div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="6" class="gt_heading gt_title gt_font_normal">Calibration Analysis of Penguins 2 Factor Sex-Prediction Model After Isotonic Recalibration</td>
+</tr>
+<tr class="gt_heading even">
+<td colspan="6" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Expected Calibration Error 4.03%</td>
+</tr>
+<tr class="gt_col_headings header">
+<th id="bucket" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Bucket Number</th>
+<th id="bucket_mean_model" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Average Predicted Probability</th>
+<th id="bucket_mean_label" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">True Fraction</th>
+<th id="bucket_min_model" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Range of Predicted Probabilities</th>
+<th id="bucket_error" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Calibration Error</th>
+<th id="n" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Number of Observations</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">1</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">0.90%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">5.88%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[1.79%-14.40%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−4.98%</td>
+<td class="gt_row gt_right" headers="n">34</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">2</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">10.26%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">5.88%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[14.42%-25.33%]</td>
+<td class="gt_row gt_right" headers="bucket_error">4.37%</td>
+<td class="gt_row gt_right" headers="n">34</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">3</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">31.98%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">35.29%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[25.39%-32.97%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−3.32%</td>
+<td class="gt_row gt_right" headers="n">34</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">4</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">50.45%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">48.48%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[33.64%-42.25%]</td>
+<td class="gt_row gt_right" headers="bucket_error">1.97%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">5</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">57.89%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">63.64%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[42.44%-50.28%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−5.74%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">6</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">57.89%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">57.58%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[51.35%-59.57%]</td>
+<td class="gt_row gt_right" headers="bucket_error">0.32%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">7</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">60.02%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">57.58%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[59.61%-66.13%]</td>
+<td class="gt_row gt_right" headers="bucket_error">2.45%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">8</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">66.67%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">72.73%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[66.48%-74.71%]</td>
+<td class="gt_row gt_right" headers="bucket_error" style="color: #AA0000">−6.06%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="bucket">9</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">71.11%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">66.67%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[74.74%-81.76%]</td>
+<td class="gt_row gt_right" headers="bucket_error">4.44%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="bucket">10</td>
+<td class="gt_row gt_right" headers="bucket_mean_model">91.52%</td>
+<td class="gt_row gt_right" headers="bucket_mean_label">84.85%</td>
+<td class="gt_row gt_right" headers="bucket_min_model">[81.88%-96.47%]</td>
+<td class="gt_row gt_right" headers="bucket_error">6.67%</td>
+<td class="gt_row gt_right" headers="n">33</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>As shown, overfitting is a serious danger of this workflow. When doing this properly, you should make sure to train your model on one split, recalibrate on another, and compute test calibration on a third.</strong></p>
+<section id="assessing-calibration-3-points" class="level3" data-number="5.1"><h3 data-number="5.1" class="anchored" data-anchor-id="assessing-calibration-3-points">
+<span class="header-section-number">5.1</span> Assessing Calibration (3 points)</h3>
+<p>The (dearly departed) political forecasting site <a href="https://en.wikipedia.org/wiki/FiveThirtyEight">FiveThirtyEight</a> produced probabilistic forecasts for a wide range of sporting and political outcomes. A full set of probabilistics forecasts, alongside actual outcomes, can be found online at <a href="https://github.com/fivethirtyeight/checking-our-work-data/raw/refs/heads/master/raw_forecasts.zip" class="uri">https://github.com/fivethirtyeight/checking-our-work-data/raw/refs/heads/master/raw_forecasts.zip</a>.</p>
+<p>Download this file and assess the calibration of 538’s different forecast models. As you do so, make sure to compare calibration across:</p>
+<ul>
+<li>Different types of events (political vs sports)</li>
+<li>Different events (presidential vs legislative elections, <em>etc.</em>)</li>
+<li>Different years</li>
+</ul>
+<p>Overall, how well did 538’s prediction models perform? Were they better in some domains than others? Did they improve or get worse over time? Do you observe any artifacts in 538’s forecasts, <em>e.g.</em>, overconfidence in tails?</p>
+</section><section id="post-processing-to-improve-calibration-6-points" class="level3" data-number="5.2"><h3 data-number="5.2" class="anchored" data-anchor-id="post-processing-to-improve-calibration-6-points">
+<span class="header-section-number">5.2</span> Post-Processing to Improve Calibration (6 points)</h3>
+<p>Apply isotonic post-processing (as shown above) to the various 538 forecast probabilities. Does this improve calibration and, if so, by how much and under what circumstances?</p>
+<p><strong>Make sure to use appropriate data splitting hygiene in your analysis.</strong></p>
+</section></section><section id="q6" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="q6">
+<span class="header-section-number">6</span> Comparing Regression &amp; Classification on the Same Task (12 points)</h2>
+<p>In this question, we will take another look at the <a href="./data/ps02_ca_drought.csv">California drought prediction task</a> introduced in the previous problem set.</p>
+<p>You originally considered this as a <em>regression</em> task in which you were attempting to predict the drought severity score. We’re now going to instead consider the <em>classification</em> task of determining simply whether we are in a drought or not.</p>
+<p>Re-download the CA drought data and create a new response variable indicating when the PDSI is below 2 (moderate drought or worse).</p>
+<p>Fit classification models to this data set, including (at a minimum):</p>
+<ul>
+<li>Ridge-Regularized Logistic Regression</li>
+<li>Lasso-Regularized Logistic Regression</li>
+<li>
+<span class="math inline">\(K\)</span>-Nearest Neighbors Classification</li>
+<li>A simple tree-based classifier</li>
+<li>Random forest classifier</li>
+<li>
+<code>xgboost</code> classifier</li>
+</ul>
+<p>Observe best practices (cross-validation and similar) for hyperparameter tuning and estimating test performance. Which of these has the best performance and why? (Make sure to omit the original PDSI variable from these models and use only the SST variables; the PDSI variable is clearly ‘too good’ a predictor.)</p>
+<p>Next, repeat your analysis using the <em>regression</em> versions of each method on the original data set. Compare your results to the classification versions.</p>
+<ul>
+<li>On which task do you achieve better performance?</li>
+<li>How would you compare regression and classification performance measures?</li>
+<li>Is the ‘shape’ of the predictions the same across all 10 models? (<em>I.e.</em>, even if the values differ, do they consistently identify the same ‘high’ and ‘low’ years?)</li>
+<li>For models that allow you to calculate feature importance measures, are the same features important?</li>
+</ul>
+<p>When comparing ‘paired’ classification and regression tasks (like those considered here), there are two countervailing forces:</p>
+<ul>
+<li>Regression provides more information per observation</li>
+<li>Classification limits the amount by which one can be wrong (0/1), so the task is fundamentally ‘easier’ in some sense.</li>
+</ul>
+<p>In general, it is hard to say which effect will win out for a particular problem. Which effect seems to have been stronger in this comparison? Justify your answer.</p>
+</section><section id="q7" class="level2" data-number="7"><h2 data-number="7" class="anchored" data-anchor-id="q7">
+<span class="header-section-number">7</span> Fairness in Machine Learning (9 points)</h2>
+<p>In many situations, when applying a classifier as an automated decision rule, there are important <em>non-discrimination</em> laws that must be followed.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> In this question, we’re going to <em>audit</em> the HDMA data for signs of discrimination. As we will see, there are <em>many</em> different mathematical formalisms for bias and they do not always (or even often!) agree.</p>
+<section id="demographic-parity-4-points" class="level3" data-number="7.1"><h3 data-number="7.1" class="anchored" data-anchor-id="demographic-parity-4-points">
+<span class="header-section-number">7.1</span> Demographic Parity (4 points)</h3>
+<p>The simplest measure of bias in classification is known as <em>(deviation from) demographic parity</em>. Demographic parity is the idea that the percentage of ‘positives’ from each sub-population should match the percentage of that sub-population in the broader population: <em>e.g.</em>, if a state has a population that is 30% African-American, its elected officials should be (approximately) 30% African-American as well.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> For our population, we’re going to use the total population of mortgage applicants as the reference population: so if female mortgage applicants are 30% of all applicants, they should also hold (approximately) 30% of all <em>approved</em> mortgages.</p>
+<p>Examine the HDMA data. Do you see any signs that demographic parity is systematically violated by any bank against any groups?</p>
+<p>Note that this is a rather unrealistic analysis. Other fairness measures such as <em>equality of opportunity</em> would likely be more appropriate here, but we don’t have actual repayment records for this data so this would not be feasible for us to calculate.</p>
+</section><section id="an-audit-construction-5-points" class="level3" data-number="7.2"><h3 data-number="7.2" class="anchored" data-anchor-id="an-audit-construction-5-points">
+<span class="header-section-number">7.2</span> An Audit Construction (5 points)</h3>
+<p>One way to <em>audit</em> this type of data for signs of bias is to via a carefully constructed <code>LOCO</code> analysis. Specifically: we would like to consider two models:</p>
+<p><span class="math display">\[f_1: \text{Race} \approx f(\text{Features Other Than Approval})\]</span></p>
+<p>and</p>
+<p><span class="math display">\[f_2: \text{Race} \approx f(\text{All Features})\]</span></p>
+<p>If <span class="math inline">\(f_2\)</span> is signifcantly more accurate than <span class="math inline">\(f_1\)</span> – <em>i.e.</em>, if knowing the approval status helps to predict the applicant’s race more than just knowing their baseline economic info – that is evidence that there may be a systematic racial difference in approval rates.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+<p>Use a powerful classifier of your choosing<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> to conduct this type of audit study on the sensitive attributes of race, sex, and Hispanic/Latino ethnicity. (This should be 3 distinct studies. You don’t need to consider any sort of ‘intersectionality’ for this problem unless you want to go deeper.)</p>
+<p>See <a href="https://fairmlbook.org/" class="uri">https://fairmlbook.org/</a> for <em>much</em> more on this topic.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>All Problem Sets have an automatic ‘grace period’ over the weekend. Submissions before Monday morning will not be penalized. You do not need to request this grace period. See <a href="../syllabus.html">the Syllabus</a> for more details.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>If I am buying an $800,000 property and putting a conventional 20% down. I will pay $160,000 up front and take out a mortgage on the remaining $640,000, yielding a 80% loan to value.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Properly, it’s best to assess ECE on out-of-sample (test) predictions, but I’m being a bit sloppy here to simplify exposition.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Note that ECE as defined here is the <span class="math inline">\(\ell_1\)</span> (taxicab / Manhattan) norm of the calibration errors for each bucket. <span class="math inline">\(\ell_2\)</span> (root mean squared calibration error) and <span class="math inline">\(\ell_{\infty}\)</span> (maximum calibration error) versions exist and work essentially the same way.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Non-discrimination laws apply to ‘regression-type’ systems as well, but the mathematical formalisms for fairness in regression are not nearly as well developed.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Selecting the <em>right</em> baseline population to compare against is a bit tricky: when looking at, <em>e.g.</em>, the composition of a corporate board, should it reflect America as a whole, American adults, American adults over the age of 50 (plausible ‘senior executives’), the shareholders of that corporation, the customer population of the business, <em>etc</em>?<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>The <code>LOCO</code> behavior is important here. We want to compare “Everything” <em>vs.</em> “Everything except Race”. It is not enough to simply see if Race is predictive of approval rates, because that may be a (permissible) indirect relationship. If, due to historical biases, one group has systematically lower incomes, banks may approval their applications at a lower rates due to the (permissible) lower incomes and higher chance of payment issues, not racial bias. Not surprisingly, this is a rather contentious topic: in essence, we are asking whethere disperate outcomes are <em>per se</em> evidence of bias. While many arguments can be made on both sides, this construct of ‘impact over and above just economics’ is my current best understanding of the law and will suffice for this problem.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>I default to Random Forests for things like this, but the ‘cool kids’ might reach for <code>xgboost</code>.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -541,4 +2960,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps03.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps03.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps03.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

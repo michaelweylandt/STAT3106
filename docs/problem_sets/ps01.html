@@ -176,17 +176,17 @@ window.Quarto = {
 <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#data-files" id="toc-data-files" class="nav-link" data-scroll-target="#data-files">Data Files</a></li>
   <li>
-<a href="#qualitative-questions-15-points" id="toc-qualitative-questions-15-points" class="nav-link" data-scroll-target="#qualitative-questions-15-points"><span class="header-section-number">1</span> <strong>Qualitative Questions</strong> (15 points)</a>
+<a href="#q1" id="toc-q1" class="nav-link" data-scroll-target="#q1"><span class="header-section-number">1</span> <strong>Qualitative Questions</strong> (15 points)</a>
   <ul class="collapse">
 <li><a href="#definitions-5-points" id="toc-definitions-5-points" class="nav-link" data-scroll-target="#definitions-5-points"><span class="header-section-number">1.1</span> Definitions (5 points)</a></li>
   <li><a href="#short-answer-10-points" id="toc-short-answer-10-points" class="nav-link" data-scroll-target="#short-answer-10-points"><span class="header-section-number">1.2</span> Short Answer (10 points)</a></li>
   </ul>
 </li>
-  <li><a href="#k-nearest-neighbor-methods-5-points" id="toc-k-nearest-neighbor-methods-5-points" class="nav-link" data-scroll-target="#k-nearest-neighbor-methods-5-points"><span class="header-section-number">2</span> <strong><span class="math inline">\(K\)</span>-Nearest Neighbor Methods</strong> (5 points)</a></li>
-  <li><a href="#encodings-and-tabular-representations-5-points" id="toc-encodings-and-tabular-representations-5-points" class="nav-link" data-scroll-target="#encodings-and-tabular-representations-5-points"><span class="header-section-number">3</span> <strong>Encodings and Tabular Representations</strong> (5 points)</a></li>
-  <li><a href="#estimating-out-of-sample-performance-with-cross-validation-20-points" id="toc-estimating-out-of-sample-performance-with-cross-validation-20-points" class="nav-link" data-scroll-target="#estimating-out-of-sample-performance-with-cross-validation-20-points"><span class="header-section-number">4</span> Estimating Out of Sample Performance with Cross-Validation (20 points)</a></li>
-  <li><a href="#using-cross-validation-for-model-selection-15-points" id="toc-using-cross-validation-for-model-selection-15-points" class="nav-link" data-scroll-target="#using-cross-validation-for-model-selection-15-points"><span class="header-section-number">5</span> Using Cross-Validation for Model Selection (15 points)</a></li>
-  <li><a href="#estimating-loco-feature-importance-15-points" id="toc-estimating-loco-feature-importance-15-points" class="nav-link" data-scroll-target="#estimating-loco-feature-importance-15-points"><span class="header-section-number">6</span> Estimating LOCO Feature Importance (15 points)</a></li>
+  <li><a href="#q2" id="toc-q2" class="nav-link" data-scroll-target="#q2"><span class="header-section-number">2</span> <strong><span class="math inline">\(K\)</span>-Nearest Neighbor Methods</strong> (5 points)</a></li>
+  <li><a href="#q3" id="toc-q3" class="nav-link" data-scroll-target="#q3"><span class="header-section-number">3</span> <strong>Encodings and Tabular Representations</strong> (5 points)</a></li>
+  <li><a href="#q4" id="toc-q4" class="nav-link" data-scroll-target="#q4"><span class="header-section-number">4</span> Estimating Out of Sample Performance with Cross-Validation (20 points)</a></li>
+  <li><a href="#q5" id="toc-q5" class="nav-link" data-scroll-target="#q5"><span class="header-section-number">5</span> Using Cross-Validation for Model Selection (15 points)</a></li>
+  <li><a href="#q6" id="toc-q6" class="nav-link" data-scroll-target="#q6"><span class="header-section-number">6</span> Estimating LOCO Feature Importance (15 points)</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps01.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
@@ -242,7 +242,7 @@ window.Quarto = {
 <p>You may work with as many classmates as you wish, but please note the names of classmates with whom you collaborated.</p>
 </div>
 </div>
-<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}}\]</span></p>
+<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}} \newcommand{\P}{\mathbb{P}}\]</span></p>
 <section id="introduction" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this problem set, you will apply machine learning (ML) methods to the problem of predicting school-wide test scores on NYS standardized mathematics exams, given geographic and socioeconomic information about the student population.</p>
 <p>Along the way, we will review some basic ML terminology, take a closer look at how qualitative features like school district can be transformed for use in quantiative contexts, compare a variety of linear regression methods under different loss functions, benchmark against a basic non-linear model, and estimate the out-of-sample performance of different models for the same data.</p>
@@ -309,7 +309,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pd.read_csv(<span class="st">"https://michael-weylandt.com/STAT3106/problem_sets/data/ps01_nysed.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="qualitative-questions-15-points" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="qualitative-questions-15-points">
+</section><section id="q1" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="q1">
 <span class="header-section-number">1</span> <strong>Qualitative Questions</strong> (15 points)</h2>
 <section id="definitions-5-points" class="level3" data-number="1.1"><h3 data-number="1.1" class="anchored" data-anchor-id="definitions-5-points">
 <span class="header-section-number">1.1</span> Definitions (5 points)</h3>
@@ -329,7 +329,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 <li>If the NYSED task is a regression problem, how could it instead be reformulated as a classification problem? Alternatively, if it is a classification problem, would would a regression formulation look like instead?</li>
 <li>What is a real-world example of an <em>active learning</em> system you have encountered? What makes it <em>active</em>?</li>
 <li>Give a real-world example of a regression problem with an <em>asymmetric</em> loss function. What aspect of the response should an ML system try to capture (<em>e.g.</em>, mean, median, <em>etc.</em>)?</li>
-</ol></section></section><section id="k-nearest-neighbor-methods-5-points" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="k-nearest-neighbor-methods-5-points">
+</ol></section></section><section id="q2" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="q2">
 <span class="header-section-number">2</span> <strong><span class="math inline">\(K\)</span>-Nearest Neighbor Methods</strong> (5 points)</h2>
 <p>In class, we introduced most of our ML concepts through one foundational method (OLS). In this assignment, we are going to compare OLS with a very different, but no less foundational, method called <span class="math inline">\(K\)</span>-Nearest Neighbors (K-NN).</p>
 <p>K-NN formalizes a simple idea: to make a prediction, remember what happened at the most similar point in the past. Specifically, when given a new point <span class="math inline">\(\tilde{\bx}\)</span>, we can search our training data for the ‘most similar’ point <span class="math inline">\(\bx_{\text{NN}}\)</span> and use its label as our prediction for <span class="math inline">\(\tilde{\bx}\)</span>: <span class="math inline">\(\hat{y} = y_{\text{NN}}\)</span>. This is <em>one</em> nearest-neighbor prediction (1-NN) because we found the <em>one</em> most similar point from our training data. In practice, we usually find several similar points (3, 5, or 7) and take their <em>average</em> to make our predictions. This is a bit less messy (random) than using a single point, while still being nearly as flexible as 1-NN.</p>
@@ -362,7 +362,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 <p>For this problem, you may use pre-written <span class="math inline">\(K\)</span>-NN methods. You do not need to implement <span class="math inline">\(K\)</span>-NN from scratch.</p>
 </div>
 </div>
-</section><section id="encodings-and-tabular-representations-5-points" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="encodings-and-tabular-representations-5-points">
+</section><section id="q3" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="q3">
 <span class="header-section-number">3</span> <strong>Encodings and Tabular Representations</strong> (5 points)</h2>
 <p>The majority of methods discussed in this course require <em>tabular</em> data output. That is, data arranged in a two-dimensional grid where one axis (typically row) indexes observations and the other (typically column) indexes different features of the data. In each cell of the resulting table, a single (scalar) value reflects the value of a specific feature for a specific observation. <em>E.g.</em>,</p>
 <div class="cell">
@@ -2086,7 +2086,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 </ul>
 </div>
 </div>
-</section><section id="estimating-out-of-sample-performance-with-cross-validation-20-points" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="estimating-out-of-sample-performance-with-cross-validation-20-points">
+</section><section id="q4" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="q4">
 <span class="header-section-number">4</span> Estimating Out of Sample Performance with Cross-Validation (20 points)</h2>
 <p>Recall that our primary focus in this course is on developing models that perform well <em>out-of-sample</em>, <em>i.e.</em>, on new ‘test’ data. Unfortunately, we do not always have an unlimited supply of ‘new’ data we can use for model evaluation and instead have to find a way to use our existing data for both model fitting and model evaluation. Doing this correctly can be a bit tricky: we want to avoid testing the model on data it has already seen so we don’t give it credit for ‘teaching to the test.’</p>
 <p>But the fix is not too hard! We can split our data into two parts and use one for model fitting and the other for model evaluation in lieu of ‘true’ test data. The ‘golden rule’ here is simple: what is used to fit a model <em>cannot</em> be used to evaluate it and <em>vice versa</em>. In general, fitting a model is harder than simply estimating its out-of-sample accuracy, so we don’t use a straight 50/50 split, but it’s hard to give a universal guideline.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> This is known as the <strong>hold-out</strong> method.</p>
@@ -2132,7 +2132,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 </div>
 </div>
 <p><em>Important</em>: When fitting CV for all features, make sure to avoid any “data leakage” during the encoding steps. You may need to look into concepts like <em>stratified sampling</em>. If a feature has too many values you can drop it from your analysis, but just be sure to note that you did.</p>
-</section><section id="using-cross-validation-for-model-selection-15-points" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="using-cross-validation-for-model-selection-15-points">
+</section><section id="q5" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="q5">
 <span class="header-section-number">5</span> Using Cross-Validation for Model Selection (15 points)</h2>
 <p>Another use of cross-validation is selecting certain ‘hyperparameters’. <em>Hyperparameters</em> in this context refers to decisions that are made before the model encounters data: <em>e.g.</em>, we might pre-select which features to include in a linear model before we actually use our data to estimate the regression coefficients.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> Recalling our ‘north star’ of optimizing predictions, we can try a reasonable range of values for a hyperparameter and pick the one that gives the most accurate cross-validation predictions.</p>
 <p>There is, however, a slight risk here as the CV error we get is not an unbiased estimate of the true prediction error. Remember: if we pick the values of the model parameters to minimize our loss, we expect our future loss to be a bit worse; the same logic applies to selecting <em>hyperparameters</em>. To avoid this, we should use a combination of CV + holdout.</p>
@@ -2158,7 +2158,7 @@ $ REGION                             &lt;chr&gt; "Capital District, New York", "
 </div>
 </div>
 <p>You may use the fast (approximate) <span class="math inline">\(K\)</span>-nearest neighbors from the previous question.</p>
-</section><section id="estimating-loco-feature-importance-15-points" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="estimating-loco-feature-importance-15-points">
+</section><section id="q6" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="q6">
 <span class="header-section-number">6</span> Estimating LOCO Feature Importance (15 points)</h2>
 <p>In certain applications, it may be important to <em>interpret</em> or <em>explain</em> the output of an ML model. Because different models work differently and different users require different types of interpretations, this is a challenging task for which a variety of methods have been proposed.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> In this sub-problem, you will explore a basic strategy sometimes called <strong>LOCO</strong> (Leave-One-Covariate-Out) feature importance.</p>
 <p>The idea of LOCO is simple: a model is fit with and without a given feature and compare its performance. If the performance of the model falls when a feature is omitted, it is important; if the performance doesn’t significantly change, the feature is probably not too important to the model (or can be ‘replaced’ by other features in the data). Since, as always, we are interested in out-of-sample performance, the LOCO score is typically computed within a cross-validation scheme, rather than simply comparing in-sample error.</p>

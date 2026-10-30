@@ -175,19 +175,19 @@ window.Quarto = {
   <ul>
 <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#data-files" id="toc-data-files" class="nav-link" data-scroll-target="#data-files">Data Files</a></li>
-  <li><a href="#ml-best-practices-question-16-points" id="toc-ml-best-practices-question-16-points" class="nav-link" data-scroll-target="#ml-best-practices-question-16-points"><span class="header-section-number">1</span> ML Best Practices Question (16 Points)</a></li>
-  <li><a href="#qualitative-questions-10-points" id="toc-qualitative-questions-10-points" class="nav-link" data-scroll-target="#qualitative-questions-10-points"><span class="header-section-number">2</span> Qualitative Questions (10 Points)</a></li>
+  <li><a href="#q1" id="toc-q1" class="nav-link" data-scroll-target="#q1"><span class="header-section-number">1</span> ML Best Practices Question (16 Points)</a></li>
+  <li><a href="#q2" id="toc-q2" class="nav-link" data-scroll-target="#q2"><span class="header-section-number">2</span> Qualitative Questions (10 Points)</a></li>
   <li>
-<a href="#first-order-methods-15-points" id="toc-first-order-methods-15-points" class="nav-link" data-scroll-target="#first-order-methods-15-points"><span class="header-section-number">3</span> First-Order Methods (15 Points)</a>
+<a href="#q3" id="toc-q3" class="nav-link" data-scroll-target="#q3"><span class="header-section-number">3</span> First-Order Methods (15 Points)</a>
   <ul class="collapse">
 <li><a href="#gradient-descent-for-linear-models-5-points" id="toc-gradient-descent-for-linear-models-5-points" class="nav-link" data-scroll-target="#gradient-descent-for-linear-models-5-points"><span class="header-section-number">3.1</span> Gradient Descent for Linear Models (5 Points)</a></li>
   <li><a href="#advanced-sgd-for-linear-models-5-points" id="toc-advanced-sgd-for-linear-models-5-points" class="nav-link" data-scroll-target="#advanced-sgd-for-linear-models-5-points"><span class="header-section-number">3.2</span> Advanced SGD for Linear Models (5 Points)</a></li>
   <li><a href="#early-stopping-of-first-order-methods" id="toc-early-stopping-of-first-order-methods" class="nav-link" data-scroll-target="#early-stopping-of-first-order-methods"><span class="header-section-number">3.3</span> Early Stopping of First Order Methods</a></li>
   </ul>
 </li>
-  <li><a href="#ridge-regression-9-points" id="toc-ridge-regression-9-points" class="nav-link" data-scroll-target="#ridge-regression-9-points"><span class="header-section-number">4</span> Ridge Regression (9 Points)</a></li>
-  <li><a href="#sparse-regression-and-feature-selection-15-points" id="toc-sparse-regression-and-feature-selection-15-points" class="nav-link" data-scroll-target="#sparse-regression-and-feature-selection-15-points"><span class="header-section-number">5</span> Sparse Regression and Feature Selection (15 Points)</a></li>
-  <li><a href="#non-linear-methods-10-points" id="toc-non-linear-methods-10-points" class="nav-link" data-scroll-target="#non-linear-methods-10-points"><span class="header-section-number">6</span> Non-Linear Methods (10 Points)</a></li>
+  <li><a href="#q4" id="toc-q4" class="nav-link" data-scroll-target="#q4"><span class="header-section-number">4</span> Ridge Regression (9 Points)</a></li>
+  <li><a href="#q5" id="toc-q5" class="nav-link" data-scroll-target="#q5"><span class="header-section-number">5</span> Sparse Regression and Feature Selection (15 Points)</a></li>
+  <li><a href="#q6" id="toc-q6" class="nav-link" data-scroll-target="#q6"><span class="header-section-number">6</span> Non-Linear Methods (10 Points)</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/problem_sets/ps02.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/problem_sets/ps02.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
 </nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
@@ -243,13 +243,13 @@ window.Quarto = {
 <p>You may work with as many classmates as you wish, but please note the names of classmates with whom you collaborated.</p>
 </div>
 </div>
-<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}}\]</span></p>
+<p><span class="math display">\[\newcommand{\bx}{\mathbf{x}} \newcommand{\V}{\mathbb{V}} \newcommand{\E}{\mathbb{E}} \newcommand{\P}{\mathbb{P}}\]</span></p>
 <section id="introduction" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this problem set, you will use a variety of <em>linear</em> and <em>non-linear</em> regression methods on both a ‘tall’ and a ‘wide’ prediction task. As you work through these, be sure to consider the relative pros and cons of each approach. As we’ve emphasized throughout the semester, there is no universally best method – “no free lunch” – for any given task and the best method for a task will be a complex function of data types, your goals, data size, and personal preferences.</p>
 </section><section id="data-files" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="data-files">Data Files</h2>
 <p>We introduce two new regression data sets for this problem set. The first, the <a href="./data/ps02_dc_bike.csv">DC BikeShare</a> data set, has hourly bike-rental counts from the <a href="https://capitalbikeshare.com/">Capital Bikeshare</a> program serving Washington, D.C.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> This data contains 17520 rows of hourly data (2022-01-01 to 2023-12-31 23:00:00) and your goal is to predict the number of bikes rented (checkout time) in that hour. To predict ridership, I provide you local temperature, humidity, wind speed, precipitation as well as some pre-constructed time features (hour 0 to 23), day of week, day of year, and weekend / weekday. You can choose to make your predictions on a linear (<code>ridership</code>) or logarithmic (<code>log_ridership</code>) scale, but you can only use one <code>ridership</code> variable.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dc_bike</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"https://michael-weylandt/STAT3106/problem_sets/data/ps02_dc_bike.csv"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">dc_bike</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"https://michael-weylandt.com/STAT3106/problem_sets/data/ps02_dc_bike.csv"</span><span class="op">)</span></span>
 <span><span class="fu">skimr</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">dc_bike</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
@@ -527,7 +527,7 @@ window.Quarto = {
 <p>This is the “tall” data set referenced below.</p>
 <p>The second “wide” data set arises from an important problem in climate forecasting. Specifically, in the <a href="./data/ps02_ca_drought.csv">CA PDSI</a> data set, we have global sea surface temperatures (<code>sst</code>) and want to use them to predict the degree of drought in California. (Think <em>El Nino</em>.) This data set has 765 rows of historical monthly data (via NASA’s POWER data) along with <code>sst</code> from a roughly 4 degree global grid, which can be used to predict the <a href="https://en.wikipedia.org/wiki/Palmer_drought_index">Palmer Drought Severity Index (PSDI)</a> for California in the same month.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ca_drought</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"https://michael-weylandt/STAT3106/problem_sets/data/ps02_ca_drought.csv"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ca_drought</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="st">"https://michael-weylandt.com/STAT3106/problem_sets/data/ps02_ca_drought.csv"</span><span class="op">)</span></span>
 <span><span class="fu">skimr</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="va">ca_drought</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
@@ -754,9 +754,9 @@ window.Quarto = {
 </div>
 </div>
 <p>(Many similar rows omitted)</p>
-</section><section id="ml-best-practices-question-16-points" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="ml-best-practices-question-16-points">
+</section><section id="q1" class="level2" data-number="1"><h2 data-number="1" class="anchored" data-anchor-id="q1">
 <span class="header-section-number">1</span> ML Best Practices Question (16 Points)</h2>
-<p>Consider the scenario below in I describe a hypothetical application of ML. There are (at least) 5 issues in how the ML system is developed, tested, and deployed. Identify <strong>four</strong> distinct issues and, for each issue you identify, describe:</p>
+<p>Consider the scenario below in which I describe a hypothetical application of ML. There are (at least) 5 issues in how the ML system is developed, tested, and deployed. Identify <strong>four</strong> distinct issues and, for each issue you identify, describe:</p>
 <ul>
 <li>The mistake that was made (1 points)</li>
 <li>The likely adverse impact arising from the mistake (1 points)</li>
@@ -768,7 +768,7 @@ window.Quarto = {
 <p>The analytics team began by querying internal HR records from 2017 to 2021, compiling complete digital application files and subsequent first-year review scores for 1,400 junior associates hired under the firm’s historical recruiting regime. To capture every possible objective signal, the data engineers extracted hundreds of resume keywords, collegiate club memberships, undergraduate major indicators, and assigned onboarding salary tiers, while imputing missing collegiate transcript grades with the global mean across the entire 5-year archive. Before fitting any models, the team normalized all continuous predictors using the mean and variance computed over the complete 1,400-employee database, and ran a univariate screening step across all columns to pre-filter down to the top 200 most correlated features. They adopted Mean Squared Error (MSE) as their primary accuracy measure, reasoning that quadratic penalties on score discrepancies were mathematically tractable, captured the ‘big miss is a big loss’ phenomenon in hiring, and cleanly mirrored standard regression theory.</p>
 <p>For the predictive engine, the team evaluated high-dimensional linear models and forward stepwise polynomial regression. To tune the model, the lead analyst configured the forward stepwise algorithm to continually add polynomial terms and pairwise interactions until the in-sample Residual Sum of Squares (RSS) ceased to drop by more than 0.25%, celebrating when the model achieved an in-sample <span class="math inline">\(R^2\)</span> of 0.91. When fitting Ridge and Lasso models as benchmarks, the engineers selected the penalty parameter <span class="math inline">\(\lambda\)</span> that maximized in-sample explained variance on the training set, concluding that because <span class="math inline">\(\lambda \to 0\)</span> delivered the lowest error, regularization was unhelpful and could be safely omitted. To evaluate the pipeline prior to deployment, the team partitioned the 1,400 past employees into an 80/20 train/validation split using uniform random sampling across the rows. Upon finding that the model achieved a validation RMSE of just 3.4 points on the 1–100 scale, the team declared ROAR production-ready.</p>
 <p>The system was launched for the 2024–2025 recruiting cycle, where HBL actively marketed its new “resume-blind, network-free” process to hundreds of non-traditional campuses, successfully attracting an applicant pool that was majority female and demographically unprecedented for the firm.</p>
-</section><section id="qualitative-questions-10-points" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="qualitative-questions-10-points">
+</section><section id="q2" class="level2" data-number="2"><h2 data-number="2" class="anchored" data-anchor-id="q2">
 <span class="header-section-number">2</span> Qualitative Questions (10 Points)</h2>
 <ol type="1">
 <li><p>Give two examples where ‘shrinkage’ might make improve a large set of predictions, other than those discussed in class. (2 points)</p></li>
@@ -779,7 +779,7 @@ window.Quarto = {
 <p>Ridge regression is equivalent to the method of <em>weight decay</em> in neural network practice. Define <em>weight decay</em> and explain why ridge regression does the same thing. You do not need to be super rigorous in your answer. (3 points)</p>
 <p><em>Hint</em>: Rather than comparing the problems directly, it may be easier to look at what a ridge penalty does to a first-order method and compare it to how weight decay is applied in practice.</p>
 </li>
-</ol></section><section id="first-order-methods-15-points" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="first-order-methods-15-points">
+</ol></section><section id="q3" class="level2" data-number="3"><h2 data-number="3" class="anchored" data-anchor-id="q3">
 <span class="header-section-number">3</span> First-Order Methods (15 Points)</h2>
 <p>In this question, you will apply <em>first-order</em> (gradient-based optimization) methods to linear models. You will compare ‘classic’ gradient descent with stochastic accelerated variants and see the benefits of early stopping.</p>
 <section id="gradient-descent-for-linear-models-5-points" class="level3" data-number="3.1"><h3 data-number="3.1" class="anchored" data-anchor-id="gradient-descent-for-linear-models-5-points">
@@ -809,12 +809,12 @@ window.Quarto = {
 <li>Plot the training and validation errors over the course of model fitting.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>
 </li>
 <li>Annotate where you would perform ‘early stopping’ and compare the computational cost and prediction performance of the ‘early stopped’ model with the ‘fully fitted’ version.</li>
-</ol></section></section><section id="ridge-regression-9-points" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="ridge-regression-9-points">
+</ol></section></section><section id="q4" class="level2" data-number="4"><h2 data-number="4" class="anchored" data-anchor-id="q4">
 <span class="header-section-number">4</span> Ridge Regression (9 Points)</h2>
 <p>Implement ridge regression for both the ‘tall’ and ‘wide’ data sets. Use cross-validation to select an optimal value of <span class="math inline">\(\lambda\)</span>. Compare the performance against OLS (tall data only) and <span class="math inline">\(K\)</span>-nearest neighbors.</p>
 <p>What do you observe? Is this consistent with our discussion of ridge regression in class? Are your results the same for both data sets or do they differ?</p>
 <p><em>You may use <code>glmnet()</code> or similar tools for both fitting ridge regression and for performing cross-validation for this problem.</em></p>
-</section><section id="sparse-regression-and-feature-selection-15-points" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="sparse-regression-and-feature-selection-15-points">
+</section><section id="q5" class="level2" data-number="5"><h2 data-number="5" class="anchored" data-anchor-id="q5">
 <span class="header-section-number">5</span> Sparse Regression and Feature Selection (15 Points)</h2>
 <p>Let us now apply <em>feature selection</em> methods (<em>i.e.</em>, LASSO) to the wide data set. First, apply lasso regression and use cross-validation to get estimates of the prediction error.</p>
 <p>In this problem, you are going to use several strategies to select ‘important’ features. Implement each of the following methods and compare your findings. (Note that your results may not be consistent across heuristics - life is hard!)</p>
@@ -828,7 +828,7 @@ window.Quarto = {
 </ol>
 <p>Based on your findings, which would you identify as the most important features? Are these scientifically reasonable?</p>
 <p><em>As in the previous problem, you may use <code>glmnet()</code> or similar tools for both fitting the lasso and for performing cross-validation for this problem, but you need to do the stability, LOCO, </em>etc* analyses directly rather than using pre-packaged functionality.*</p>
-</section><section id="non-linear-methods-10-points" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="non-linear-methods-10-points">
+</section><section id="q6" class="level2" data-number="6"><h2 data-number="6" class="anchored" data-anchor-id="q6">
 <span class="header-section-number">6</span> Non-Linear Methods (10 Points)</h2>
 <p>Apply a non-linear regression method to the tall data set, allowing for non-linear relationships in any variable where it may make sense.</p>
 <ol type="1">
