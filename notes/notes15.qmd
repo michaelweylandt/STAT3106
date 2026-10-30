@@ -351,8 +351,7 @@ closest <- base_data |>
     mutate(closest_x = (body_mass + SLOPE * (flipper_len - INTERCEPT))/(SLOPE^2+1), 
            closest_y = SLOPE * closest_x + INTERCEPT, 
            xy_dist = abs(SLOPE * body_mass - flipper_len + INTERCEPT) / sqrt(SLOPE^2+1)) |>
-    slice_min(xy_dist)
-
+    slice_min(xy_dist, with_ties=FALSE)
 
 predictions <- base_data |>
     mutate(y_line = SLOPE * body_mass + INTERCEPT, 
