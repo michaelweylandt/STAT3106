@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-10-21">
+<meta name="dcterms.date" content="2026-10-30">
 <title>Notes for Lecture #13: Introduction to Course Competition &amp; Unit III. Classification: Introduction to Classification – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -211,7 +211,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 21, 2026</p>
+      <p class="date">October 30, 2026</p>
     </div>
   </div>
   
@@ -368,13 +368,15 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </ul>
 <p>From this simple count table, we can create <em>many</em> different ratios. I find the statistical terminology a bit more intuitive than the ML terminology:</p>
 <ul>
-<li>True Positive Rate: Of the actual positives (<span class="math inline">\(y^*=1\)</span>), what fraction are predicted correctly (truly) positives (<span class="math inline">\(\hat{y} = 1\)</span>)? <span class="math inline">\(\text{TPR} = n_{11}/(n_{01} + n_{11})\)</span>
+<li><p>True Positive Rate: Of the actual positives (<span class="math inline">\(y^*=1\)</span>), what fraction are predicted correctly (truly) positives (<span class="math inline">\(\hat{y} = 1\)</span>)? <span class="math display">\[\text{TPR} = \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{n_{11}}{n_{01} + n_{11}}\]</span> This is also sometimes called <em>recall</em>, <em>sensitivity</em>, or <em>power</em> depending on the background of the speaker (ML, biomedical, or statistics).</p></li>
+<li>
+<p>False Negative Rate: Of the actual positives (<span class="math inline">\(y^*=1\)</span>), what fraction are predicted incorrectly (falsely) as negatives (<span class="math inline">\(\hat{y} = 0\)</span>)? <span class="math display">\[\text{FNR} = \frac{n_{01}}{n_{01} + n_{11}}\]</span> Because false negatives are sometimes known as ‘Type II’ errors, this is occasionally (but not that commonly) called the Type II error rate.</p>
+<p>Note that, when we are discussing either <em>true positives</em> or <em>false negatives</em>, we are implicitly assuming the truth is <em>positive</em>, so the denominator is based on the number of (actual) positives for both TPR and FNR.</p>
 </li>
-<li>False Negative Rate: Of the actual positives (<span class="math inline">\(y^*=1\)</span>), what fraction are predicted incorrectly (falsely) as negatives (<span class="math inline">\(\hat{y} = 0\)</span>)? <span class="math inline">\(\text{FNR} = n_{01}/(n_{01} + n_{11})\)</span>
-</li>
-<li>True Negative Rate: Of the actual negatives (<span class="math inline">\(y^*=0\)</span>), what fraction are predicted correctly (truly) as negatives (<span class="math inline">\(\hat{y} = 0\)</span>)?<br><span class="math inline">\(\text{FNR} = n_{00}/(n_{00} + n_{10})\)</span>
-</li>
-<li>False Positive Rate: Of the actual negatives (<span class="math inline">\(y^*=0\)</span>), what fraction are predicted incorrectly (falsely) as positives (<span class="math inline">\(\hat{y} = 1\)</span>)? <span class="math inline">\(\text{FPR} = n_{10} / (n_{00} + n_{10})\)</span>
+<li><p>True Negative Rate: Of the actual negatives (<span class="math inline">\(y^*=0\)</span>), what fraction are predicted correctly (truly) as negatives (<span class="math inline">\(\hat{y} = 0\)</span>)?<br><span class="math display">\[\text{TNR} = \frac{\text{TN}}{\text{TN} + \text{FP}}=\frac{n_{00}}{n_{00} + n_{10}}\]</span> This is sometimes called <em>specificity</em> or (less commonly) selectivity.</p></li>
+<li>
+<p>False Positive Rate: Of the actual negatives (<span class="math inline">\(y^*=0\)</span>), what fraction are predicted incorrectly (falsely) as positives (<span class="math inline">\(\hat{y} = 1\)</span>)? <span class="math display">\[\text{FPR} = \frac{\text{FP}}{\text{TN} + \text{FP}} = \frac{n_{10}}{n_{00} + n_{10})}\]</span> FPR doesn’t have as catchy a name as some of the other rates, but you will occasionally see it called the ‘Type I error rate’ or, relating to the early-detection-for-military-applications history of early classifiers, the <em>false alarm probability</em>.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>As with the first two rates, both <em>true negatives</em> and <em>false positives</em> assume the truth is negative, so the denominator is based on the number of (actual) negatives for both TNR and FPR.</p>
 </li>
 </ul>
 <p>These clearly satisfy some useful relationships:</p>
@@ -383,8 +385,10 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p><span class="math display">\[\text{FPR} = 1 - \text{TNR} \Leftrightarrow \text{TNR} = 1 - \text{FPR}\]</span></p>
 <p>In this scenario, we recognize the <em>false positive rate</em> as the <em>size</em> (or <em>level</em>) associated with a statistical test (5% for a 95% confidence test) and the true positive rate as the <em>power</em>. Again, the statistical definitions can help us navigate the confusing terminology here: the confidence of a test, and therefore its false positive rate, are defined <em>assuming the null</em> (<em>i.e.</em>, in a “true” negative scenario).</p>
 <p>The “other direction” of rates – where we condition on the prediction instead of the truth – are less common, except for the <em>false discovery rate</em>:</p>
-<p><span class="math display">\[\text{FDR} = \frac{n_{10}}{n_{10} + n_{11}}\]</span></p>
+<p><span class="math display">\[\text{FDR} = \frac{\text{FP}}{\text{TP} + \text{FP}} = \frac{n_{10}}{n_{10} + n_{11}}\]</span></p>
 <p>The FDR is commonly used in scientific settings and it answers this question: if a scientist makes <span class="math inline">\(K\)</span> discoveries, what fraction <em>of those claimed discoveries</em> are correct?</p>
+<p>The ‘complement’ of FDR is known as <em>precision</em>:</p>
+<p><span class="math display">\[\text{Precision} = 1 - \text{FDR} = \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{n_{11}}{n_{10} + n_{11}}\]</span></p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -395,16 +399,17 @@ Warning
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Note that the convention used to define <em>rates</em> can be quite confusing and is perhaps opposite the convention used to define <em>counts</em>.</p>
+<p>Note that the convention used to define <em>rates</em> can be a bit confusing and is perhaps opposite the convention used to define <em>counts</em>. The ‘positive’ and ‘negative’ in TPR, FNR, <em>etc</em> refer to the <strong>actual truth</strong>, while the ‘positive’ and ‘negative’ in TP, FN, <em>etc</em> refer to <strong>our predictions</strong>.</p>
 <p>To compute the number of <em>true positives</em>, we look at predicted positives and count the number of “truths”, while to compute the <em>true positive rate</em>, our denominator is the number of <em>actual</em> positives and we count the fraction of correct predictions.</p>
-<p>To me, the FDR is actually the most clearly named rate; I try to remember the definition of FDR and ‘work backwards’ to FPR since it must be something different than FDR.</p>
+<p>To me, the FDR is actually the most clearly named rate; when I can’t refer to <a href="https://en.wikipedia.org/wiki/Precision_and_recall#Definition">this very handy Wikpedia chart</a> and am forced to work these out from scratch, I try to remember the definition of FDR and ‘work backwards’ to FPR since it must be something different than FDR. Once I have FPR figured out, everything else follows.</p>
 </div>
 </div>
+<p>One could fill a zoo with the different measures of classification accuracy that have been proposed over the years. I’ll re-emphasize the most common here.</p>
 <p>In ML context, you will commonly hear reference to <em>precision</em> and <em>recall</em>. With our definitions above, we have</p>
 <ul>
 <li>Precision = <span class="math inline">\(1 - \text{FDR}\)</span>
 </li>
-<li>Recall = <span class="math inline">\(\text{FNR} = 1 - \text{TPR}\)</span>
+<li>Recall = <span class="math inline">\(\text{TPR} = 1 - \text{FNR}\)</span>
 </li>
 </ul>
 <p>so, by maximizing precision, we ensure that all of our predicted positives are true positives and, by maximizing recall, we ensure that we have no false negatives (that is, we truly identify all of the real positives).</p>
@@ -418,7 +423,7 @@ Warning
 <p>If you look at the 2x2 table above, you can convince yourself that it has two “degrees of freedom:” having a high TPR implies nothing about the TNR (or equivalent metrics). That is, it is possible to have a classifier with arbitrarily good TPR (equivalently, small FNR) and terrible TNR (equivalently, small FPR).</p>
 <p>In fact, we can construct one trivially:</p>
 <p><span class="math display">\[\hat{f}(\cdot) = 1\]</span></p>
-<p>That is, the function that predicts <span class="math inline">\(1\)</span> <em>always</em>. This classifier has zero false negatives, because it has no negatives whatsoever, but it necessarily has many false positives.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>That is, the function that predicts <span class="math inline">\(1\)</span> <em>always</em>. This classifier has zero false negatives, because it has no negatives whatsoever, but it necessarily has many false positives.<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
 <p>Conversely,</p>
 <p><span class="math display">\[\hat{f}(\cdot) = 0\]</span></p>
 <p>has no false positives, but many false negatives.</p>
@@ -479,7 +484,7 @@ Warning
 </div>
 </section><section id="trade-off-of-recall-and-precision" class="level3"><h3 class="anchored" data-anchor-id="trade-off-of-recall-and-precision">Trade-Off of Recall and Precision</h3>
 <p>Our discussion of ‘trivial’ classifiers that focus on one metric while completely ignoring the other may remind you of the way this is typically solved in statistical testing procedures. We specify a maximum acceptable false positive rate (level or 1 - confidence) and then minimize the false negative rate subject to that constraint; in statistical speak, we seek a test with <em>maximal power</em>.</p>
-<p>As we have seen with ridge and lasso regression, there is typically a ‘knob’ (hyperparameter) we can pick to tune a particular classifier. It is common to apply the classifier at all values of this knob, measure the TPR and TNR at all levels, and plot them in a trade-off curve. This curve is, for historical reasons, known as the receiver operating characteristic (ROC)<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> curve and it looks something like:</p>
+<p>As we have seen with ridge and lasso regression, there is typically a ‘knob’ (hyperparameter) we can pick to tune a particular classifier. It is common to apply the classifier at all values of this knob, measure the TPR and TNR at all levels, and plot them in a trade-off curve. This curve is, for historical reasons, known as the receiver operating characteristic (ROC)<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> curve and it looks something like:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/yardstick">yardstick</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
@@ -613,13 +618,13 @@ if the test does not strongly suggest a disease. -->
 </div>
 </div>
 </div>
-<p>In fact, this is a <em>bimodal</em> distribution with each ‘lump’ representing males or females.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> Distributions of this form can often be written more compactly using a ‘convex combination’ notation:</p>
+<p>In fact, this is a <em>bimodal</em> distribution with each ‘lump’ representing males or females.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> Distributions of this form can often be written more compactly using a ‘convex combination’ notation:</p>
 <p><span class="math display">\[\text{Basset} \sim \frac{2}{5}\Ncal(65, 10) + \frac{3}{5}\Ncal(55, 10)\]</span></p>
 <p>The above notation can be interpreted as specifying a draw from the first distribution with probability <span class="math inline">\(2/5 = 40\%\)</span> and from the second with probability <span class="math inline">\(3/5 = 60\%\)</span>; that is, it’s a particular 2-component mixture of normals.</p>
 <p>In specifying this mixture, the probabilities of each component must be non-negative and must sum to 1; these are exactly the same restrictions we put on a convex combination of points earlier in the course. In fact, the set of mixture distributions can be consider the ‘convex set’ containing all of its individual components.</p>
 </section><section id="inference-from-a-mixture-distribution" class="level3"><h3 class="anchored" data-anchor-id="inference-from-a-mixture-distribution">Inference from a Mixture Distribution</h3>
 <p>Now suppose you are on a walk and you meet a very friendly 62 pound basset hound. You of course want to pet this marvelous dog, but you need to ask the owner’s permission first: in doing so, should you ask “may I pet him?” or “may I pet her?”</p>
-<p>While the basset hound may not care if you misgender it,<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> you still want to be polite, recall that you can use <a href="https://en.wikipedia.org/wiki/Bayes%27_theorem"><em>Bayes’ Rule</em></a> to ‘invert’ the mixture distribution. That is, while the mixture distribution normally goes <em>from sex to weight</em>, Bayes’ rule will let us go <em>from weight back to sex</em>.</p>
+<p>While the basset hound may not care if you misgender it,<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> you still want to be polite, recall that you can use <a href="https://en.wikipedia.org/wiki/Bayes%27_theorem"><em>Bayes’ Rule</em></a> to ‘invert’ the mixture distribution. That is, while the mixture distribution normally goes <em>from sex to weight</em>, Bayes’ rule will let us go <em>from weight back to sex</em>.</p>
 <p>Specifically, in this case, Bayes’ rule tells us:</p>
 <p><span class="math display">\[\P(\text{Female}|\text{Weight=62}) = \frac{\P(\text{Weight=62}|\text{Female})\P(\text{Female})}{\P(\text{Weight=62}|\text{Female})\P(\text{Female}+\P(\text{Weight=62}|\text{Male})\P(\text{Male}))}\]</span></p>
 <p>The math here is a bit nasty numerically, but we can do it in <code>R</code> quite simply:</p>
@@ -672,10 +677,11 @@ if the test does not strongly suggest a disease. -->
 <li id="fn1"><p>Recall that regression problems need to be <em>truly</em> numeric. A good proxy is whether taking averages makes sense (as it will for wealth or height) or not (ZIP codes).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>The <em>support</em> of a random variable is the set of values it can take. So the support of a normal distribution is <span class="math inline">\(\R\)</span>, the support of a Poisson variable is the set of non-negative integers, <em>etc.</em><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Even though it doesn’t make sense to average ordinal data, University administrators are <em>notorious</em> for averaging Likert data to evaluate faculty. This is a nigh-universal grievance of numerically-minded faculty, but getting universities to change their established procedures to something statistically reasonable is only slightly less impossible than drawing blood from a turnip.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>In this case, the FPR is exactly equal to the negative rate in the population.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>Don’t confuse this with <em>Rate of Change</em>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Note that a mixture of normals is not <em>always</em> multimodal (<em>e.g.</em>, if the two means are very close together), but a mixture of normals is a common model for multimodal data.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>Among their many notable qualities, Basset hounds are quite slow to anger. They also don’t speak English.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>But by <a href="https://en.wikipedia.org/wiki/1983_Soviet_nuclear_false_alarm_incident">the steady hand of Stanislav Petrov</a>, none of us would be here today to complain about confusing ML terminology (among other things).<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>In this case, the FPR is exactly equal to the negative rate in the population.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Don’t confuse this with <em>Rate of Change</em>.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Note that a mixture of normals is not <em>always</em> multimodal (<em>e.g.</em>, if the two means are very close together), but a mixture of normals is a common model for multimodal data.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Among their many notable qualities, Basset hounds are quite slow to anger. They also don’t speak English.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

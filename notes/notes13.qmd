@@ -219,16 +219,33 @@ statistical terminology a bit more intuitive than the ML terminology:
 
 - True Positive Rate: Of the actual positives ($y^*=1$), what fraction are
   predicted correctly (truly) positives ($\hat{y} = 1$)? 
-  $\text{TPR} = n_{11}/(n_{01} + n_{11})$
+  $$\text{TPR} = \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{n_{11}}{n_{01} + n_{11}}$$
+  This is also sometimes called *recall*, *sensitivity*, or *power* depending on
+  the background of the speaker (ML, biomedical, or statistics). 
 - False Negative Rate: Of the actual positives ($y^*=1$), what fraction are
   predicted incorrectly (falsely) as negatives ($\hat{y} = 0$)? 
-  $\text{FNR} = n_{01}/(n_{01} + n_{11})$
+  $$\text{FNR} = \frac{n_{01}}{n_{01} + n_{11}}$$
+  Because false negatives are sometimes known as 'Type II' errors, this is
+  occasionally (but not that commonly) called the Type II error rate. 
+  
+  Note that, when we are discussing either *true positives* or *false negatives*,
+  we are implicitly assuming the truth is *positive*, so the denominator 
+  is based on the number of (actual) positives for both TPR and FNR. 
 - True Negative Rate: Of the actual negatives ($y^*=0$), what fraction are
   predicted correctly (truly) as negatives ($\hat{y} = 0$)?  
-  $\text{FNR} = n_{00}/(n_{00} + n_{10})$
+  $$\text{TNR} = \frac{\text{TN}}{\text{TN} + \text{FP}}=\frac{n_{00}}{n_{00} + n_{10}}$$
+  This is sometimes called *specificity* or (less commonly) selectivity. 
 - False Positive Rate: Of the actual negatives ($y^*=0$), what fraction are
   predicted incorrectly (falsely) as positives ($\hat{y} = 1$)? 
-  $\text{FPR} = n_{10} / (n_{00} + n_{10})$
+  $$\text{FPR} = \frac{\text{FP}}{\text{TN} + \text{FP}} = \frac{n_{10}}{n_{00} + n_{10})}$$
+  FPR doesn't have as catchy a name as some of the other rates, but you will
+  occasionally see it called the 'Type I error rate' or, relating to the 
+  early-detection-for-military-applications history of early classifiers, the
+  *false alarm probability*.[^petrov] 
+  
+  As with the first two rates, both *true negatives* and *false positives* 
+  assume the truth is negative, so the denominator is based on the number of
+  (actual) negatives for both TNR and FPR. 
   
 These clearly satisfy some useful relationships: 
 
@@ -248,33 +265,52 @@ in a "true" negative scenario).
 The "other direction" of rates -- where we condition on the prediction 
 instead of the truth -- are less common, except for the *false discovery rate*: 
 
-$$\text{FDR} = \frac{n_{10}}{n_{10} + n_{11}}$$
+$$\text{FDR} = \frac{\text{FP}}{\text{TP} + \text{FP}} = \frac{n_{10}}{n_{10} + n_{11}}$$
 
 The FDR is commonly used in scientific settings and it answers this question: 
 if a scientist makes $K$ discoveries, what fraction _of those claimed 
 discoveries_ are correct? 
 
+The 'complement' of FDR is known as *precision*: 
+
+$$\text{Precision} = 1 - \text{FDR} = \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{n_{11}}{n_{10} + n_{11}}$$
+
+[^petrov]: But by [the steady hand of Stanislav
+Petrov](https://en.wikipedia.org/wiki/1983_Soviet_nuclear_false_alarm_incident),
+none of us would be here today to complain about confusing ML terminology
+(among other things).
+
 ::: {.callout-warning} 
 
-Note that the convention used to define *rates* can be quite confusing
-and is perhaps opposite the convention used to define *counts*. 
+Note that the convention used to define *rates* can be a bit confusing
+and is perhaps opposite the convention used to define *counts*. The 'positive'
+and 'negative' in TPR, FNR, *etc* refer to the **actual truth**, while the
+'positive' and 'negative' in TP, FN, *etc* refer to **our predictions**. 
 
 To compute the number of *true positives*, we look at predicted 
 positives and count the number of "truths", while to compute
 the *true positive rate*, our denominator is the number of 
 _actual_ positives and we count the fraction of correct predictions. 
 
-To me, the FDR is actually the most clearly named rate; I try to remember
-the definition of FDR and 'work backwards' to FPR since it must be something
-different than FDR.
+
+To me, the FDR is actually the most clearly named rate; when I can't refer
+to [this very handy Wikpedia 
+chart](https://en.wikipedia.org/wiki/Precision_and_recall#Definition) 
+and am forced to work these out from scratch, 
+I try to remember the definition of FDR and 'work backwards' to FPR since 
+it must be something different than FDR. Once I have FPR figured out, everything
+else follows.
 
 :::
+
+One could fill a zoo with the different measures of classification accuracy
+that have been proposed over the years. I'll re-emphasize the most common here.
 
 In ML context, you will commonly hear reference to *precision* and *recall*. 
 With our definitions above, we have
 
 - Precision = $1 - \text{FDR}$
-- Recall = $\text{FNR} = 1 - \text{TPR}$
+- Recall = $\text{TPR} = 1 - \text{FNR}$
 
 so, by maximizing precision, we ensure that all of our predicted positives are
 true positives and, by maximizing recall, we ensure that we have no false 
