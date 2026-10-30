@@ -56,7 +56,8 @@ read_csv("key_dates.csv") |>
     filter(Item %in% c("Class Session", 
                        "Homework", 
                        "No Class", 
-                       "Prediction Competition")) |>
+                       "Prediction Competition", 
+                       "Midterm Exam")) |>
     group_by(Item) |> 
     mutate(Details = case_when(
       Item == "Class Session" ~ paste0("Lecture #", row_number(), ": ", Details), 
