@@ -2,9 +2,13 @@
 notes_num: "`r n <- knitr::current_input() |> stringr::str_extract('notes([:digit:]+).(qmd|rmarkdown)', group=1) |> as.integer(); sprintf('%02g', n)`"
 date: "`r Sys.Date()`"
 notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Class Session', Number == n) |> dplyr::pull(Details)`"
+format:
+  live-html
 ---
 
 {{< include _latex_defines.qmd >}}
+
+{{< include ../_extensions/r-wasm/live/_knitr.qmd >}}
 
 Outline: 
 
@@ -238,9 +242,208 @@ legend("topright",
 where here the green line is given by $$(1 - \alpha)_+ = \begin{cases} 1 - \alpha & \text{ when } 1 - \alpha > 0 \\ 0 & \text{ when } 1 - \alpha \leq 0 \end{cases}$$
 Here, $(x)_+ = \max\{0, x\}$ is known as the *positive part* operator. 
 
-Where does this *hinge loss* come from? 
+Where does this *hinge loss* come from? To get there, let's take a detour
+into margin classifiers. Supposed we have the `penguins` data we have
+used before and we want to classify species based on `body_mass` and 
+`flipper_len`. If we omit Chinstrap penguins to make this a binary problem, we
+get the following for the 2007 measurements
 
-**TODO** Geometric viewpoint on SVMs
+```{r}
+#| echo: false
+penguins |>
+    drop_na() |>
+    filter(species != "Chinstrap", 
+           year==2007) |>
+    ggplot(aes(x=body_mass, 
+               y=flipper_len, 
+               color=species)) + 
+    geom_point() + 
+    theme_bw() + 
+    scale_color_brewer(name="Species", 
+                       palette=2,
+                       type="qual") + 
+    theme(legend.position="bottom") + 
+    xlab("Body Mass (g)") + 
+    ylab("Flipper Length (mm)") + 
+    ggtitle("Where to Draw Linear Boundary?")
+```
+
+Clearly, this is not a hard problem. We can draw a line that achieves
+_perfect_ accuracy here. In fact, we can draw several such lines: 
+
+```{r}
+#| echo: false
+penguins |>
+    drop_na() |>
+    filter(species != "Chinstrap", 
+           year==2007) |>
+    ggplot(aes(x=body_mass, 
+               y=flipper_len, 
+               color=species)) + 
+    geom_point() + 
+    theme_bw() + 
+    scale_color_brewer(name="Species", 
+                       palette=2,
+                       type="qual") + 
+    theme(legend.position="bottom") + 
+    xlab("Body Mass (g)") + 
+    ylab("Flipper Length (mm)") + 
+    geom_abline(slope=-0.02, intercept=290) + 
+    geom_abline(slope=0, intercept=205) + 
+    geom_abline(slope=-0.015, intercept=270) + 
+    geom_abline(slope=0.001, intercept=198) + 
+    geom_abline(slope=-0.02, intercept=290)
+```
+
+While these are all perfect _in sample_, I would be more worried about some of
+them _out of sample_. In particular, the downward sloping diagonal lines that
+get close to some of the Gentoos are a bit too close for comfort. If I had to 
+pick a line, I'd like to select the one that gives me the biggest 'margin 
+for error': that is, that stays farthest away from the training points. 
+
+Let's look at what this means for each of the lines shown above. For each line,
+we can find the closest training point and measure its (perpendicular) distance
+to the line: 
+
+```{ojs}
+//| echo: false
+viewof SLOPE = Inputs.range([-0.1, 0.1], {
+  step: 0.001,
+  value: 0,
+  label: "What is the slope of the decision boundary?"
+})
+```
+
+```{ojs}
+//| echo: false
+viewof INTERCEPT = Inputs.range([160, 250], {
+  step: 0.0,
+  value: 200,
+  label: "What is the intercept of the decision boundary?"
+})
+```
+
+```{webr}
+#| echo: false
+#| input: ['SLOPE', 'INTERCEPT']
+#| message: false
+#| warning: false
+library(glue)
+library(tidyverse)
+base_data <- penguins |>
+    drop_na() |>
+    filter(species != "Chinstrap", 
+           year==2007) 
+
+base_plot <- base_data |>
+    ggplot(aes(x=body_mass, 
+               y=flipper_len, 
+               color=species)) + 
+    geom_point()  + theme_bw() + 
+    scale_color_brewer(name="Species", 
+                       palette=2,
+                       type="qual") + 
+    theme(legend.position="bottom") + 
+    xlab("Body Mass (g)") + 
+    ylab("Flipper Length (mm)")
+
+closest <- base_data |>
+    mutate(closest_x = (body_mass + SLOPE * (flipper_len - INTERCEPT))/(SLOPE^2+1), 
+           closest_y = SLOPE * closest_x + INTERCEPT, 
+           xy_dist = abs(SLOPE * body_mass - flipper_len + INTERCEPT) / sqrt(SLOPE^2+1)) |>
+    slice_min(xy_dist)
+
+
+predictions <- base_data |>
+    mutate(y_line = SLOPE * body_mass + INTERCEPT, 
+           pred = if_else(flipper_len > y_line, "Gentoo", "Adelie"), 
+           miss = species != pred) 
+
+n_errors <- predictions |>
+    summarize(n_errors = sum(miss)) |>
+    pull(n_errors)
+
+base_plot + 
+    geom_point(x=closest$closest_x, 
+               y=closest$closest_y, 
+               size=3, 
+               shape=1, 
+               color="red4") + 
+    geom_abline(slope=SLOPE, 
+                intercept=INTERCEPT) + 
+    geom_point(x=closest$body_mass, 
+               y=closest$flipper_len, 
+               shape=1, 
+               size=3, 
+               color="red4") + 
+    geom_segment(x=closest$closest_x, 
+                 y=closest$closest_y, 
+                 xend=closest$body_mass, 
+                 yend=closest$flipper_len, 
+                 color="red4") + 
+    geom_ribbon(aes(ymin=INTERCEPT + SLOPE * body_mass - closest$xy_dist, 
+                    ymax=INTERCEPT + SLOPE * body_mass + closest$xy_dist, 
+                    color=NULL), 
+                fill="grey80", 
+                alpha=0.6) + 
+    geom_point(data=predictions |> filter(miss), 
+               shape=4, 
+               alpha=0.8, 
+               color="black",
+               size=3) +
+    ggtitle(glue("Margin (Distance to Closest Point): {closest$xy_dist}"),
+            glue("Number of Errors: {n_errors}"))
+```
+
+(An interactive demonstration of a classification margin should load above. Please
+wait just a few seconds if you don't see it yet.)
+
+**TODO** Write out loss function that creates this geometric viewpoint on SVMs
+
+The so-called *maximum margin* classifier is the linear classifier that maximizes
+the margin while ensuring all points are correctly classified. In the
+above problem, this is a line with slope $-0.003$ and intercept $216$ (both
+approximate). Try it out above. 
+
+But in general this is the sort of thing we want to solve algorithmically rather
+than by brute force.  Some (rather painful, but elementary) algebraic geometry
+gets us the optimization problem: 
+
+$$\min_{\beta_0, \bbeta \in \R^{p+1}} \|\bbeta\|_2^2 \text{ subject to } y_i(\bbeta^{\top}\bx_i + \beta_0) \geq 1$$
+
+There's quite a lot of strangeness here. Firstly, note that we're now using the
+$y \in \pm 1$ convention. This isn't the biggest deal in the world, but it
+makes the math easier and avoids some dangerous zeros floating around. More 
+notably, we have an objective function that doesn't really 'touch' the data
+directly. 
+
+This problem might seem a bit mysterious (and it is), but, in brief, recall
+that [the distance from a line to a point](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line)
+for a decision boundary of the form[^zero] $\bbeta^{\top}{\bx} + \bbeta_0 = 0$ will
+have the form 
+
+[^zero]: The zero on the right hand side here captures the fact that if $\pm 1$
+are data points that are definitely classified, $0$ must be our decision boundary
+falling exactly between the two. 
+
+$$\text{dist} = \frac{|\bbeta^{\top}\bx + \bbeta_0|}{\|\bbeta\|_2}$$
+
+To deal with the numerator, we note that it must be $\pm 1$ (depending on the
+sign of $y_i$) from our optimization problem. From there, we simply note that
+
+$$\max \text{Margin} = \max \frac{1}{\|\bbeta\|_2} \Leftrightarrow \min \|\bbeta\|_2^2$$
+
+where we introduce the extra power of two in the final expression to make the
+(eventual) calculus easier.[^der]
+
+So our objective problem for maximum margin classifiers has two parts: 
+
+$$\min_{\beta_0, \bbeta \in \R^{p+1}} \underbrace{\|\bbeta\|_2^2}_{\text{Maximizes margin}} \text{ subject to } \underbrace{ y_i(\bbeta^{\top}\bx_i + \beta_0) \geq 1}_{\text{Each point classified correctly}}$$
+
+[^der]: The derivative of $\beta_1^2 + \beta_2^2$ is much easier than the 
+derivative of $\sqrt{\beta_1^2 + \beta_2^2}$. 
+
+TODO: Allow errors. 
 
 ## Generative Classifiers
 
@@ -310,7 +513,6 @@ ggplot() +
 
 Let's ignore Chinstrap penguins for a bit and focus on a binary Adelie *vs*
 Gentoo classifier: 
-
 
 ```{r}
 #| echo: false
