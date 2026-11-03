@@ -8,4 +8,321 @@ notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Clas
 
 Outline: 
 
+- Why Ensemble?
+- Decision Trees
+
 --- 
+
+Up to this point, we have introduced a variety of tools for classification
+and regression. In the regression context, we took `OLS` as our basic model
+and extended it in a variety of ways: 
+
+- We first derived OLS as the MSE-ERM among linear predictors, showing that
+  OLS is 'right' for any problem where we want to predict a mean, even if
+  there are no Gaussian assumptions in sight.
+- Analyzing the MSE loss, we found our _bias-variance_ decomposition, showing
+  that we could break down test error into a sum of distinct components. 
+- Ridge and Lasso regularization allowed us to control the size of the
+  regression coefficients in either a 'Euclidean' or 'Taxicab' way.
+  - By keeping regression coefficients small, these techniques allow us to
+    fit models even in the $p \gg n$ setting. (Among the infinite number of
+    possible solutions, all with equal training error, regularization picks
+    out the 'smallest' one)
+  - Ridge regression provides a essentially-guaranteed (small) out-of-sample
+    prediction boost using 'shrinkage' to trade off a large variance decrease
+    for a small bias increase. While we set up regression as a particular
+    $\ell_2^2$ penalty, we saw that _many_ techniques in ML have the same
+    effect. Ridge regression, at least, has an explicit _bias-variance_ 
+    **tradeoff**, not just a decomposition. 
+  - Lasso regression provides a different form of shrinkage and allows us to
+    automatically force some components all the way to zero, achieving an
+    automated model selection process. 
+- Moving beyond linearity, we saw how (polynomial) feature expansion could
+  be used to get a better approximation to the underlying relationship, at
+  the cost of increased statistical instability (variance). 
+  
+  - To counteract this increase in variance, we used a variety of techniques:
+  
+    - Local polynomials, that allow us to use a lower degree polynomial to
+      fit a smaller region of the data at a time
+    - Spline models that allow us to smoothly switch between local models
+      instead of 'going wild' with high powers
+    - Ridge regression to ensure our higher degree terms don't inflate our
+      variance
+    - _Additive_ models allow for 'coordinate-wise' non-linearity and provide
+      an attractive middle-ground between linear models and full nonlinearity
+      
+- To move from regression to classification, we first detoured through
+  _generalized_ linear models, which replace the normal sampling distribution
+  with a different distribution on $Y$. 
+  
+  - To predict $Y$, these models target $\E[Y|X] = f(X\beta)$ where $f(\cdot)$
+    is some function that maps the unbounded range of $X\beta$ to the
+    appropriate mean of $Y$.
+  - Important examples: logistic regression (Bernoulli with sigmoid link),
+    log-linear (Poisson with exponential link)
+  - To push these even further, we saw that the $X\beta$ term could be
+    replaced with essentially any non-linear model (especially additive)
+    to provide non-linear classification or count regression
+- Other important classification families: 
+  - Discriminative methods, which attempt to directly determine the class
+    boundaries: logistic regression, SVMs (margin classifiers), neural
+    networks (generally)
+  - Generative methods, which model $X$ depending on $Y$ and then invert this
+    model using Bayes' Rule to build a classifie: NB, LDA, QDA
+- The central _motif_ of all of our analysis was the Scylla-and-Charybdis
+  of bias and variance. We principally worry about variance, which we tame
+  by using simpler (less 'complex') models or larger data sets; when we have
+  enough data to make variance a (relative) non-issue, we focus on reducing
+  bias by using non-linear methods
+  
+  This complexity calculus re-appeared throughout our work, informing our
+  discussion of hyperparameter selection, different model families, hold-out
+  sets, model calibration, *etc.*
+  
+While this journey has gone _many_ places, we never quite stepped away from one
+of our earliest assumptions: 
+
+$$\hat{f} = \argmin_{f \in \Fcal} \text{TrainingError}(f) + \lambda \text{Regularization}(f) \tag{R-ERM/SRM}$$
+
+Building on this ERM paradigm, we have always looked for _the_
+(singular) best fitting model. While we sometimes 'slanted' away from pure
+training error minimization, we still took it for granted that there was
+_one_ model we would use. Today, we begin to relax that assumption. 
+
+The study of using _multiple_ models together in a smart way is called 
+_ensemble learning_. 
+
+## Ensemble Learning
+
+Ensemble learning relies on the idea that multiple models, smartly combined,
+can do better (on average) than any single model. We can divide ensemble
+learning into two broad schools: 
+
+- (Weighted) Combination of Models: in these models, we use a weighted
+  average (or similar) of models in hopes of a 'wisdom of the crowds'
+  phenomenon. We know that we can't guarantee one model to always beat
+  another, but we hope that by taking an average, the errors of each 
+  model will average out and we'll wind up somewhere better than any
+  individual input model.
+  
+  I like to think of these ensemble strategies as _parallel_. We fit 
+  many models 'unaware' of each other and then combine them _ex post_. 
+  
+- Repeated improvement: given one model, we know when it gets the right
+  answer and when it makes mistakes (at least on our training data). 
+  Is it possible to fit a new model that doesn't attempt to predict $Y$
+  directly, but instead targets $Y - f(X) = Y - \hat{Y}$. This model 
+  serves as a 'corrective' to the original model and (hopefully) improves
+  its performance. We repeat this process again and again (correcting
+  the corrected corrections...) until we have a very powerful ensemble. 
+  
+  These strategies are inhernetly _sequential_: we can't build the
+  corrector until the original model has been fitted and tested. 
+  
+Let's begin by focusing on our _parallel_ strategies: before we work out
+details, let's pause to think about what situations (if any) we might
+expect a sort of weighted average to help us out. 
+
+For simplicity, we'll focus on MSE-loss in the regression setting, though
+there's nothing regression specific to the techniques we're going to look
+at. 
+
+
+Suppose that we want to predict the outcome of some variable $Y$ using
+two *statistically independent* predictors $\hat{Y}_1, \hat{Y}_2$: if
+*arguendo* we assume these are unbiased, the MSE of each prediction
+is simply
+
+$$\begin{align*}
+\MSE_{\hat{Y}_i} &= \E_{Y, \hat{Y}_i}[(Y - \hat{Y}_i)^2] \\
+                       &= \E_{Y, \hat{Y}_i}[(Y - \E[Y] + \E[Y] - \hat{Y}_i)^2] \\
+                       &= \E_{Y, \hat{Y}_i}[(Y - \E[Y])^2 +2(Y - \E[Y])(\E[Y] - \hat{Y}_i)+(\E[Y] - \hat{Y}_i)^2] \\
+                       &= \E_{Y}[(Y - \E[Y])^2 +2\E_{Y, \hat{Y}_i}[(Y - \E[Y])(\E[Y] - \hat{Y}_i)]+\E_{\hat{Y}_i}[(\E[Y] - \hat{Y}_i)^2] \\
+                       &= \sigma_Y^2 + 2\E_{Y}[Y - \E[Y]]\E_{\hat{Y}_i}[\E[Y] - \hat{Y}_i)] + \sigma^2_{\hat{Y}_i} \\
+                       &= \sigma_Y^2 + \sigma^2_{\hat{Y}_i}
+\end{align*}$$
+
+(Why do the cross terms vanish?) That is, the MSE is simply sum of the 
+'irreducible error' associated with the best possible prediction ($\sigma_Y^2$
+against the optimal prediction $\E[Y]$) and the variance (error) in $\hat{Y}_i$
+as an estimator of $\E[Y]$.
+
+If $\hat{Y}_1, \hat{Y}_2$ are both predictors of $Y$, it is natural to ask
+if we can do better using a *combination* of the two of them than we can with
+either separately. Indeed, if we let $\widehat{Y} = \frac{1}{2}(\hat{Y}_1 + \hat{Y}_2)$, the above analysis tells us: 
+
+$$\begin{align*}
+\MSE_{\widehat{Y}} &= \sigma_Y^2 + \sigma_{\widehat{Y}}^2 \\
+&= \sigma_Y^2 + \V\left[\frac{\hat{Y}_1 + \hat{Y}_2}{2}\right] \\
+&= \sigma_Y^2 + \sigma_{\hat{Y}_1}^2/4 + \sigma_{\hat{Y}_2}^2/4
+\end{align*}$$
+
+How does this compare to the separate predictions? Well, if 
+$\sigma_{\hat{Y}_1} = \sigma_{\hat{Y}_2}$, then we have clearly reduced our 
+expected MSE by half of the variance error. (By definition, we can't do anything
+about the irreducible error.) If, on the other hand, one predictor is much
+better than the other, say $\sigma_{\hat{Y}_1}^2 = 400 \sigma_{\hat{Y}_2}^2$,
+then we have
+
+$$\begin{align*}
+\MSE_{\hat{Y}_1} &= \sigma_Y^2 + 400 \sigma_{\hat{Y}_2}^2 \\
+\MSE_{\hat{Y}_2} &= \sigma_Y^2 + \sigma_{\hat{Y}_2}^2 \\
+\MSE_{\widehat{Y}} &= \sigma_Y^2 + 100.25 \sigma_{\hat{Y}_2}^2 \\
+\end{align*}$$
+
+So we don't beat the superior predictor ($Y_2$), but we comfortably beat the
+inferior predictor ($Y_1$). Notably, if we didn't know which predictor
+was better and had to select randomly (50/50), we would have an expected
+MSE of $\sigma_Y^2 + 200\sigma_{\hat{Y}_2}^2$, so the 'averaging' predictor
+is still better. More generally, if $\hat{Y_1}$ is sometimes better and
+$\hat{Y_2}$ is better at other times, a suitable averaging strategy will 
+do better  *in the long run* than using a single predictor. (We should pick
+the averaging weights as a function of the variance of the two approaches and
+the relatively frequencies of the $\hat{Y}_1$-better and $\hat{Y}_2$-better
+scenarios.)
+
+This example - simple as it is - gets at the core insight of stacking: if we
+have several 'good enough' models, we can do better - sometimes much better -
+by using a combination of them. This is not guaranteed - if $\hat{Y}_2$ is 
+always the 'lower variance' model, adding in some $\hat{Y}_1$ pretty much
+always hurts - but we do not expect to have a single 'dominant' model. 
+(See earlier discussion of the *No Free Lunch* Theorem.) In 
+practice, we typically find ourselves armed with models of similar-enough
+performance (logistic regression, linear SVMs, RBF Kernel SVMs, RBF Kernel 
+logistic regression) and find that different models perform better on different
+inputs. *E.g.*, the 'linear' models might do well far from the decision boundary,
+while the 'kernelized' models might improve performance near the decision
+boundary while suffering from extra 'wiggliness' (variance) far from the 
+decision boundary. 
+
+So what can we take away from this discussion? 
+
+> Low correlation among predictors is helpful. If our base learners give
+  the exact same predictions at every point, there's nothing to be gained by 
+  combining and comparing them. 
+
+Put another way, ensemble learning benefits from a *diverse* set of base 
+learners. We hope to 'combine strength' from different approaches to build
+an ensemble predictor that is better than any of its individual components.
+
+The three major ensembling techniques we will cover - stacking, bagging, and 
+boosting - essentially come down to different ways of getting this diversity.
+
+The hope of ensemble learning is that by combining several _simple, but
+flexible_ base learners we can achieve performance beyond that of any model. 
+Because a (linear) average of linear models is still linear, we might hope
+that ensemble learning is at its best in situations where our base learners 
+are: 
+
+- Quite flexible (non-linear)
+- Easily made 'diverse'
+
+and that we don't really need to worry about variance all that much. This
+suggests it is time to introduce the final _base learner_ of this unit, the
+humble *decision tree*.
+
+## Decision Trees
+
+You are almost certainly already familiar with 
+decision trees through diagrams like this: 
+
+```{r}
+#| echo: true
+library(rpart)
+library(rpart.plot)
+library(MASS)
+dtree <- rpart(medv ~ . , data=Boston)
+
+rpart.plot(dtree)
+```
+
+Here, the tree is evaluated by applying a series of _univariate[^ob] binary_
+decision rules 'downwards': that is, at each step, we ask one step about
+one variable and take the left or right branch as appropriate. The final
+terminus (or 'leaf') of the tree is then our prediction.
+
+[^ob]: This model can be generalized to decisions like $3x_1 + 2x_2 < 5$ instead
+of simple univariate rules like $x_1 < 2.5$. These sorts of trees, often called
+*oblique* trees because they have decision boundaries that are not axis-aligned,
+are rather more difficult computationally, so you won't see them used as much,
+but they are popular among theory-minded researchers. 
+
+Decision trees are incredibly popular because they are easy to apply
+'mentally' and suggest natural interpretations. Variables which are
+used to split early or split often are more important. Interestingly, 
+decision trees also can be used to give an 'intermediate prediction'
+which is what we would get by stopping the prediction at that point. 
+Splits which materially change the intermediate prediction are 
+also more important. 
+
+But how should we *actually fit* a decision tree to data? This is, like
+so much in machine learning, the sort of thing which is easy to 
+understand intuitively, but comes with a significant amount of bookkeeping
+in practice. 
+
+Essentially, trees are fit by repeatedly asking the question: "What split
+would most reduce the error if my predictions stop here?" So, for the 
+first split, the tree looks at each variable to determine its optimal
+split point, and then finds the optimal variable to split on. To find
+the optimal split point, we need to sort the data on that variable
+and then compute the 'before' and 'after' variance for each value. 
+After finding the first split, the two 'second level' splits repeat
+this process _on only the data in their path_. That is, the two 'second
+level' splits are found on _different_ data. The four 'third level' splits
+are found on four different data sets, *etc.* 
+
+Because the later splits are computed on different data sets, they 
+almost always select different variables at each level (as in our
+example above, where the two 'level two' splits use the `lstat` and `rm`
+variables). Predictions are made by taking the average (or majority)
+of data left in that split. 
+
+Note that the splits need not be _and typically are not_ 'even' splits
+along a variable. *E.g.*, if we were doing a split on a variable that
+looks like
+
+| Variable | Value | 
+|----------|-------|
+| 1.0      | 1.0   | 
+| 1.1      | 0.9   | 
+| 1.2      | 1.1   | 
+| 1.3      | 1.4   | 
+| 100      | 500   | 
+| 105      | 550   | 
+
+The optimal split is clearly something like $\texttt{Variable} < 1.3$ with
+conditional predictions of $1.1$ and $525$ in each split and split sizes
+of $4$ and $2$. 
+
+Clearly, if the tree is allowed to run 'to completion', there will be
+one data point left in each leaf and the tree can obtain 0 training error. 
+That is, maximal decision trees are a very high complexity (low bias, 
+high variance) model. On the other extreme, a 'single split' tree (often
+called a 'stump') will be low complexity (high bias, low variance). So
+we can take tree depth (number of levels) as a good proxy for model
+complexity. Like $K$-Nearest Neighbors, we can pick depth (complexity)
+by a suitable cross-validation or train-test scheme, but will soon see
+a better way. 
+
+Some other notes on trees: 
+
+- You will sometimes see decision trees refered to as `CART`
+  (Classification and Regression Trees) or `rpart` (Recursive Partitioning)
+  but most folks will know the term "decision trees" so I just use that. 
+- Trees extend _very naturally_ to categorical variables and do not require
+  numeric encoding: we simply have to adapt the decision rule from 
+  $x \leq y$ to $x \in \Ycal$ where $x$ is now a categorical feature
+  and $\Ycal$ is a set of lables. 
+- Trees also handle missing values nicely: we can simply treat `NA` as
+  _very high_ or _very low_ or use an explicit `is.na` decision rule
+- Trees are rather robust to outliers: if a data point has an extreme
+  value, it will be 'split away' rather early and the 'main branch' of
+  the tree will be fit on the rest of the data. Non-outlier test points
+  will funnel into this 'main branch' and it will be like the outlier
+  essentially never existed
+  
+There are tons of tiny little decisions in building trees, so I don't
+recommend writing your own implementation. See, *e.g.*, `?rpart.control`
+for the fitting parameters used by the `rpart` package: other software
+will have similar options. 

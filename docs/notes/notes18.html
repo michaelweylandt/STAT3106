@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-11-03">
 <title>Notes for Lecture #18: Unit III. Classification &amp; Ensemble Methods: Boosting – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,29 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#boosting" id="toc-boosting" class="nav-link active" data-scroll-target="#boosting">Boosting</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes18.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes18.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #18: Unit III. Classification &amp; Ensemble Methods: Boosting</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">November 3, 2026</p>
     </div>
   </div>
   
@@ -164,15 +204,144 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<section id="boosting" class="level2"><h2 class="anchored" data-anchor-id="boosting">Boosting</h2>
+<p>So “stack-’em-and-bag-’em” is a great pair of techniques for ensemble construction. Can we go further?</p>
+<p>In both strategies, we have a set of base learners built more-or-less independently and are looking to combine them. This assumes that other learners can ‘make up’ for incorrect answers learned by one base learner. (Either through averaging or through a simple majority-vote scheme.) But this requires a bit of luck. Can we instead build an ensemble models that are designed to improve on each other?</p>
+<p>This is the fundamental idea of <em>boosting</em>: given one learner, what if we fit another learner whose goal is not to predict <span class="math inline">\(y\)</span> <em>per se</em>, but to fix where the prior learner went wrong? While boosting can be applied for both classification and regression (and was originally developed for classification), I find the math a bit more intuitive in the regression case.</p>
+<p>Suppose we have a set of training data <span class="math inline">\((\bX, \by)\)</span> and we fit a predictor <span class="math inline">\(\hat{f}_1\)</span>. We can construct a set of ‘first stage’ predictions</p>
+<p><span class="math display">\[\hat{\by}_1 = \hat{f}_1(\bX)\]</span></p>
+<p>and associated residuals</p>
+<p><span class="math display">\[\hat{\br}_1 = \by - \hat{\by}_1.\]</span> <em>If</em> we could predict <span class="math inline">\(\hat{\br}_1\)</span> reasonably well, say with another function <span class="math inline">\(\hat{f}_2\)</span>, we could get better predictions by combining the two models together:</p>
+<p><span class="math display">\[\hat{\by}_{1:2} = \hat{\by}_1 + \hat{\br}_1 = \hat{f}_1(\bX) + \hat{f}_2(\bX)\]</span></p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Why not Use $\by$?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Why not Use <span class="math inline">\(\by\)</span>?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You might ask why note fit <span class="math inline">\(\hat{f}_2\)</span> to take <span class="math inline">\(\hat{\by}_1\)</span> or <span class="math inline">\(\hat{\br}_1\)</span> as inputs. We can’t use anything that depends on <span class="math inline">\(\by\)</span> as inputs to any <span class="math inline">\(\hat{f}(\cdot)\)</span> in the test (unknown <span class="math inline">\(\by\)</span>) context.</p>
+</div>
+</div>
+<p>At this point, your BS alarm should be going off. If it were possible to predict <span class="math inline">\(\hat{r}_1\)</span> meaningfully in the first place, why didn’t our original <span class="math inline">\(\hat{f}_1\)</span> do this? After all, we know from the gradient condition from OLS that:</p>
+<p><span class="math display">\[\bX^{\top}(\by - \bX \hat{\bbeta}) = \bzero \implies \bx_j^{\top}\br = 0 \text{ for all } j = 1, \dots, p\]</span></p>
+<p>so OLS leaves no linear relationship “on the table.” Many other models have similar guarantees, but not all!</p>
+<p>As we have discussed throughout this course, we often pick models that don’t “go to the mattresses” and take on their most flexible forms (think <span class="math inline">\(K\)</span>-NN with <span class="math inline">\(K &gt; 1\)</span>: it’s not the ‘all out’ version of <span class="math inline">\(K\)</span>-NN). If we pick a base learner with minimal fitting ability, it might leave something on the table.</p>
+<p>So what is our laziest base learner? Let’s go back to our beloved trees and consider a tree with only a single split:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes18_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This type of minimal tree is often referred to as a <em>stump</em> in the ML community.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Clearly, a stump is a very high-bias (inflexible) low variance learner. Even if we do not go all the way to a stump, shallow decision trees still form a good basis for <em>boosting</em> or iterative model improvement.</p>
+<p>This gives us our basic Boosting-type algorithm:</p>
+<ul>
+<li>Initialize: <span class="math inline">\(\hat{f}_0(\cdot) = 0\)</span> (constant predictor)</li>
+<li>For <span class="math inline">\(b = 1, \dots, B\)</span>:
+<ul>
+<li>Compute residuals: <span class="math inline">\(\hat{\br}_b = \by - \hat{f}_{b-1}(\bX)\)</span>
+</li>
+<li>Build new learner <span class="math inline">\(\tilde{f}_b\)</span> on training data <span class="math inline">\((\bX, \hat{\br}_b)\)</span>
+</li>
+<li>Update ensemble predictor: <span class="math display">\[ \hat{f}_b(\cdot) = \hat{f}_{b-1}(\cdot) + \lambda \tilde{f}_b(\cdot) \Leftrightarrow \hat{f}_b(\cdot) = \sum_{i=1}^b \lambda\tilde{f}_b(\cdot)\]</span>
+</li>
+</ul>
+</li>
+</ul>
+<p>Wait? What is this new <span class="math inline">\(\lambda\)</span> term? It’s a form of regularization that we use to avoid overfitting. Instead of using <em>all</em> of the residual predictor we construct, we use a small fraction thereof. <span class="math inline">\(\lambda\)</span> is typically chosen to be small, on the order of <span class="math inline">\(\lambda \approx 0.01\)</span>. The hope is that, by taking such small steps, and not running boosting <em>ad infinitum</em> we can identify a good boosted predictor.</p>
+<div class="callout callout-style-default callout-caution callout-titled" title="Boosting and Overfitting">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Boosting and Overfitting
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In <em>bagging</em> scenarios, we can run <span class="math inline">\(B \to \infty\)</span> without risk of overfitting because we are resampling data but still only fitting a model of limited capacity. The resampling only exists as a variance taming mechanism.</p>
+<p>In <em>boosting</em> scenarios, running <span class="math inline">\(B \to \infty\)</span> is a recipe for overfitting as we will continue to fit increasingly more complex models to capture more and more residual variance. It is important to have good data hygiene and use some sort of hold-out/cross-validation scheme to avoid overfitting.</p>
+</div>
+</div>
+<p>At this point, you might recognize a bit of a gradient descent ‘flavor’ to boosting: we take small steps in a direction that further reduces our loss. This is not just a coincidence: as noted above, regression residuals are intimately tied to the gradient at a particular <span class="math inline">\(\hat{\beta}\)</span>. If we want to extend boosting to classification contexts, where residuals are not well-defined, one commonly used strategy (not surprisingly called <em>gradient boosting</em>) fits each successive base learner to the <em>gradient</em> of the loss function at each training point: that is, we fit the new base learner so that it pushes us “just a bit” in a direction that further minimizes the loss.</p>
+<p>While other forms of boosting exist (<code>AdaBoost</code>, <code>LogitBoost</code>), gradient boosting is the most commonly used today. In particular, a software framework known as <a href="https://xgboost.ai"><code>xgboost</code></a> dominates the boosting landscape. <code>xgboost</code> - with the <code>x</code> standing for e<strong>X</strong>treme - is not just the blue-raspberry flavor of machine learning. It uses small decision trees as the base learner, additionally using a random-forest feature randomization step to get some additional variability. The authors of <code>xgboost</code> have put significant effort into <code>xgboost</code> to make it as efficient as possible on a variety of computer architectures and have added many additionally useful features like automatic feature selection, a penalization scheme to downweight certain trees, and a Newton-like step instead of a simple gradient step for constructing the ensemble. See the <a href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html">official documentation</a> for a more detailed discussion of these and the other powerful features of the <code>xgboost</code> library.</p>
+<p>Like random forests, <code>xgboost</code> is also a widely used “nearly optimal” tool of choice for much applied predictive modeling and you are highly encouraged to familiarize yourself with it and add it to your toolbox.</p>
+<p>Below, I demonstrate both random forests and xgboost to predict the <code>price</code> feature in the <code>diamonds</code> data you might have seen used to demonstrate <code>ggplto2</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsample.tidymodels.org">rsample</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://imbs-hl.github.io/ranger/">ranger</a></span><span class="op">)</span> <span class="co"># Provides random forest</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost">xgboost</a></span><span class="op">)</span> <span class="co"># Provides xgboost</span></span>
+<span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">9890</span><span class="op">)</span></span>
+<span><span class="va">split</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rsample/man/initial_split.html">initial_split</a></span><span class="op">(</span><span class="va">diamonds</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">train_diamonds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rsample/man/initial_split.html">training</a></span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
+<span><span class="va">test_diamonds</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rsample/man/initial_split.html">testing</a></span><span class="op">(</span><span class="va">split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">diamonds_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">price</span> <span class="op">~</span> <span class="va">.</span>, data<span class="op">=</span><span class="va">train_diamonds</span><span class="op">)</span></span>
+<span><span class="va">diamonds_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ranger/man/ranger.html">ranger</a></span><span class="op">(</span><span class="va">price</span> <span class="op">~</span> <span class="va">.</span>, data<span class="op">=</span><span class="va">train_diamonds</span><span class="op">)</span></span>
+<span><span class="co"># No formula interface</span></span>
+<span><span class="va">diamonds_xg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xgboost/man/xgboost.html">xgboost</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">diamonds_lm</span><span class="op">)</span>, y<span class="op">=</span><span class="va">train_diamonds</span><span class="op">$</span><span class="va">price</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">y_hat_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">diamonds_lm</span>, newdata<span class="op">=</span><span class="va">test_diamonds</span><span class="op">)</span></span>
+<span><span class="va">y_hat_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">diamonds_rf</span>, data<span class="op">=</span><span class="va">test_diamonds</span><span class="op">)</span><span class="op">$</span><span class="va">predictions</span></span>
+<span></span>
+<span><span class="co">## Some awful magic to process test_diamonds into the expected format</span></span>
+<span><span class="co">## Ignore this!</span></span>
+<span><span class="va">diamonds_lm_terms</span> <span class="op">&lt;-</span> <span class="va">diamonds_lm</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/terms.html">terms</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/delete.response.html">delete.response</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.frame.html">model.frame</a></span><span class="op">(</span><span class="va">diamonds_lm_terms</span>, <span class="va">test_diamonds</span>, xlev <span class="op">=</span> <span class="va">diamonds_lm</span><span class="op">$</span><span class="va">xlevels</span><span class="op">)</span></span>
+<span><span class="va">diamonds_lm_X_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">diamonds_lm_terms</span>, <span class="va">m</span>, contrasts.arg <span class="op">=</span> <span class="va">diamonds_lm</span><span class="op">$</span><span class="va">contrasts</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">y_hat_xg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">diamonds_xg</span>, newdata<span class="op">=</span><span class="va">diamonds_lm_X_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">test_diamonds</span><span class="op">$</span><span class="va">price</span>, </span>
+<span>     y_hat_lm<span class="op">=</span><span class="va">y_hat_lm</span>, </span>
+<span>     y_hat_rf<span class="op">=</span><span class="va">y_hat_rf</span>, </span>
+<span>     y_hat_xg<span class="op">=</span><span class="va">y_hat_xg</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/bind_cols.html">bind_cols</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tidyr/man/pivot_longer.html">pivot_longer</a></span><span class="op">(</span>cols<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/tidyselect/man/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"y_hat"</span><span class="op">)</span>, </span>
+<span>               names_to<span class="op">=</span><span class="st">"method"</span>, </span>
+<span>               values_to<span class="op">=</span><span class="st">"prediction"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/recode-and-replace-values.html">recode_values</a></span><span class="op">(</span><span class="va">method</span>, </span>
+<span>    <span class="st">"y_hat_lm"</span> <span class="op">~</span> <span class="st">"Linear Regression"</span>, </span>
+<span>    <span class="st">"y_hat_rf"</span> <span class="op">~</span> <span class="st">"Random Forest"</span>, </span>
+<span>    <span class="st">"y_hat_xg"</span> <span class="op">~</span> <span class="st">"xgBoost"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">y</span>, y<span class="op">=</span><span class="va">prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_point.html">geom_point</a></span><span class="op">(</span>alpha<span class="op">=</span><span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">method</span>, <span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/labs.html">xlab</a></span><span class="op">(</span><span class="st">"True y"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Predicted y"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_abline.html">geom_abline</a></span><span class="op">(</span>slope<span class="op">=</span><span class="fl">1</span>, intercept<span class="op">=</span><span class="fl">0</span>, color<span class="op">=</span><span class="st">"red4"</span>, linewidth<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/scale_continuous.html">scale_x_continuous</a></span><span class="op">(</span>labels<span class="op">=</span><span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/scales/man/dollar_format.html">dollar</a></span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span>labels<span class="op">=</span><span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/scales/man/dollar_format.html">dollar</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes18_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This is quite clunky - and we didn’t even do any tuning. Still, we see that a naive application of random forest (RMSE $540.39) or xgboost (RMSE $540.29) gives a real improvement over a linear model (RMSE $1119.85). For a more fluid UX, I recommend the use of the <code>tidymodels</code> package instead.</p>
+<p>TODO: Tidymodels Example</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>To my eye, this is more like the very sad Charlie Brown Christmas tree with one branch than a true <em>stump</em>, but if the worlds of statistics and ML can barely agree on terminology, what chance is there for botany and ML to agree on terms?<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +745,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes18.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes18.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes18.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes18.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

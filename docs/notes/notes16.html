@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-11-03">
 <title>Notes for Lecture #16: Unit III. Classification &amp; Ensemble Methods: Tree Based Methods – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,30 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#ensemble-learning" id="toc-ensemble-learning" class="nav-link active" data-scroll-target="#ensemble-learning">Ensemble Learning</a></li>
+  <li><a href="#decision-trees" id="toc-decision-trees" class="nav-link" data-scroll-target="#decision-trees">Decision Trees</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes16.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes16.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #16: Unit III. Classification &amp; Ensemble Methods: Tree Based Methods</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">November 3, 2026</p>
     </div>
   </div>
   
@@ -164,15 +205,186 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
+<ul>
+<li>Why Ensemble?</li>
+<li>Decision Trees</li>
+</ul>
 <hr>
+<p>Up to this point, we have introduced a variety of tools for classification and regression. In the regression context, we took <code>OLS</code> as our basic model and extended it in a variety of ways:</p>
+<ul>
+<li><p>We first derived OLS as the MSE-ERM among linear predictors, showing that OLS is ‘right’ for any problem where we want to predict a mean, even if there are no Gaussian assumptions in sight.</p></li>
+<li><p>Analyzing the MSE loss, we found our <em>bias-variance</em> decomposition, showing that we could break down test error into a sum of distinct components.</p></li>
+<li>
+<p>Ridge and Lasso regularization allowed us to control the size of the regression coefficients in either a ‘Euclidean’ or ‘Taxicab’ way.</p>
+<ul>
+<li>By keeping regression coefficients small, these techniques allow us to fit models even in the <span class="math inline">\(p \gg n\)</span> setting. (Among the infinite number of possible solutions, all with equal training error, regularization picks out the ‘smallest’ one)</li>
+<li>Ridge regression provides a essentially-guaranteed (small) out-of-sample prediction boost using ‘shrinkage’ to trade off a large variance decrease for a small bias increase. While we set up regression as a particular <span class="math inline">\(\ell_2^2\)</span> penalty, we saw that <em>many</em> techniques in ML have the same effect. Ridge regression, at least, has an explicit <em>bias-variance</em> <strong>tradeoff</strong>, not just a decomposition.</li>
+<li>Lasso regression provides a different form of shrinkage and allows us to automatically force some components all the way to zero, achieving an automated model selection process.</li>
+</ul>
+</li>
+<li>
+<p>Moving beyond linearity, we saw how (polynomial) feature expansion could be used to get a better approximation to the underlying relationship, at the cost of increased statistical instability (variance).</p>
+<ul>
+<li>
+<p>To counteract this increase in variance, we used a variety of techniques:</p>
+<ul>
+<li>Local polynomials, that allow us to use a lower degree polynomial to fit a smaller region of the data at a time</li>
+<li>Spline models that allow us to smoothly switch between local models instead of ‘going wild’ with high powers</li>
+<li>Ridge regression to ensure our higher degree terms don’t inflate our variance</li>
+<li>
+<em>Additive</em> models allow for ‘coordinate-wise’ non-linearity and provide an attractive middle-ground between linear models and full nonlinearity</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>To move from regression to classification, we first detoured through <em>generalized</em> linear models, which replace the normal sampling distribution with a different distribution on <span class="math inline">\(Y\)</span>.</p>
+<ul>
+<li>To predict <span class="math inline">\(Y\)</span>, these models target <span class="math inline">\(\E[Y|X] = f(X\beta)\)</span> where <span class="math inline">\(f(\cdot)\)</span> is some function that maps the unbounded range of <span class="math inline">\(X\beta\)</span> to the appropriate mean of <span class="math inline">\(Y\)</span>.</li>
+<li>Important examples: logistic regression (Bernoulli with sigmoid link), log-linear (Poisson with exponential link)</li>
+<li>To push these even further, we saw that the <span class="math inline">\(X\beta\)</span> term could be replaced with essentially any non-linear model (especially additive) to provide non-linear classification or count regression</li>
+</ul>
+</li>
+<li>
+<p>Other important classification families:</p>
+<ul>
+<li>Discriminative methods, which attempt to directly determine the class boundaries: logistic regression, SVMs (margin classifiers), neural networks (generally)</li>
+<li>Generative methods, which model <span class="math inline">\(X\)</span> depending on <span class="math inline">\(Y\)</span> and then invert this model using Bayes’ Rule to build a classifie: NB, LDA, QDA</li>
+</ul>
+</li>
+<li>
+<p>The central <em>motif</em> of all of our analysis was the Scylla-and-Charybdis of bias and variance. We principally worry about variance, which we tame by using simpler (less ‘complex’) models or larger data sets; when we have enough data to make variance a (relative) non-issue, we focus on reducing bias by using non-linear methods</p>
+<p>This complexity calculus re-appeared throughout our work, informing our discussion of hyperparameter selection, different model families, hold-out sets, model calibration, <em>etc.</em></p>
+</li>
+</ul>
+<p>While this journey has gone <em>many</em> places, we never quite stepped away from one of our earliest assumptions:</p>
+<p><span class="math display">\[\hat{f} = \argmin_{f \in \Fcal} \text{TrainingError}(f) + \lambda \text{Regularization}(f) \tag{R-ERM/SRM}\]</span></p>
+<p>Building on this ERM paradigm, we have always looked for <em>the</em> (singular) best fitting model. While we sometimes ‘slanted’ away from pure training error minimization, we still took it for granted that there was <em>one</em> model we would use. Today, we begin to relax that assumption.</p>
+<p>The study of using <em>multiple</em> models together in a smart way is called <em>ensemble learning</em>.</p>
+<section id="ensemble-learning" class="level2"><h2 class="anchored" data-anchor-id="ensemble-learning">Ensemble Learning</h2>
+<p>Ensemble learning relies on the idea that multiple models, smartly combined, can do better (on average) than any single model. We can divide ensemble learning into two broad schools:</p>
+<ul>
+<li>
+<p>(Weighted) Combination of Models: in these models, we use a weighted average (or similar) of models in hopes of a ‘wisdom of the crowds’ phenomenon. We know that we can’t guarantee one model to always beat another, but we hope that by taking an average, the errors of each model will average out and we’ll wind up somewhere better than any individual input model.</p>
+<p>I like to think of these ensemble strategies as <em>parallel</em>. We fit many models ‘unaware’ of each other and then combine them <em>ex post</em>.</p>
+</li>
+<li>
+<p>Repeated improvement: given one model, we know when it gets the right answer and when it makes mistakes (at least on our training data). Is it possible to fit a new model that doesn’t attempt to predict <span class="math inline">\(Y\)</span> directly, but instead targets <span class="math inline">\(Y - f(X) = Y - \hat{Y}\)</span>. This model serves as a ‘corrective’ to the original model and (hopefully) improves its performance. We repeat this process again and again (correcting the corrected corrections…) until we have a very powerful ensemble.</p>
+<p>These strategies are inhernetly <em>sequential</em>: we can’t build the corrector until the original model has been fitted and tested.</p>
+</li>
+</ul>
+<p>Let’s begin by focusing on our <em>parallel</em> strategies: before we work out details, let’s pause to think about what situations (if any) we might expect a sort of weighted average to help us out.</p>
+<p>For simplicity, we’ll focus on MSE-loss in the regression setting, though there’s nothing regression specific to the techniques we’re going to look at.</p>
+<p>Suppose that we want to predict the outcome of some variable <span class="math inline">\(Y\)</span> using two <em>statistically independent</em> predictors <span class="math inline">\(\hat{Y}_1, \hat{Y}_2\)</span>: if <em>arguendo</em> we assume these are unbiased, the MSE of each prediction is simply</p>
+<p><span class="math display">\[\begin{align*}
+\MSE_{\hat{Y}_i} &amp;= \E_{Y, \hat{Y}_i}[(Y - \hat{Y}_i)^2] \\
+                       &amp;= \E_{Y, \hat{Y}_i}[(Y - \E[Y] + \E[Y] - \hat{Y}_i)^2] \\
+                       &amp;= \E_{Y, \hat{Y}_i}[(Y - \E[Y])^2 +2(Y - \E[Y])(\E[Y] - \hat{Y}_i)+(\E[Y] - \hat{Y}_i)^2] \\
+                       &amp;= \E_{Y}[(Y - \E[Y])^2 +2\E_{Y, \hat{Y}_i}[(Y - \E[Y])(\E[Y] - \hat{Y}_i)]+\E_{\hat{Y}_i}[(\E[Y] - \hat{Y}_i)^2] \\
+                       &amp;= \sigma_Y^2 + 2\E_{Y}[Y - \E[Y]]\E_{\hat{Y}_i}[\E[Y] - \hat{Y}_i)] + \sigma^2_{\hat{Y}_i} \\
+                       &amp;= \sigma_Y^2 + \sigma^2_{\hat{Y}_i}
+\end{align*}\]</span></p>
+<p>(Why do the cross terms vanish?) That is, the MSE is simply sum of the ‘irreducible error’ associated with the best possible prediction (<span class="math inline">\(\sigma_Y^2\)</span> against the optimal prediction <span class="math inline">\(\E[Y]\)</span>) and the variance (error) in <span class="math inline">\(\hat{Y}_i\)</span> as an estimator of <span class="math inline">\(\E[Y]\)</span>.</p>
+<p>If <span class="math inline">\(\hat{Y}_1, \hat{Y}_2\)</span> are both predictors of <span class="math inline">\(Y\)</span>, it is natural to ask if we can do better using a <em>combination</em> of the two of them than we can with either separately. Indeed, if we let <span class="math inline">\(\widehat{Y} = \frac{1}{2}(\hat{Y}_1 + \hat{Y}_2)\)</span>, the above analysis tells us:</p>
+<p><span class="math display">\[\begin{align*}
+\MSE_{\widehat{Y}} &amp;= \sigma_Y^2 + \sigma_{\widehat{Y}}^2 \\
+&amp;= \sigma_Y^2 + \V\left[\frac{\hat{Y}_1 + \hat{Y}_2}{2}\right] \\
+&amp;= \sigma_Y^2 + \sigma_{\hat{Y}_1}^2/4 + \sigma_{\hat{Y}_2}^2/4
+\end{align*}\]</span></p>
+<p>How does this compare to the separate predictions? Well, if <span class="math inline">\(\sigma_{\hat{Y}_1} = \sigma_{\hat{Y}_2}\)</span>, then we have clearly reduced our expected MSE by half of the variance error. (By definition, we can’t do anything about the irreducible error.) If, on the other hand, one predictor is much better than the other, say <span class="math inline">\(\sigma_{\hat{Y}_1}^2 = 400 \sigma_{\hat{Y}_2}^2\)</span>, then we have</p>
+<p><span class="math display">\[\begin{align*}
+\MSE_{\hat{Y}_1} &amp;= \sigma_Y^2 + 400 \sigma_{\hat{Y}_2}^2 \\
+\MSE_{\hat{Y}_2} &amp;= \sigma_Y^2 + \sigma_{\hat{Y}_2}^2 \\
+\MSE_{\widehat{Y}} &amp;= \sigma_Y^2 + 100.25 \sigma_{\hat{Y}_2}^2 \\
+\end{align*}\]</span></p>
+<p>So we don’t beat the superior predictor (<span class="math inline">\(Y_2\)</span>), but we comfortably beat the inferior predictor (<span class="math inline">\(Y_1\)</span>). Notably, if we didn’t know which predictor was better and had to select randomly (50/50), we would have an expected MSE of <span class="math inline">\(\sigma_Y^2 + 200\sigma_{\hat{Y}_2}^2\)</span>, so the ‘averaging’ predictor is still better. More generally, if <span class="math inline">\(\hat{Y_1}\)</span> is sometimes better and <span class="math inline">\(\hat{Y_2}\)</span> is better at other times, a suitable averaging strategy will do better <em>in the long run</em> than using a single predictor. (We should pick the averaging weights as a function of the variance of the two approaches and the relatively frequencies of the <span class="math inline">\(\hat{Y}_1\)</span>-better and <span class="math inline">\(\hat{Y}_2\)</span>-better scenarios.)</p>
+<p>This example - simple as it is - gets at the core insight of stacking: if we have several ‘good enough’ models, we can do better - sometimes much better - by using a combination of them. This is not guaranteed - if <span class="math inline">\(\hat{Y}_2\)</span> is always the ‘lower variance’ model, adding in some <span class="math inline">\(\hat{Y}_1\)</span> pretty much always hurts - but we do not expect to have a single ‘dominant’ model. (See earlier discussion of the <em>No Free Lunch</em> Theorem.) In practice, we typically find ourselves armed with models of similar-enough performance (logistic regression, linear SVMs, RBF Kernel SVMs, RBF Kernel logistic regression) and find that different models perform better on different inputs. <em>E.g.</em>, the ‘linear’ models might do well far from the decision boundary, while the ‘kernelized’ models might improve performance near the decision boundary while suffering from extra ‘wiggliness’ (variance) far from the decision boundary.</p>
+<p>So what can we take away from this discussion?</p>
+<blockquote class="blockquote">
+<p>Low correlation among predictors is helpful. If our base learners give the exact same predictions at every point, there’s nothing to be gained by combining and comparing them.</p>
+</blockquote>
+<p>Put another way, ensemble learning benefits from a <em>diverse</em> set of base learners. We hope to ‘combine strength’ from different approaches to build an ensemble predictor that is better than any of its individual components.</p>
+<p>The three major ensembling techniques we will cover - stacking, bagging, and boosting - essentially come down to different ways of getting this diversity.</p>
+<p>The hope of ensemble learning is that by combining several <em>simple, but flexible</em> base learners we can achieve performance beyond that of any model. Because a (linear) average of linear models is still linear, we might hope that ensemble learning is at its best in situations where our base learners are:</p>
+<ul>
+<li>Quite flexible (non-linear)</li>
+<li>Easily made ‘diverse’</li>
+</ul>
+<p>and that we don’t really need to worry about variance all that much. This suggests it is time to introduce the final <em>base learner</em> of this unit, the humble <em>decision tree</em>.</p>
+</section><section id="decision-trees" class="level2"><h2 class="anchored" data-anchor-id="decision-trees">Decision Trees</h2>
+<p>You are almost certainly already familiar with decision trees through diagrams like this:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bethatkinson/rpart">rpart</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.milbo.org/rpart-plot/index.html">rpart.plot</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/">MASS</a></span><span class="op">)</span></span>
+<span><span class="va">dtree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rpart/man/rpart.html">rpart</a></span><span class="op">(</span><span class="va">medv</span> <span class="op">~</span> <span class="va">.</span> , data<span class="op">=</span><span class="va">Boston</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rpart.plot/man/rpart.plot.html">rpart.plot</a></span><span class="op">(</span><span class="va">dtree</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes16_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here, the tree is evaluated by applying a series of <em>univariate<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> binary</em> decision rules ‘downwards’: that is, at each step, we ask one step about one variable and take the left or right branch as appropriate. The final terminus (or ‘leaf’) of the tree is then our prediction.</p>
+<p>Decision trees are incredibly popular because they are easy to apply ‘mentally’ and suggest natural interpretations. Variables which are used to split early or split often are more important. Interestingly, decision trees also can be used to give an ‘intermediate prediction’ which is what we would get by stopping the prediction at that point. Splits which materially change the intermediate prediction are also more important.</p>
+<p>But how should we <em>actually fit</em> a decision tree to data? This is, like so much in machine learning, the sort of thing which is easy to understand intuitively, but comes with a significant amount of bookkeeping in practice.</p>
+<p>Essentially, trees are fit by repeatedly asking the question: “What split would most reduce the error if my predictions stop here?” So, for the first split, the tree looks at each variable to determine its optimal split point, and then finds the optimal variable to split on. To find the optimal split point, we need to sort the data on that variable and then compute the ‘before’ and ‘after’ variance for each value. After finding the first split, the two ‘second level’ splits repeat this process <em>on only the data in their path</em>. That is, the two ‘second level’ splits are found on <em>different</em> data. The four ‘third level’ splits are found on four different data sets, <em>etc.</em></p>
+<p>Because the later splits are computed on different data sets, they almost always select different variables at each level (as in our example above, where the two ‘level two’ splits use the <code>lstat</code> and <code>rm</code> variables). Predictions are made by taking the average (or majority) of data left in that split.</p>
+<p>Note that the splits need not be <em>and typically are not</em> ‘even’ splits along a variable. <em>E.g.</em>, if we were doing a split on a variable that looks like</p>
+<table class="caption-top table">
+<thead><tr class="header">
+<th>Variable</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td>1.1</td>
+<td>0.9</td>
+</tr>
+<tr class="odd">
+<td>1.2</td>
+<td>1.1</td>
+</tr>
+<tr class="even">
+<td>1.3</td>
+<td>1.4</td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>105</td>
+<td>550</td>
+</tr>
+</tbody>
+</table>
+<p>The optimal split is clearly something like <span class="math inline">\(\texttt{Variable} &lt; 1.3\)</span> with conditional predictions of <span class="math inline">\(1.1\)</span> and <span class="math inline">\(525\)</span> in each split and split sizes of <span class="math inline">\(4\)</span> and <span class="math inline">\(2\)</span>.</p>
+<p>Clearly, if the tree is allowed to run ‘to completion’, there will be one data point left in each leaf and the tree can obtain 0 training error. That is, maximal decision trees are a very high complexity (low bias, high variance) model. On the other extreme, a ‘single split’ tree (often called a ‘stump’) will be low complexity (high bias, low variance). So we can take tree depth (number of levels) as a good proxy for model complexity. Like <span class="math inline">\(K\)</span>-Nearest Neighbors, we can pick depth (complexity) by a suitable cross-validation or train-test scheme, but will soon see a better way.</p>
+<p>Some other notes on trees:</p>
+<ul>
+<li>You will sometimes see decision trees refered to as <code>CART</code> (Classification and Regression Trees) or <code>rpart</code> (Recursive Partitioning) but most folks will know the term “decision trees” so I just use that.</li>
+<li>Trees extend <em>very naturally</em> to categorical variables and do not require numeric encoding: we simply have to adapt the decision rule from <span class="math inline">\(x \leq y\)</span> to <span class="math inline">\(x \in \Ycal\)</span> where <span class="math inline">\(x\)</span> is now a categorical feature and <span class="math inline">\(\Ycal\)</span> is a set of lables.</li>
+<li>Trees also handle missing values nicely: we can simply treat <code>NA</code> as <em>very high</em> or <em>very low</em> or use an explicit <code>is.na</code> decision rule</li>
+<li>Trees are rather robust to outliers: if a data point has an extreme value, it will be ‘split away’ rather early and the ‘main branch’ of the tree will be fit on the rest of the data. Non-outlier test points will funnel into this ‘main branch’ and it will be like the outlier essentially never existed</li>
+</ul>
+<p>There are tons of tiny little decisions in building trees, so I don’t recommend writing your own implementation. See, <em>e.g.</em>, <code><a href="https://rdrr.io/pkg/rpart/man/rpart.control.html">?rpart.control</a></code> for the fitting parameters used by the <code>rpart</code> package: other software will have similar options.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>This model can be generalized to decisions like <span class="math inline">\(3x_1 + 2x_2 &lt; 5\)</span> instead of simple univariate rules like <span class="math inline">\(x_1 &lt; 2.5\)</span>. These sorts of trees, often called <em>oblique</em> trees because they have decision boundaries that are not axis-aligned, are rather more difficult computationally, so you won’t see them used as much, but they are popular among theory-minded researchers.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +788,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes16.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes16.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes16.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes16.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

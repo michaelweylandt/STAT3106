@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-11-03">
 <title>Notes for Lecture #17: Unit III. Classification &amp; Ensemble Methods: Stacking and Bagging – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,43 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#stacking" id="toc-stacking" class="nav-link active" data-scroll-target="#stacking">Stacking</a></li>
+  <li>
+<a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling">Resampling</a>
+  <ul class="collapse">
+<li><a href="#bootstrapping" id="toc-bootstrapping" class="nav-link" data-scroll-target="#bootstrapping">Bootstrapping</a></li>
+  <li><a href="#bootstrap-aggregation-bagging" id="toc-bootstrap-aggregation-bagging" class="nav-link" data-scroll-target="#bootstrap-aggregation-bagging">Bootstrap Aggregation (Bagging)</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#summary-of-bagging" id="toc-summary-of-bagging" class="nav-link" data-scroll-target="#summary-of-bagging">Summary of Bagging</a>
+  <ul class="collapse">
+<li><a href="#out-of-bag-error" id="toc-out-of-bag-error" class="nav-link" data-scroll-target="#out-of-bag-error">‘Out of Bag’ Error</a></li>
+  </ul>
+</li>
+  <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests">Random Forests</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes17.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes17.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #17: Unit III. Classification &amp; Ensemble Methods: Stacking and Bagging</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">November 3, 2026</p>
     </div>
   </div>
   
@@ -164,15 +218,286 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<section id="stacking" class="level2"><h2 class="anchored" data-anchor-id="stacking">Stacking</h2>
+<p>So this is all well and good, but where do we <em>actually get</em> different predictors? Here, we’re going to change notation to <span class="math inline">\(\hat{f}_1, \hat{f}_2, \dots
+\hat{f}_K\)</span> to emphasize that we want to learn a combination of <em>predictors</em> (functions estimated from data), not <em>predictions</em>.</p>
+<p>Well… perhaps the easiest thing to do is to train different models on the same data. Logistic Regression, LDA, and SVMs will likely find <em>similar</em> decision boundaries, but they won’t be exactly the same. Suppose we have</p>
+<ul>
+<li>
+<span class="math inline">\(\hat{f}_{\text{LR}}\)</span>: Logistic Regression (for simplicity, plain and unregularized)</li>
+<li>
+<span class="math inline">\(\hat{f}_{\text{LDA}}\)</span>: Linear Discriminant Analysis</li>
+<li>
+<span class="math inline">\(\hat{f}_{\text{SVM}}\)</span>: A Linear SVM with the default hyperparameter from <code>sklearn</code>
+</li>
+</ul>
+<p>Further, let’s assume that we have the binarized predictions (<span class="math inline">\(\{0, 1\}\)</span>, no soft labels for now) from each model. How can we combine these?</p>
+<p>Perhaps the simplest rule is the ‘majority vote’ rule: if <span class="math inline">\(\hat{f}_{\text{LR}}(\bx) = \hat{f}_{\text{LDA}}(\bx) = 1\)</span> and <span class="math inline">\(\hat{f}_{\text{SVM}}(\bx) = 0\)</span>, then <span class="math inline">\(\hat{f}_{\text{Majority}}(\bx) = 1\)</span>.</p>
+<p>This approach is quite easy to implement, but it treats all the inputs as equally reliable. While this isn’t the <em>worst</em> assumption, we can do better. In particular, what if we <em>learned</em> an optimal set of weights. Specifically, we want to learn a vector of weights <span class="math inline">\(\bw \in \R^3\)</span> to maximize predictive accuracy of the linear combination <span class="math inline">\(w_1 \hat{f}_{\text{LR}} + w_2 \hat{f}_{\text{LDA}} + w_3 \hat{f}_{\text{SVM}}\)</span>. This gives us <em>another</em> classification problem, so let’s use logistic regression to determine the combination weights:</p>
+<p><span class="math display">\[\hat{\bw} = \argmin_{\bw} \sum_{i=1}^n -y_i \bw^{\top}\hat{\bf} + \log(1 + e^{\bw^{\top}\hat{\bf}})\]</span> where <span class="math inline">\(\hat{\bf}\)</span> is a vector of the three base learner predictions.</p>
+<p>The solution to this problem, <span class="math inline">\(\hat{\bw}\)</span>, gives the <em>stacking weights</em> for our three base learners. Once we have <span class="math inline">\(\hat{\bw}\)</span>, we can make predictions at our our new test point, <span class="math inline">\(\tilde{\bx}\)</span>, by:</p>
+<ol type="1">
+<li>Apply three base learners separately:
+<ul>
+<li><span class="math inline">\(\hat{y}_{\text{LR}} = \hat{f}_{\text{LR}}(\tilde{\bx})\)</span></li>
+<li>
+<span class="math inline">\(\hat{y}_{\text{LDA}} = \hat{f}_{\text{LDA}}(\tilde{\bx})\)</span><br>
+</li>
+<li><span class="math inline">\(\hat{y}_{\text{SVM}} = \hat{f}_{\text{SVM}}(\tilde{\bx})\)</span></li>
+</ul>
+</li>
+<li>Determine the weighted combination:
+<ul>
+<li><span class="math inline">\(\text{Stacking Score} = w_1\hat{y}_{\text{LR}} + w_2\hat{y}_{\text{LDA}}+w_3\hat{y}_{\text{SVM}}\)</span></li>
+</ul>
+</li>
+<li>Make a prediction using the stacking score: <span class="math display">\[\hat{y}_{\text{Ensemble}} = \begin{cases} 1 &amp; \text{ if } \text{Stacking Score} &gt; \theta \\ 0 &amp; \text{ if } \text{ Stacking Scoore} \leq \theta \end{cases}\]</span> where <span class="math inline">\(\theta\)</span> is a threshold chosen to minimize the problem-specific loss. (Alternatively, set <span class="math inline">\(\theta = 0\)</span> and include an intercept term.)</li>
+</ol>
+<p>We note a few practical points here:</p>
+<ol type="1">
+<li>What data should we use to estimate <span class="math inline">\(\bw\)</span>? This is a new step in our pipeline, so we need a new ‘chunk’ of our data. This split of the data is typically called either a query or validation set, but I tend to describe it as an ‘ensembling’ set to make its purpose clear. Regardless, it serves to give us a new data set to fit our new ensemble model. (If we use the training set used to train each <span class="math inline">\(\hat{f}_i\)</span>, the base learners may look ‘too good’ to the ensemble learning process.)</li>
+<li>Nothing actually requires us to use the binarized predictions. For models that provide soft labels (class probabilities), we can and should use those in the ensemble process (both in training the ensemble weights and in constructing the predictor vectors <span class="math inline">\(\hat{\bf}\)</span>). Dropping the probabilities is really just throwing away data.</li>
+<li>We motivated stacking by weighted averages. As such, it is common to add additional constraints to the stacking problem to make it look more like averaging. For example, you will often see:
+<ul>
+<li>
+<span class="math inline">\(\bw \geq 0\)</span>: The stacking weights are non-negative. This makes sense if you assume each predictor is generally reasonable. (If you have a prediction that is <em>anti-correlated</em> with your response, you should probably pause and look into that further first.)</li>
+<li>
+<span class="math inline">\(\sum w_i = 1\)</span>: The stacking weights sum to 1. Again, a natural generalization of averaging.</li>
+</ul>
+</li>
+<li>When fitting <em>large</em> ensembles (like any large model), it is not uncommon to see ridge or lasso penalties. These are <em>particularly important</em> in ensemble building since the base learners are generally <em>highly correlated</em>.</li>
+<li>Suitably tuned (and that’s a big assumption!) stacking should never do worse than any individual predictor because we can always pick <span class="math inline">\(\bw = (1, 0, 0)\)</span> if the first base learner strictly dominates the others.</li>
+</ol>
+<p>Stacking creates a ‘model of models’ - the turducken of machine learning - and all of the ML tricks we have learned to date can be used in creating this meta-model. Like any modeling step, we have to practice good data hygiene (splitting and hold outs) to make sure we don’t overfit and to generate a good estimate of predictive accuracy, but otherwise it is particularly straightforward.</p>
+<p>An interesting fact about stacking is that it treats each of the base learners <span class="math inline">\(\hat{f}_i\)</span> as black boxes and doesn’t really need to know what is inside them or where they came from. This lets us use stacking as a ‘work-around’ for certain types of practical problems:</p>
+<ul>
+<li>the models are all pre-trained and we don’t have the ability to alter them (<em>e.g.</em>, building an ensemble that ‘averages’ out the advice from ChatGPT, Google Gemini, and Anthropic)</li>
+<li>we are unable to move the data from a restricted setting for privacy reasons (data trained on patient records held by different medical providers)</li>
+</ul>
+<p>Stacking can also be used as a form of ‘post-processing’ to introduce additional desiderata that the original model training process was not aware of. I have <a href="https://arxiv.org/abs/2206.00074">explored this in the fairness context</a> with some collaborators. Here, we consider a situation in which the base learners are learned to only maximize accuracy, but we include fairness constraints in the stacking process, effectively eliminating models that are highly predictive, but whose predictive power comes from systemtic biases.</p>
+<p>Despite these strengths, stacking can only take us so far: the value-added of stacking comes from differences between the base learners and, when trained on the same data set, we don’t expect too much diversity among the base learners. In practical settings, stacking is particularly useful when we are given ‘standard’ or ‘baseline’ models for a task that we want to combine without changing the individual models, but for real improvements we may want to modify our pipeline to explicitly generate more diversity.</p>
+<p>This brings us to our next family of ensembling techniques - resampling methods, the most famous of which is <em>bootstrap aggregation</em> or bagging.</p>
+</section><section id="resampling" class="level2"><h2 class="anchored" data-anchor-id="resampling">Resampling</h2>
+<p>In our discussion above, we argued that diversity of (variance between) base learners was key to ensemble performance. When these base learners are trained on the same training data, we can only get so much variance. Since most of our models are not terrible, they generally pick out the same major patterns in the data.</p>
+<p>So how can we get more variance? We could further split our training data, using a small chunk for each model, but this seems likely to bring about variance problems. If we want to fit large ensembles of 10, 20, or even 100 models, we might wind up using less than 1% of the overall data to train a single model, which is clearly subpar. Stacking might give us some power at the margin, but it’s hard to make up for the weakness associated with using such a small portion of our data.</p>
+<p>We can get around this problem using <em>sampling</em> or <em>resampling</em> techniques. We can train our esnemble members on randomly selected subsets of our data (or subsets of the features). Because these models have different training sets, they will be more varied. Typically, this sort of ‘data randomization’ induces more variance than just changing hyperparamters or model families.)</p>
+<p>These randomization schemes have different names:</p>
+<ul>
+<li>Minibatching: training on random subsets of samples (rows)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+</li>
+<li>Random Subspace Method: training on random subsets of features (columns)</li>
+<li>Minipatching: training on random subsets of samples and features (row and columns)</li>
+</ul>
+<p>If the model is not too sensitive to the sample size (or if we use a high sampling rate), these strategies can work well. But we have a bit of a bind here: if we want to use large training sets for each learner, we go back to the overlapping training scenario we were trying to avoid.</p>
+<p>Can we be a bit more creative on our sampling? We want to minimize overlap but also get ‘full sized’ training sets.</p>
+<section id="bootstrapping" class="level3"><h3 class="anchored" data-anchor-id="bootstrapping">Bootstrapping</h3>
+<p>To get around this problem, we rely on a key idea of late 20th century statistics: <strong>the bootstrap.</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Recall the core idea of bootstrapping:</p>
+<ul>
+<li>We have samples <span class="math inline">\(\{(\bx_1, y_1), (\bx_2, y_2), \dots, (\bx_n, y_n)\}\)</span> from an unknown distribution.</li>
+<li>We would like to have more samples from this distribution, but we don’t have the ability to gain more data.</li>
+<li>If our data set is large, we expect that the <em>empirical distribution</em> <span class="math inline">\(\hat{\P}_n\)</span> will be close to the ‘real’ distribution <span class="math inline">\(\P\)</span>. Formally, the law of large numbers (and its fancy variants like Glivenko-Cantelli) guarantees us that <span class="math inline">\(\hat{P}_n \to \P \text{ as } n \to \infty\)</span>.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
+</li>
+<li>Sampling from <span class="math inline">\(\hat{P}_n\)</span> is ‘close’ to sampling from <span class="math inline">\(\P\)</span>
+</li>
+</ul>
+<p>So how can we sample from the empirical distribution <span class="math inline">\(\hat{P}_n\)</span>? We sample <em>with replacement</em>. That is, we pick one of the training points <span class="math inline">\(n\)</span> times <strong>independently</strong> (with no regard for prior selections). Intuitively, this captures the idea of IID sampling - it’s also necessary so we don’t just reproduce the (shuffled) training data.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>This scheme - sampling with replacement - is the essence of <strong>bootstrap sampling</strong>. In STA 9719, you will see how it can be used to do things like estimate sampling variability of complex statistics. Here, our goal is a bit more straightforward: we just want a way to ‘shake things up.’</p>
+</section><section id="bootstrap-aggregation-bagging" class="level3"><h3 class="anchored" data-anchor-id="bootstrap-aggregation-bagging">Bootstrap Aggregation (Bagging)</h3>
+<p>We can use a similar strategy to generate ‘new’ training data for our base learners:</p>
+<ul>
+<li>Repeat <span class="math inline">\(b=1, \dots, B\)</span> times:
+<ul>
+<li>Sample from the training data <span class="math inline">\(\Dcal_{\text{train}}\)</span> <span class="math inline">\(n\)</span> times <em>with replacement</em> to get a bootstrap set <span class="math inline">\(\tilde{\Dcal_b}\)</span>
+</li>
+<li>Train a base learner <span class="math inline">\(\hat{f}_b\)</span> on <span class="math inline">\(\tilde{\Dcal_b}\)</span>
+</li>
+</ul>
+</li>
+<li>Create the ensemble predictor: <span class="math display">\[\hat{f}(\bx) = \frac{1}{B}\sum_{b=1}^B \hat{f}_b(\bx)\]</span>
+</li>
+</ul>
+<p>This ensembling strategy is called <strong>bootstrap aggregation</strong> or more simply <strong>bagging</strong>.</p>
+<p>So how much diversity / variance can we actually expect from this strategy? It depends on how much overlap we get in our sampling. This is a fun little probability exercise:</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Probability of a Given Sample Being in a Bootstrap Data Set">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Probability of a Given Sample Being in a Bootstrap Data Set
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In our scenario above, what is the chance that <span class="math inline">\(\bx_1\)</span> is in <span class="math inline">\(\tilde{\Dcal}_b\)</span>?</p>
+<p>For each sample, there is a <span class="math inline">\(1/n\)</span> chance that we select <span class="math inline">\(\bx_1\)</span>, and hence a <span class="math inline">\(1-1/n\)</span> chance that we don’t. If we repeat this process <span class="math inline">\(n\)</span> times, there is a <span class="math inline">\((1-1/n)^n\)</span> chance that we never select <span class="math inline">\(\bx_1\)</span>. For a large data set, this converges to</p>
+<p><span class="math display">\[\lim_{n\to\infty}\left(1-\frac{1}{n}\right)^n = e^{-1} \approx \frac{2}{3}\]</span></p>
+<p>so about <span class="math inline">\(2/3\)</span> of our data is used for each base learner. <em>Unlike</em> straight subsampling, however, this process includes repeats, so we have <span class="math inline">\(n\)</span> samples, guaranteeing us repeats.</p>
+<p>A more detailed analysis can show that the <em>number</em> of times a sample appears is asymptotically Poisson: rare events (<span class="math inline">\(1/n\)</span>) and large samples (<span class="math inline">\(n \to \infty\)</span>) strike again.</p>
+</div>
+</div>
+<p>So how does bagging actually work? We know that we’re always trying to control bias and variance so let’s look at those two terms separately:</p>
+<ul>
+<li>Bias: Because we are fitting the same model <span class="math inline">\(B\)</span> times, there’s really no impact on bias. (<em>E.g.</em>, if we are fitting a linear model, the average of <span class="math inline">\(B\)</span> lines is just another line so whatever approximation error we have is unchanged.)</li>
+<li>Variance: Suppose that the base learners <span class="math inline">\(\hat{f}_i\)</span> have variance <span class="math inline">\(\sigma^2\)</span> and correlation <span class="math inline">\(\rho\)</span>. (These are constant for all <span class="math inline">\(\hat{f}_i, \hat{f}_j\)</span> by the IID sampling structure used). Then the variance of <span class="math inline">\(\hat{f}\)</span> (the bagged average) is given by</li>
+</ul>
+<p><span class="math display">\[\begin{align*}
+\V[\hat{f}] &amp;= \V\left[\frac{1}{B}\sum_b \hat{f}_b\right] \\
+            &amp;= B^{-2}\V\left[\sum_b \hat{f}_b\right] \\
+            &amp;= B^{-2}\left(\sum_{b=1}^B \V[\hat{f}_b] + \sum_{\substack{b, b'=1 \\ b \neq b'}}^B \C[\hat{f}_b, \hat{f}_{b'}]\right)\\
+            &amp;= B^{-2}\left(\sum_{b=1}^B \sigma^2 + \sum_{\substack{b, b'=1 \\ b \neq b'}}^B \rho\sigma^2\right) \\
+            &amp;= B^{-2}\left(B\sigma^2 + (B^2 - B) \rho\sigma^2\right) \\
+            &amp;= B^{-2}\left(B(\rho\sigma^2 + (1-\rho)\sigma^2) + (B^2 - B) \rho\sigma^2\right) \\
+            &amp;= B^{-2}\left(B\rho\sigma^2 + B(1-\rho)\sigma^2) + B^2\rho\sigma^2 - B\rho\sigma^2\right) \\
+            &amp;= B^{-2}\left(B(1-\rho)\sigma^2) + B^2\rho\sigma^2\right) \\
+            &amp;= \rho\sigma^2 + \frac{1}{B}(1-\rho)\sigma^2
+\end{align*}\]</span></p>
+<p>This is an interesting formula. As always, we can understand it best by taking the extremes:</p>
+<ul>
+<li>
+<span class="math inline">\(B = 1\)</span>: In this case, the variance reduces to <span class="math inline">\(\sigma^2\)</span>, the variance of a single predictor (as we would expect for ‘ensemble of one’).</li>
+<li>
+<span class="math inline">\(B \to \infty\)</span>: The variance decreases to <span class="math inline">\(\rho\sigma^2\)</span>, but no further. Practically, we see diminishing returns in the <span class="math inline">\(B\approx 200-500\)</span> range, which you will see as the default for most software that has a bagging step.</li>
+<li>
+<span class="math inline">\(\rho \to 1\)</span>: As the base learners become more correlated, the variance converges to <span class="math inline">\(\sigma^2\)</span>, the variance of a single predictor. As we would expect since we have no diversity among base learners when <span class="math inline">\(\rho \to 1\)</span>.</li>
+<li>
+<span class="math inline">\(\rho \to 0\)</span>: As the base learners become uncorrelated, the variance converges to <span class="math inline">\(\sigma^2/B\)</span>, the variance of a standard average. (You might ask why not take <span class="math inline">\(B \to \infty\)</span> in this case to have no bias: we really can’t get an infinite number of uncorrelated<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> models, no matter how hard we try, if they are modeling the same underlying DGP.)</li>
+</ul>
+<p>So we see we want a <em>flexible</em> (low-bias) base learner that is also going to give us low correlation (and low variance) among the bagged predictors. How can we get such a base learner? We’ll cover this more below.</p>
+</section></section><section id="summary-of-bagging" class="level2"><h2 class="anchored" data-anchor-id="summary-of-bagging">Summary of Bagging</h2>
+<p>To review: e discussed the ensemble learning technique known as <em>bagging</em>. Bagging, a contraction of ‘boostrap aggregation’ can be used to create an ensemble by training <span class="math inline">\(B\)</span> copies of a given base learner on <span class="math inline">\(B\)</span> distinct bootstrap samples, <em>i.e.</em>, ‘faux’ data sets of <span class="math inline">\(n\)</span> points obtained by sampling the original training data <span class="math inline">\(n\)</span> times <em>with replacement</em>. Because these <span class="math inline">\(B\)</span> trained base learners are essentially interchangeable, it is conventional to create the bagged prediction by a straight average (or majority vote if classification) of the individual base learners, though you will occasionally see the bagging base learners combined in a ‘stacked’ fashion.</p>
+<p>We showed that the MSE associated with a bagged ensemble of size <span class="math inline">\(B\)</span> is:</p>
+<p><span class="math display">\[\MSE_{\text{Bagging}} = \text{Bias}^2_{\text{Base Learner}} +\underbrace{\rho\sigma^2 + \frac{1}{B}(1-\rho)\sigma^2}_{\text{Variance}} + \text{Irreducible Error}\]</span></p>
+<p>and noted that, by sending <span class="math inline">\(B \to 0\)</span>, we reduce the ‘bootstrapping variance’ to 0 but that some ‘inherent variance’ remains from the training data.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> As we noted last week, this implies that our search for the optimal base learner should do three things:</p>
+<ul>
+<li>Have low bias</li>
+<li>Have low correlation among the bagged learners</li>
+<li>Best fast enough that we can take <span class="math inline">\(B \to \infty\)</span> and cancel that term</li>
+</ul>
+<p>If we can find something that does all of these, we will have a (near) optimal predictor (<span class="math inline">\(\MSE \approx \text{Irreducible Error}\)</span>). This is our primary goal for the day.</p>
+<section id="out-of-bag-error" class="level3"><h3 class="anchored" data-anchor-id="out-of-bag-error">‘Out of Bag’ Error</h3>
+<p>Before we move to our long-promised final base learner, let’s consider another advantage of bagging. We know that it is important to have ‘new’ data when assessing model performance. To date, we have obtained this ‘new’ data through variants of the hold-out principle, such as the test-train split or cross-validation: if it is important to have new data, it is important enough to set aside some of our putative training data for model assessment.</p>
+<p>But bagging gives us another source of ‘unseen’ data: if we sample <span class="math inline">\(n\)</span> points from a population of size <span class="math inline">\(n\)</span> with replacement, approximately <span class="math inline">\(n/e \approx 2n/3\)</span> points will be sampled, leaving <span class="math inline">\(n(1-e^{-1}) \approx n/3\)</span> points unseen by each base learner. If these points were the same across each base learner, we would have a readily available test set. But then our whole bagging strategy would be essentially useless…</p>
+<p>We can estimate the so-called ‘out-of-bag’ error (OOB) associated with each training point by computing the predictive performance <em>on the ensemble of learners that haven’t seen that point</em>. That is, instead of testing the performance of the whole ensemble, we take a ‘subensemble’ of the base learners that never saw that point. Repeating this process over all <span class="math inline">\(n\)</span> training points (and creating <span class="math inline">\(n\)</span> different sub-ensembles) we obtain an estimate of the OOB error. Clearly, OOB is not test error of the entire ensemble, but it is a useful quantity nevertheless.</p>
+<p>Formally, we obtain the bagged ensemble and associated OOB error as follows:</p>
+<ul>
+<li>
+<strong>Inputs</strong>:
+<ul>
+<li>Base learner family <span class="math inline">\(\Fcal\)</span>
+</li>
+<li>Training set of size <span class="math inline">\(n\)</span>: <span class="math inline">\(\Dcal=\{(\bx_1, y_1), (\bx_2, y_2), \dots, (\bx_n, y_n)\}\)</span>
+</li>
+<li>Number of bootstrap samples <span class="math inline">\(B\)</span>
+</li>
+</ul>
+</li>
+<li>For <span class="math inline">\(b=1, \dots, B\)</span>:
+<ul>
+<li>Create bootstrap training set <span class="math inline">\(\Dcal_b = \{(\bx_1^{(b)}, y_1^{(b)}), (\bx_2^{(b)}, y_2^{(b)}), \dots, (\bx_n^{(b)}, y_n^{(b)})\}\)</span>
+</li>
+<li>Fit base learner <span class="math inline">\(\hat{f}_b\)</span> to <span class="math inline">\(\Dcal_b\)</span>
+</li>
+</ul>
+</li>
+<li>Build ensemble <span class="math inline">\(\hat{f}(\bx) = B^{-1}\sum_{b=1}^B \hat{f}_b(\bx)\)</span>
+</li>
+<li>For <span class="math inline">\(i=1, \dots, n\)</span>:
+<ul>
+<li>Let <span class="math inline">\(b_i^c = 0\)</span> be the number of bootstrap samples not containing <span class="math inline">\(i\)</span>
+</li>
+<li>Let <span class="math inline">\(y_i^c = 0\)</span> be the average prediction of bootstrapped learners not trained on <span class="math inline">\(i\)</span>
+</li>
+<li>For <span class="math inline">\(b = 1, \dots, B\)</span>:
+<ul>
+<li>If <span class="math inline">\(i \notin \Dcal_b\)</span>:
+<ul>
+<li><span class="math inline">\(b_i^c := b_i^c+1\)</span></li>
+<li><span class="math inline">\(y_i^c := y_i^c + \hat{f}_i(\bx_i)\)</span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Let <span class="math inline">\(\hat{y}_i^c = y_i^c / b_i^c\)</span> (or majority vote if classifying)</li>
+<li>Let <span class="math inline">\(\text{OOB}_i = \text{Loss}(\hat{y}_i^c, y_i)\)</span>
+</li>
+</ul>
+</li>
+<li>Estimate OOB error as <span class="math inline">\(\text{OOB} = n^{-1} \sum_{i=1}^n \text{OOB}_i\)</span>
+</li>
+<li>
+<strong>Return</strong> <span class="math inline">\(\hat{f}, \text{OOB}\)</span>
+</li>
+</ul>
+<p>For each training point, we expect it to occur in approximately <span class="math inline">\(B/e\)</span> bootstrap samples and hence we have approximately <span class="math inline">\(1 - B/e \approx B/3\)</span> bootstrapped base learners that we can use to computing the OOB error. This isn’t quite as good as the full <span class="math inline">\(B\)</span> samples we would use for a true test point, but since variance decreases quadratically in <span class="math inline">\(B\)</span>, this isn’t really a major loss.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+</section></section><section id="random-forests" class="level2"><h2 class="anchored" data-anchor-id="random-forests">Random Forests</h2>
+<p>We are now ready to introduce the concept of <em>random forests</em>, which are <em>almost</em> bagged decision trees. Recall our big goal for bagging: constructing an ensemble of <em>minimally correlated</em> <em>very flexible</em> base learners. Clearly, ‘deep’ trees, <em>i.e.</em>, trees with many splits, can be very flexible. (In the limit, sufficiently deep trees can fit the training data perfectly <em>à la</em> <span class="math inline">\(1\)</span>-nearest neighbor methods.) And row-subsampling (bagging) gives us a good source of variance. So “bagged decision trees” are pretty darn good. But can we go further?</p>
+<p>Indeed! We have one other knob we can turn: random use of features. When building a single tree, we always built our next split by looking for the <em>best</em> feature to split on out of <em>all</em> of our features. But we don’t actuallly need to use the best feature at each step. Instead, we can randomly select a subset of features at each split, pick the best of those, and go on our merry way.</p>
+<p>Clearly, this is going to give us more variability, but are we concerned it might hurt us? If we (randomly) leave out the most important features, are we just producing a worse tree overall? This is where the true genius of random forests comes in: the feature is not <em>removed from the whole tree</em>, it is only removed from that one split. We can use it (if randomly selected) in later (deeper) splits. That is, if the feature is important early and we happen to miss it, the tree will wind up partially reconstructing it later.</p>
+<p>So that’s the key construction of <em>random forests</em>:</p>
+<ul>
+<li>Build a bunch of decision trees;</li>
+<li>by randomly subsampling rows (observations) for each tree; and</li>
+<li>randomly sampling features (columns) <em>within</em> each split.</li>
+</ul>
+<p>This basically hits everything we want for ensemble learning: high variance flexible learners in the form of deep decision trees that are constructed in a way that gives us lots of tree-to-tree variance (resulting from both our row and column sampling) without loss of power in any individual tree (because the missing column in split <span class="math inline">\(i\)</span> can reappear in all later splits).</p>
+<p>Additionally, because trees are relatively quick to code and quick to apply (computers are very good at less than/greater than checks and binary logic), random forests are <em>fast</em>. Additionally, we note that for any bagging scheme- including random forests-the base learners are built and applied in parallel, so we can get even more speed by just throwing more compute power at the problem.</p>
+<p>Here, you might ask whether we can combine <em>stacking</em> and <em>random forests</em>. Instead of using a simple sample average of trees, can we get an optimally weighted average of our trees? These sorts of <em>optimized</em> forests definitely have been explored, but they don’t tend to add too much above random forests.</p>
+<p>As a general rule, random forests are pretty near optimal for applied ML on tabular data. They are:</p>
+<ul>
+<li>easy to apply</li>
+<li>fit quickly</li>
+<li>don’t have too many <em>important</em> tuning parameters<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>
+</li>
+<li>have a built in error metric that can be used to make sure training doesn’t go off the rails (OOB error)</li>
+<li>have great software support in almost every programming environment</li>
+<li>can fit linear and non-linear relationships quite well</li>
+</ul>
+<p>For this reason, random forests are an indispensible part of the ML toolbox. You can throw them at almost any (tabular) problem and they will perform within some reasonable percentage of optimality. Being clear here: random forests are not <em>optimal</em> for every problem – no method is – but they do very well on almost all problem with minimal analyst effort. It often takes real work to beat a good random forest implementation.</p>
+<p>When I face a challenge, <em>e.g.</em> in work with scientific collaborators, I often start by throwing a simple linear model (possibly with <span class="math inline">\(k\)</span> lasso selected features) and a random forest and seeing how the performance compares. If the linear model is 80-90% as good as the random forest, I usually just stop there and report back “this is as good a linear model as you are likely to get without massive overfitting”. If the linear model is 10% as good as the RF, I know there is more work to be done and more signal that could be captured. Note that this strategy makes sense in my typical context - developing an interpretable model for scientific discovery - but it may not always work for you.</p>
+<p>Due to this usefulness, almost every variation of random forests you can imagine has already been explored. We won’t explore these as most of them add little general purpose value (many are useful in specific scenarios however).</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>Most of these methods were actually designed to speed up training/fitting and that remains the main use case for minibatching today (<em>cf.</em> <em>stochastic</em> gradient descent or certain dropout schemes). We won’t focus too much on implications for speed today, but it certainly is nice when a technique invented to solve one problem turns out to be useful in other scenarios.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>If you have seen bootstrapping before, it was likely in the context of estimating the sampling variance of an estimator. (If you haven’t seen this, go look it up - it’s awesome!) Here, we’re using bootstrap sampling to induce some variance, not to estimate variance, but the sampling strategy is the same.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The Law of Large Numbers gives us a pointwise convergence here, while Glivenko-Cantelli is needed to give us <em>uniform</em> convergence guarantees. The distinction matters, but we’re not going to use it here.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>If this seems weird, step back from thinking of resampling data and just think about sampling from a distribution. If you are sampling from a <span class="math inline">\(\text{Binomial}(n=5, p=0.5)\)</span> distribution, you will get <em>several</em> <code>3</code>s in a data set of reasonable size. That’s just a fact of life with discrete distributions (it’s a “probablility zero” event in the continuous case) and we take the empirical distribution <span class="math inline">\(\hat{P}_n\)</span> as a discrete uniform distribution supported on the training set. This is why it’s so important to think of bootstrapping as sampling from <em>a distribution</em> not as sampling from <em>the data</em> (even though that distribution is estimated from the data).<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Well, <em>technically</em> we can get a bunch of uncorrelated models if we are willing to accept models that have no predictive power, <em>e.g.</em>, a bunch of distinct random number generators. The reasons this is a bad strategy should be obvious.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>There is randomness in our selection / acquisition of training data and nothing we do can completely remove it. Three cheers for large and well-constructed training sets, the unsung heros of machine learning!<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Taking a typical choice of <span class="math inline">\(B = 500\)</span>, the OOB ensemble of (expected) <span class="math inline">\(316\)</span> base learners will have a variance that is approximately <span class="math inline">\(500/316 \approx 1.6\)</span> times higher than the ‘true’ ensemble. If <span class="math inline">\(B\)</span> is large enough <span class="math inline">\((1-\rho)\sigma^2/B \approx 0\)</span>, <span class="math inline">\((1-\rho)\sigma^2/(B(1-e^{-1})) \approx 1.6(1-\rho)\sigma^2/B\)</span> will also be negligible. Put another way, the bulk of the error in bagged ensembles comes from i) bias; ii) <em>training data</em> variance; and iii) irreducible error. The ‘not enough bootstraps’ contribution is typically quite small.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8">
+<p>Random Forests actually have a <em>lot</em> of tuning parameters: <em>e.g.</em>,</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://imbs-hl.github.io/ranger/">ranger</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/args.html">args</a></span><span class="op">(</span><span class="va">ranger</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (formula = NULL, data = NULL, num.trees = 500, mtry = NULL, 
+    importance = "none", write.forest = TRUE, probability = FALSE, 
+    min.node.size = NULL, min.bucket = NULL, max.depth = NULL, 
+    replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632), 
+    case.weights = NULL, class.weights = NULL, splitrule = NULL, 
+    num.random.splits = 1, alpha = 0.5, minprop = 0.1, poisson.tau = 1, 
+    split.select.weights = NULL, always.split.variables = NULL, 
+    respect.unordered.factors = NULL, scale.permutation.importance = FALSE, 
+    local.importance = FALSE, regularization.factor = 1, regularization.usedepth = FALSE, 
+    keep.inbag = FALSE, inbag = NULL, holdout = FALSE, quantreg = FALSE, 
+    time.interest = NULL, oob.error = TRUE, num.threads = NULL, 
+    save.memory = FALSE, verbose = TRUE, node.stats = FALSE, 
+    seed = NULL, na.action = "na.learn", dependent.variable.name = NULL, 
+    status.variable.name = NULL, classification = NULL, x = NULL, 
+    y = NULL, ...) 
+NULL</code></pre>
+</div>
+</div>
+<p>but most of these have pretty marginal impact.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p>
+</li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +901,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes17.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes17.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes17.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes17.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
