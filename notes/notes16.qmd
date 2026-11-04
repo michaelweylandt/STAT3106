@@ -83,7 +83,7 @@ and extended it in a variety of ways:
 While this journey has gone _many_ places, we never quite stepped away from one
 of our earliest assumptions: 
 
-$$\hat{f} = \argmin_{f \in \Fcal} \text{TrainingError}(f) + \lambda \text{Regularization}(f) \tag{R-ERM/SRM}$$
+$$\hat{f} = \argmin_{f \in \Fcal} \text{TrainingError}(f) + \lambda *  \text{Regularization}(f) \tag{R-ERM/SRM}$$
 
 Building on this ERM paradigm, we have always looked for _the_
 (singular) best fitting model. While we sometimes 'slanted' away from pure
@@ -291,7 +291,7 @@ looks like
 | 100      | 500   | 
 | 105      | 550   | 
 
-The optimal split is clearly something like $\texttt{Variable} < 1.3$ with
+The optimal split is clearly something like $\texttt{Variable} \leq 1.3$ with
 conditional predictions of $1.1$ and $525$ in each split and split sizes
 of $4$ and $2$. 
 
@@ -326,3 +326,190 @@ There are tons of tiny little decisions in building trees, so I don't
 recommend writing your own implementation. See, *e.g.*, `?rpart.control`
 for the fitting parameters used by the `rpart` package: other software
 will have similar options. 
+
+## Trees as Ensemble Base Learners
+
+Decision trees represent a nearly-perfect input to a model ensemble: they are
+quick to fit, easily modified to achieve all sorts of one-off-rules and are
+quite low bias (when deep). It's worth taking a moment to see what that 
+low bias looks like. 
+
+Here, I'm going to fit a series of decision trees of increasing depth to a 
+(one dimensional) non-linear example.
+
+```{r}
+#| echo: false
+library(rpart)
+library(tidyverse)
+library(glue)
+
+f <- function(x) 2 * x + sin(x^3) + 5 * sqrt(log(x^2+1))
+tibble(x=seq(-3, 3, length.out=201)) |> 
+    mutate(y=f(x), 
+           y_depth1 = predict(rpart(y ~ x, control=rpart.control(maxdepth=1, 
+                                                                 minbucket=1, 
+                                                                 minsplit=1, 
+                                                                 cp=0))), 
+           y_depth2 = predict(rpart(y ~ x, control=rpart.control(maxdepth=2, 
+                                                                 minbucket=1, 
+                                                                 minsplit=1, 
+                                                                 cp=0))), 
+           y_depth3 = predict(rpart(y ~ x, control=rpart.control(maxdepth=3, 
+                                                                 minbucket=1, 
+                                                                 minsplit=1, 
+                                                                 cp=0))), 
+           y_depth4 = predict(rpart(y ~ x, control=rpart.control(maxdepth=4, 
+                                                                 minbucket=1, 
+                                                                 minsplit=1, 
+                                                                 cp=0))), 
+           y_depth5 = predict(rpart(y ~ x, control=rpart.control(maxdepth=5, 
+                                                                 minbucket=1, 
+                                                                 minsplit=1, 
+                                                                 cp=0))),
+           y_depth6 = predict(rpart(y ~ x, control=rpart.control(maxdepth=6, 
+                                                                 minbucket=1, 
+                                                                 minsplit=1, 
+                                                                 cp=0)))) |>
+    pivot_longer(starts_with("y_"), names_to="model", values_to="y_hat") |>
+    mutate(model=glue("Tree Fit: Max Depth {str_sub(model, 8, 8)}")) |>
+    ggplot(aes(x=x)) + 
+    geom_line(aes(y=y), linewidth=1) + 
+    geom_line(aes(y=y_hat), color="blue2", lwd=1.2) + 
+    facet_wrap(~model) + 
+    theme_bw() 
+```
+
+Not surprisingly, as we allow a more complex tree, we are able to fit this
+funny shape more and more effectively. Because we have fit a _binary_ tree, 
+note the number of 'levels' (leaves) in the final tree: 
+
+- At a depth of 1, we have $2^1=2$ distinct 'chunks' in our fitted estimate
+- At a depth of 2, we have $2^2=4$ distinct 'chunks'
+- At a depth of 3, we have $2^3=8$ distinct 'chunks'
+
+and so on. Clearly, our function has the potential to become quite complex
+(and potentially overfit) quite quickly. 
+
+We see something similar in 2D: 
+
+```{r}
+#| echo: false
+#| fig-height: 12
+library(tidyverse)
+library(rpart)
+
+f2d <- function(x1, x2) {
+    sin(x1 * 2) + cos(x2 * 2) + 0.5 * (x1^2 - x2^2)
+}
+
+grid <- expand_grid(
+    x1 = seq(-3, 3, length.out = 201),
+    x2 = seq(-3, 3, length.out = 201)
+) |> 
+    mutate(y = f2d(x1, x2))
+
+depths <- 1:9
+
+fit_depth <- function(d, data) {
+    model <- rpart(
+        y ~ x1 + x2,
+        data = data,
+        control = rpart.control(
+            maxdepth  = d,
+            cp        = 0,
+            minsplit  = 2,
+            minbucket = 1
+        )
+    )
+    predict(model, newdata = data)
+}
+
+tree_preds <- map(depths, \(d) {
+    grid |> 
+        mutate(
+            val = fit_depth(d, grid),
+            panel = sprintf("Tree Depth %d", d)
+        )
+}) |> 
+    bind_rows()
+
+bind_rows(
+    grid |> mutate(val = y, panel = "True Function"),
+    tree_preds)|> 
+    mutate(panel = factor(panel, 
+                          levels = c("True Function", 
+                                     sprintf("Tree Depth %d", depths)))) |>
+    ggplot(aes(x = x1, y = x2)) +
+    geom_raster(aes(fill=val), 
+                interpolate = FALSE) +
+    geom_contour(aes(z = val), color = "black", alpha = 0.25, bins = 8) +
+    facet_wrap(~ panel, ncol=2) +
+    scale_fill_distiller(name = expression(hat(y)), type="div", palette=6) +
+    coord_fixed() +
+    theme_bw() +
+    theme(
+        strip.text = element_text(face = "bold", size = 10),
+        legend.position = "bottom"
+    ) +
+    labs(
+        title = "2D Trees: Effect of Maximum Tree Depth",
+        subtitle = "Piecewise-constant orthogonal partitions approximating a smooth surface",
+        x = expression(x[1]),
+        y = expression(x[2])
+    ) 
+```
+
+Here, we see that instead of getting 1D steps, we have a 2D 
+[Mondrian](https://en.wikipedia.org/wiki/Piet_Mondrian) structure to
+our predictions.[^plaid] Beyond the increasing complexity, there are a few
+interesting things to notice: 
+
+- Like our 1D example, we still have _piecewise constant_ predictions.
+- Our partitions (breaks) are axis-aligned (sometimes called 'orthogonal')
+  because we only split on one variable at a time. (_Oblique_ trees could allow
+  diagonal splits, but we won't really dig into those in this course.)
+  
+These will generally hold for arbitrary numbers of predictors. As with our
+one-dimensional case, the number of partitions still grows as $2^{\text{depth}}$.
+
+[^plaid]: Sometimes, this might be described as a _plaid_ pattern, but
+that's almost certainly wrong. Plaids are quite regularly spaced; trees, as we
+see here, can be quite flexible.
+
+From the above, it's easy to see that very deep trees can easily overfit, but we 
+want to at least consider the possibility of high depth if our data demands it.
+(This should remind you of the general role of regularization.) So, other than 
+using very simple trees, what other tools and techniques can we
+use to control the complexity of the fitted model? 
+
+*(In the examples above, I turned off all of the other 'complexity control' knobs
+but now we're going to start turning them back on.)*
+
+As with $1$-NN, we know that things can get _very_ complex when we only look at
+one observation (or a small number of observations) to make a prediction, so 
+we might want to early stop our trees. In particular, we can add rules that say: 
+
+- Don't split a node that currently has less than $n_{\text{min-split}}$ 
+  observations in it. This doesn't stop the tree from continuing to grow, but
+  it forces the algorithm to look elsewhere, rather than to continue further and
+  further subdividing that part of the space.
+- Don't split a node if it produces _significantly_ imbalance splits. If we have
+  a node with 100 observations, we may be willing to split it, but not in a
+  99-vs-1 way. Instead of getting the 'optimal' split, we can restrict ourselves
+  to splits that leave at least $n_{\text{min-bucket}}$ observations in the
+  resulting nodes. 
+  
+  These are quite similar and easily confused: the `min-split` is a constraint 
+  on the _parent_, considered _before_ splitting; `min-bucket` is a constraint 
+  on the _children_, considered _after_ forming a split. In practice, you
+  will typically only set one or the other of these. (I have seen `min-split`
+  used more often since it's a bit faster and easier to implement.)
+- We can also take an idea from model selection, where we only include a variable
+  if it 'proves its worth'. In the tree context, we might include a split only
+  if it lowers our training error by a sufficient amount. Instead of hard-capping
+  the tree in various ways, this has a smoother, more adaptive, feel. 
+  
+  Depending on the particular set-up, there are different loss functions you 
+  might look at (change in MSE, change in $R^2$, change in classification accuracy), 
+  but the general idea of "only if it's worth it" can be applied similarly (modulo
+  some changes in units).
