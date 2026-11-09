@@ -10,12 +10,81 @@ Outline:
 
 --- 
 
+## Review: On the Importance of Holdouts
+
+Before we dive into our different ensemble learning strategies, let's review one
+of our fundamental commandments of machine learning: thou shall not evaluate on
+a training set. 
+
+More generally, anytime in the machine learning process you need to make a _new
+decision_, you should use a new chunk of your data. Let's work through a few 
+examples of this principle in increasing complexity: 
+
+A)  You want to fit linear regression and do absolutely nothing else. 
+
+    In this case, we don't need to split our data at all. We have one decision
+    to make (the linear regression parameters/coefficients) so we only need one
+    'chunk' of data. 
+
+B)  You want to fit linear regression and decide whether the model is good enough
+    to use. 
+    
+    In this case, we have two decisions to make: 
+    
+    - the regression coefficients
+    - the usefulness of the model, which we'll likely decide based on some RMSE
+      threshold
+      
+    So we need to split our data into two (a classic training-validation split): 
+    
+    - one chunk (larger) to pick out the regression coefficients
+    - one chunk (smaller) to estimate the RMSE and make our 'go/no-go' decision
+    
+C)  You want to fit the lasso with *a priori* fixed $\lambda$ and report an
+    estimated prediction error
+    
+    In this case, because $\lambda$ is known *a priori*, this is basically
+    the same as the previous scenario. 
+    
+D)  You want to fit the lasso with a data-dependent $\lambda$ and report the
+    estimtated prediction error. 
+    
+    In this case, we have three decisions to make: 
+    
+    - Which $\lambda$
+    - Which $\beta$
+    - Which $\hat{\text{RMSE}}$
+    
+    So we will need to have three distinct chunks to our data. 
+    
+E)  You want to fit the lasso with a data-dependent $\lambda$, then you want
+    to take the selected variables, re-fit OLS on them and report the prediction
+    error associated with that refitted OLS (the so-called 'relaxed lasso')
+    
+    In this case, we have three decisions to make: 
+    
+    - Which $\lambda$
+    - Which $\beta_{\text{Lasso}}$
+    - Which $\beta_{\text{OLS}}$
+    - Which $\hat{\text{RMSE}}$
+    
+    So we should probably have four chunks to our data (though I often see this
+    done with just three and it doesn't seem like the end of the world).
+    
+    Note that we do not need a separate data split for selecting variables based
+    on the lasso fit since the lasso does this for us automatically.
+    
+In general, data hygiene can be tricky, but I find this: _how many decisions_ 
+heuristic to be quite helpful. 
+
 ## Stacking
 
-So this is all well and good, but where do we *actually get* different 
-predictors? Here, we're going to change notation to $\hat{f}_1, \hat{f}_2, \dots
-\hat{f}_K$ to emphasize that we want to learn a combination of _predictors_ 
-(functions estimated from data), not _predictions_. 
+Returning to ensemble learning, our discussion of putting together different
+predictirs in a weighted average is all well and good, but where do we 
+*actually get* different predictors? Here, we're going to change notation to
+$\hat{f}_1, \hat{f}_2, \dots \hat{f}_K$ to emphasize that we want to learn a
+combination of _predictors_ (functions estimated from data), not just
+_predictions_. 
 
 Well... perhaps the easiest thing to do is to train different models on the
 same data. Logistic Regression, LDA, and SVMs will likely find _similar_ 
@@ -34,7 +103,7 @@ Perhaps the simplest rule is the 'majority vote' rule: if $\hat{f}_{\text{LR}}(\
 
 This approach is quite easy to implement, but it treats all the inputs as
 equally reliable. While this isn't the _worst_ assumption, we can do better.
-In particular, what if we _learned_ an optimal set of weights. Specifically, 
+In particular, what if we _learned_ an optimal set of weights? Specifically, 
 we want to learn a vector of weights $\bw \in \R^3$ to maximize
 predictive accuracy of the linear combination $w_1 \hat{f}_{\text{LR}} + w_2 \hat{f}_{\text{LDA}} + w_3 \hat{f}_{\text{SVM}}$. This gives us *another*
 classification problem, so let's use logistic regression to determine the 
@@ -71,7 +140,7 @@ We note a few practical points here:
    that provide soft labels (class probabilities), we can and should use those
    in the ensemble process (both in training the ensemble weights and in
    constructing the predictor vectors $\hat{\bf}$). Dropping the
-   probabilities is really just throwing away data. 
+   probabilities is really just throwing away hard-earned nuance. 
 3. We motivated stacking by weighted averages. As such, it is common to add
    additional constraints to the stacking problem to make it look more like
    averaging. For example, you will often see: 
@@ -203,9 +272,10 @@ bootstrapping as sampling from *a distribution* not as sampling from *the data*
 (even though that distribution is estimated from the data). 
 
 This scheme - sampling with replacement - is the essence of 
-**bootstrap sampling**. In STA 9719, you will see how it can be used to do
-things like estimate sampling variability of complex statistics. Here, our goal
-is a bit more straightforward: we just want a way to 'shake things up.'
+**bootstrap sampling**. In your inference courses, you will see how it can 
+be used to do things like estimate sampling variability of complex statistics. 
+Here, our goal is a bit more straightforward: we just want a way to 
+'shake things up.'
 
 ### Bootstrap Aggregation (Bagging)
 
@@ -306,7 +376,7 @@ is the same.
 
 ## Summary of Bagging
 
-To review: e discussed the ensemble learning technique known as 
+To review: we discussed the ensemble learning technique known as 
 *bagging*. Bagging, a contraction of 'boostrap aggregation' can be used
 to create an ensemble by training $B$ copies of a given base learner on $B$
 distinct bootstrap samples, *i.e.*, 'faux' data sets of $n$ points obtained
@@ -319,7 +389,7 @@ fashion.
 
 We showed that the MSE associated with a bagged ensemble of size $B$ is: 
 
-$$\MSE_{\text{Bagging}} = \text{Bias}^2_{\text{Base Learner}} +\underbrace{\rho\sigma^2 + \frac{1}{B}(1-\rho)\sigma^2}_{\text{Variance}} + \text{Irreducible Error}$$
+$$\text{MSE}_{\text{Bagging}} = \text{Bias}^2_{\text{Base Learner}} +\underbrace{\rho\sigma^2 + \frac{1}{B}(1-\rho)\sigma^2}_{\text{Variance}} + \text{Irreducible Error}$$
 
 and noted that, by sending $B \to 0$, we reduce the 'bootstrapping variance'
 to 0 but that some 'inherent variance' remains from the training
@@ -328,7 +398,7 @@ search for the optimal base learner should do three things:
 
 - Have low bias
 - Have low correlation among the bagged learners
-- Best fast enough that we can take $B \to \infty$ and cancel that
+- Be fast enough that we can take $B \to \infty$ and cancel that
   term
   
 If we can find something that does all of these, we will have a (near)
@@ -452,7 +522,8 @@ we can get even more speed by just throwing more compute power at the problem.
 Here, you might ask whether we can combine *stacking* and *random forests*. 
 Instead of using a simple sample average of trees, can we get an optimally 
 weighted average of our trees? These sorts of *optimized* forests definitely
-have been explored, but they don't tend to add too much above random forests. 
+have been explored, but they don't tend to add too much above random forests
+because the trees are all 'exchangeable' in some sense.
 
 As a general rule, random forests are pretty near optimal for applied ML on
 tabular data. They are: 

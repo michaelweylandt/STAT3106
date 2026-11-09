@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-11-03">
+<meta name="dcterms.date" content="2026-11-09">
 <title>Notes for Lecture #17: Unit III. Classification &amp; Ensemble Methods: Stacking and Bagging – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -174,7 +174,8 @@ window.Quarto = {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
    
   <ul>
-<li><a href="#stacking" id="toc-stacking" class="nav-link active" data-scroll-target="#stacking">Stacking</a></li>
+<li><a href="#review-on-the-importance-of-holdouts" id="toc-review-on-the-importance-of-holdouts" class="nav-link active" data-scroll-target="#review-on-the-importance-of-holdouts">Review: On the Importance of Holdouts</a></li>
+  <li><a href="#stacking" id="toc-stacking" class="nav-link" data-scroll-target="#stacking">Stacking</a></li>
   <li>
 <a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling">Resampling</a>
   <ul class="collapse">
@@ -207,7 +208,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 3, 2026</p>
+      <p class="date">November 9, 2026</p>
     </div>
   </div>
   
@@ -223,9 +224,64 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </div>
 <p>Outline:</p>
 <hr>
-<section id="stacking" class="level2"><h2 class="anchored" data-anchor-id="stacking">Stacking</h2>
-<p>So this is all well and good, but where do we <em>actually get</em> different predictors? Here, we’re going to change notation to <span class="math inline">\(\hat{f}_1, \hat{f}_2, \dots
-\hat{f}_K\)</span> to emphasize that we want to learn a combination of <em>predictors</em> (functions estimated from data), not <em>predictions</em>.</p>
+<section id="review-on-the-importance-of-holdouts" class="level2"><h2 class="anchored" data-anchor-id="review-on-the-importance-of-holdouts">Review: On the Importance of Holdouts</h2>
+<p>Before we dive into our different ensemble learning strategies, let’s review one of our fundamental commandments of machine learning: thou shall not evaluate on a training set.</p>
+<p>More generally, anytime in the machine learning process you need to make a <em>new decision</em>, you should use a new chunk of your data. Let’s work through a few examples of this principle in increasing complexity:</p>
+<ol type="A">
+<li>
+<p>You want to fit linear regression and do absolutely nothing else.</p>
+<p>In this case, we don’t need to split our data at all. We have one decision to make (the linear regression parameters/coefficients) so we only need one ‘chunk’ of data.</p>
+</li>
+<li>
+<p>You want to fit linear regression and decide whether the model is good enough to use.</p>
+<p>In this case, we have two decisions to make:</p>
+<ul>
+<li>the regression coefficients</li>
+<li>the usefulness of the model, which we’ll likely decide based on some RMSE threshold</li>
+</ul>
+<p>So we need to split our data into two (a classic training-validation split):</p>
+<ul>
+<li>one chunk (larger) to pick out the regression coefficients</li>
+<li>one chunk (smaller) to estimate the RMSE and make our ‘go/no-go’ decision</li>
+</ul>
+</li>
+<li>
+<p>You want to fit the lasso with <em>a priori</em> fixed <span class="math inline">\(\lambda\)</span> and report an estimated prediction error</p>
+<p>In this case, because <span class="math inline">\(\lambda\)</span> is known <em>a priori</em>, this is basically the same as the previous scenario.</p>
+</li>
+<li>
+<p>You want to fit the lasso with a data-dependent <span class="math inline">\(\lambda\)</span> and report the estimtated prediction error.</p>
+<p>In this case, we have three decisions to make:</p>
+<ul>
+<li>Which <span class="math inline">\(\lambda\)</span>
+</li>
+<li>Which <span class="math inline">\(\beta\)</span>
+</li>
+<li>Which <span class="math inline">\(\hat{\text{RMSE}}\)</span>
+</li>
+</ul>
+<p>So we will need to have three distinct chunks to our data.</p>
+</li>
+<li>
+<p>You want to fit the lasso with a data-dependent <span class="math inline">\(\lambda\)</span>, then you want to take the selected variables, re-fit OLS on them and report the prediction error associated with that refitted OLS (the so-called ‘relaxed lasso’)</p>
+<p>In this case, we have three decisions to make:</p>
+<ul>
+<li>Which <span class="math inline">\(\lambda\)</span>
+</li>
+<li>Which <span class="math inline">\(\beta_{\text{Lasso}}\)</span>
+</li>
+<li>Which <span class="math inline">\(\beta_{\text{OLS}}\)</span>
+</li>
+<li>Which <span class="math inline">\(\hat{\text{RMSE}}\)</span>
+</li>
+</ul>
+<p>So we should probably have four chunks to our data (though I often see this done with just three and it doesn’t seem like the end of the world).</p>
+<p>Note that we do not need a separate data split for selecting variables based on the lasso fit since the lasso does this for us automatically.</p>
+</li>
+</ol>
+<p>In general, data hygiene can be tricky, but I find this: <em>how many decisions</em> heuristic to be quite helpful.</p>
+</section><section id="stacking" class="level2"><h2 class="anchored" data-anchor-id="stacking">Stacking</h2>
+<p>Returning to ensemble learning, our discussion of putting together different predictirs in a weighted average is all well and good, but where do we <em>actually get</em> different predictors? Here, we’re going to change notation to <span class="math inline">\(\hat{f}_1, \hat{f}_2, \dots \hat{f}_K\)</span> to emphasize that we want to learn a combination of <em>predictors</em> (functions estimated from data), not just <em>predictions</em>.</p>
 <p>Well… perhaps the easiest thing to do is to train different models on the same data. Logistic Regression, LDA, and SVMs will likely find <em>similar</em> decision boundaries, but they won’t be exactly the same. Suppose we have</p>
 <ul>
 <li>
@@ -238,7 +294,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </ul>
 <p>Further, let’s assume that we have the binarized predictions (<span class="math inline">\(\{0, 1\}\)</span>, no soft labels for now) from each model. How can we combine these?</p>
 <p>Perhaps the simplest rule is the ‘majority vote’ rule: if <span class="math inline">\(\hat{f}_{\text{LR}}(\bx) = \hat{f}_{\text{LDA}}(\bx) = 1\)</span> and <span class="math inline">\(\hat{f}_{\text{SVM}}(\bx) = 0\)</span>, then <span class="math inline">\(\hat{f}_{\text{Majority}}(\bx) = 1\)</span>.</p>
-<p>This approach is quite easy to implement, but it treats all the inputs as equally reliable. While this isn’t the <em>worst</em> assumption, we can do better. In particular, what if we <em>learned</em> an optimal set of weights. Specifically, we want to learn a vector of weights <span class="math inline">\(\bw \in \R^3\)</span> to maximize predictive accuracy of the linear combination <span class="math inline">\(w_1 \hat{f}_{\text{LR}} + w_2 \hat{f}_{\text{LDA}} + w_3 \hat{f}_{\text{SVM}}\)</span>. This gives us <em>another</em> classification problem, so let’s use logistic regression to determine the combination weights:</p>
+<p>This approach is quite easy to implement, but it treats all the inputs as equally reliable. While this isn’t the <em>worst</em> assumption, we can do better. In particular, what if we <em>learned</em> an optimal set of weights? Specifically, we want to learn a vector of weights <span class="math inline">\(\bw \in \R^3\)</span> to maximize predictive accuracy of the linear combination <span class="math inline">\(w_1 \hat{f}_{\text{LR}} + w_2 \hat{f}_{\text{LDA}} + w_3 \hat{f}_{\text{SVM}}\)</span>. This gives us <em>another</em> classification problem, so let’s use logistic regression to determine the combination weights:</p>
 <p><span class="math display">\[\hat{\bw} = \argmin_{\bw} \sum_{i=1}^n -y_i \bw^{\top}\hat{\bf} + \log(1 + e^{\bw^{\top}\hat{\bf}})\]</span> where <span class="math inline">\(\hat{\bf}\)</span> is a vector of the three base learner predictions.</p>
 <p>The solution to this problem, <span class="math inline">\(\hat{\bw}\)</span>, gives the <em>stacking weights</em> for our three base learners. Once we have <span class="math inline">\(\hat{\bw}\)</span>, we can make predictions at our our new test point, <span class="math inline">\(\tilde{\bx}\)</span>, by:</p>
 <ol type="1">
@@ -261,7 +317,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 <p>We note a few practical points here:</p>
 <ol type="1">
 <li>What data should we use to estimate <span class="math inline">\(\bw\)</span>? This is a new step in our pipeline, so we need a new ‘chunk’ of our data. This split of the data is typically called either a query or validation set, but I tend to describe it as an ‘ensembling’ set to make its purpose clear. Regardless, it serves to give us a new data set to fit our new ensemble model. (If we use the training set used to train each <span class="math inline">\(\hat{f}_i\)</span>, the base learners may look ‘too good’ to the ensemble learning process.)</li>
-<li>Nothing actually requires us to use the binarized predictions. For models that provide soft labels (class probabilities), we can and should use those in the ensemble process (both in training the ensemble weights and in constructing the predictor vectors <span class="math inline">\(\hat{\bf}\)</span>). Dropping the probabilities is really just throwing away data.</li>
+<li>Nothing actually requires us to use the binarized predictions. For models that provide soft labels (class probabilities), we can and should use those in the ensemble process (both in training the ensemble weights and in constructing the predictor vectors <span class="math inline">\(\hat{\bf}\)</span>). Dropping the probabilities is really just throwing away hard-earned nuance.</li>
 <li>We motivated stacking by weighted averages. As such, it is common to add additional constraints to the stacking problem to make it look more like averaging. For example, you will often see:
 <ul>
 <li>
@@ -306,7 +362,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </li>
 </ul>
 <p>So how can we sample from the empirical distribution <span class="math inline">\(\hat{P}_n\)</span>? We sample <em>with replacement</em>. That is, we pick one of the training points <span class="math inline">\(n\)</span> times <strong>independently</strong> (with no regard for prior selections). Intuitively, this captures the idea of IID sampling - it’s also necessary so we don’t just reproduce the (shuffled) training data.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
-<p>This scheme - sampling with replacement - is the essence of <strong>bootstrap sampling</strong>. In STA 9719, you will see how it can be used to do things like estimate sampling variability of complex statistics. Here, our goal is a bit more straightforward: we just want a way to ‘shake things up.’</p>
+<p>This scheme - sampling with replacement - is the essence of <strong>bootstrap sampling</strong>. In your inference courses, you will see how it can be used to do things like estimate sampling variability of complex statistics. Here, our goal is a bit more straightforward: we just want a way to ‘shake things up.’</p>
 </section><section id="bootstrap-aggregation-bagging" class="level3"><h3 class="anchored" data-anchor-id="bootstrap-aggregation-bagging">Bootstrap Aggregation (Bagging)</h3>
 <p>We can use a similar strategy to generate ‘new’ training data for our base learners:</p>
 <ul>
@@ -369,14 +425,14 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </ul>
 <p>So we see we want a <em>flexible</em> (low-bias) base learner that is also going to give us low correlation (and low variance) among the bagged predictors. How can we get such a base learner? We’ll cover this more below.</p>
 </section></section><section id="summary-of-bagging" class="level2"><h2 class="anchored" data-anchor-id="summary-of-bagging">Summary of Bagging</h2>
-<p>To review: e discussed the ensemble learning technique known as <em>bagging</em>. Bagging, a contraction of ‘boostrap aggregation’ can be used to create an ensemble by training <span class="math inline">\(B\)</span> copies of a given base learner on <span class="math inline">\(B\)</span> distinct bootstrap samples, <em>i.e.</em>, ‘faux’ data sets of <span class="math inline">\(n\)</span> points obtained by sampling the original training data <span class="math inline">\(n\)</span> times <em>with replacement</em>. Because these <span class="math inline">\(B\)</span> trained base learners are essentially interchangeable, it is conventional to create the bagged prediction by a straight average (or majority vote if classification) of the individual base learners, though you will occasionally see the bagging base learners combined in a ‘stacked’ fashion.</p>
+<p>To review: we discussed the ensemble learning technique known as <em>bagging</em>. Bagging, a contraction of ‘boostrap aggregation’ can be used to create an ensemble by training <span class="math inline">\(B\)</span> copies of a given base learner on <span class="math inline">\(B\)</span> distinct bootstrap samples, <em>i.e.</em>, ‘faux’ data sets of <span class="math inline">\(n\)</span> points obtained by sampling the original training data <span class="math inline">\(n\)</span> times <em>with replacement</em>. Because these <span class="math inline">\(B\)</span> trained base learners are essentially interchangeable, it is conventional to create the bagged prediction by a straight average (or majority vote if classification) of the individual base learners, though you will occasionally see the bagging base learners combined in a ‘stacked’ fashion.</p>
 <p>We showed that the MSE associated with a bagged ensemble of size <span class="math inline">\(B\)</span> is:</p>
-<p><span class="math display">\[\MSE_{\text{Bagging}} = \text{Bias}^2_{\text{Base Learner}} +\underbrace{\rho\sigma^2 + \frac{1}{B}(1-\rho)\sigma^2}_{\text{Variance}} + \text{Irreducible Error}\]</span></p>
+<p><span class="math display">\[\text{MSE}_{\text{Bagging}} = \text{Bias}^2_{\text{Base Learner}} +\underbrace{\rho\sigma^2 + \frac{1}{B}(1-\rho)\sigma^2}_{\text{Variance}} + \text{Irreducible Error}\]</span></p>
 <p>and noted that, by sending <span class="math inline">\(B \to 0\)</span>, we reduce the ‘bootstrapping variance’ to 0 but that some ‘inherent variance’ remains from the training data.<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> As we noted last week, this implies that our search for the optimal base learner should do three things:</p>
 <ul>
 <li>Have low bias</li>
 <li>Have low correlation among the bagged learners</li>
-<li>Best fast enough that we can take <span class="math inline">\(B \to \infty\)</span> and cancel that term</li>
+<li>Be fast enough that we can take <span class="math inline">\(B \to \infty\)</span> and cancel that term</li>
 </ul>
 <p>If we can find something that does all of these, we will have a (near) optimal predictor (<span class="math inline">\(\MSE \approx \text{Irreducible Error}\)</span>). This is our primary goal for the day.</p>
 <section id="out-of-bag-error" class="level3"><h3 class="anchored" data-anchor-id="out-of-bag-error">‘Out of Bag’ Error</h3>
