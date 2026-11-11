@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-11-09">
+<meta name="dcterms.date" content="2026-11-11">
 <title>Notes for Lecture #17: Unit III. Classification &amp; Ensemble Methods: Stacking and Bagging – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -208,7 +208,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 9, 2026</p>
+      <p class="date">November 11, 2026</p>
     </div>
   </div>
   
@@ -502,7 +502,7 @@ $\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mat
 </ul>
 <p>This basically hits everything we want for ensemble learning: high variance flexible learners in the form of deep decision trees that are constructed in a way that gives us lots of tree-to-tree variance (resulting from both our row and column sampling) without loss of power in any individual tree (because the missing column in split <span class="math inline">\(i\)</span> can reappear in all later splits).</p>
 <p>Additionally, because trees are relatively quick to code and quick to apply (computers are very good at less than/greater than checks and binary logic), random forests are <em>fast</em>. Additionally, we note that for any bagging scheme- including random forests-the base learners are built and applied in parallel, so we can get even more speed by just throwing more compute power at the problem.</p>
-<p>Here, you might ask whether we can combine <em>stacking</em> and <em>random forests</em>. Instead of using a simple sample average of trees, can we get an optimally weighted average of our trees? These sorts of <em>optimized</em> forests definitely have been explored, but they don’t tend to add too much above random forests.</p>
+<p>Here, you might ask whether we can combine <em>stacking</em> and <em>random forests</em>. Instead of using a simple sample average of trees, can we get an optimally weighted average of our trees? These sorts of <em>optimized</em> forests definitely have been explored, but they don’t tend to add too much above random forests because the trees are all ‘exchangeable’ in some sense.</p>
 <p>As a general rule, random forests are pretty near optimal for applied ML on tabular data. They are:</p>
 <ul>
 <li>easy to apply</li>

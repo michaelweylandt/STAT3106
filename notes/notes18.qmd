@@ -10,7 +10,6 @@ Outline:
 
 --- 
 
-
 ## Boosting
 
 So "stack-'em-and-bag-'em" is a great pair of techniques for ensemble 
@@ -200,9 +199,247 @@ or xgboost
 (RMSE \$`r yardstick::rmse_vec(test_diamonds$price, y_hat_xg) |> round(digits=2)`)
 gives a real improvement over a linear model
 (RMSE \$`r yardstick::rmse_vec(test_diamonds$price, y_hat_lm) |> round(digits=2)`). 
-For a more fluid UX, I recommend the use of the `tidymodels` package instead. 
 
-TODO: Tidymodels Example
+The `xgboost` interface is a bit clunky (as we saw above). For a more fluid UX,
+I recommend the use of the `tidymodels` package (in `R`) or `sklearn` 
+(in `python`) instead. 
+
+For instance, if I want to apply this to the PDSI data from [Problem Set #02](../problem_sets/ps02.qmd):
+
+```{r}
+#| cache: true
+library(tidymodels)
+library(bonsai)     # Enables the lightgbm engine in parsnip
+                    # Bonsai = small trees. Get it?
+library(tidyverse)
+
+ca_drought <- read_csv("http://michael-weylandt.com/STAT3106/problem_sets/data/ps02_ca_drought.csv", 
+                       show_col_types = FALSE) |>
+    select(-date)
+
+drought_split <- initial_split(ca_drought, prop = 0.8)
+drought_train <- training(drought_split)
+drought_test  <- testing(drought_split)
+
+drought_folds <- vfold_cv(drought_train, v = 5)
+
+# 3. Feature Recipe
+# First column is assumed to be the row ID/identifier
+
+drought_rec <- recipe(pdsi ~ ., data = drought_train) |>
+    step_zv(all_predictors())
+
+# --- Engine 1: XGBoost (Level-Wise GBDT) ---
+xgb_spec <- boost_tree(mode = "regression",
+    trees = 100,
+    tree_depth = 3,
+    learn_rate = 0.05) |>
+    set_engine("xgboost", nthread = 1)
+
+lgbm_spec <- boost_tree(mode = "regression",
+    trees = 100,
+    tree_depth = 4,
+    learn_rate = 0.05) |>
+    set_engine("lightgbm", num_leaves = 15, verbose = -1)
+
+# Combine recipes and models
+boosting_models <- workflow_set(
+    preproc = list(base = drought_rec),
+    models = list(
+        xgboost  = xgb_spec,
+        lightgbm = lgbm_spec
+    )
+)
+
+# Evaluate via 5-Fold Cross-Validation
+boosting_res <- boosting_models |>
+    workflow_map(
+        fn = "fit_resamples",
+        resamples = drought_folds,
+        metrics = metric_set(rmse, rsq, mae),
+        control = control_resamples(save_pred = TRUE)
+    )
+
+# Display comparative CV metrics
+collect_metrics(boosting_res) |>
+    select(wflow_id, .metric, mean, std_err) |>
+    pivot_wider(names_from = .metric, values_from = c(mean, std_err))
+
+# Finalize the XGBoost workflow on full training data
+final_xgb_fit <- workflow() |>
+    add_recipe(drought_rec) |>
+    add_model(xgb_spec) |>
+    fit(data = drought_train)
+
+# Evaluate on held-out test data
+test_preds <- augment(final_xgb_fit, new_data = drought_test)
+
+# Test set RMSE
+test_preds |>
+    metrics(truth = pdsi, estimate = .pred)
+
+# Plot: Predicted vs. Observed PDSI
+ggplot(test_preds, aes(x = .pred, y = pdsi)) +
+    geom_abline(slope = 1, 
+                intercept = 0, 
+                linetype = "dashed", 
+                color = "firebrick") +
+    geom_point(alpha = 0.5, 
+               size = 2, 
+               color = "midnightblue") +
+    labs(
+        title = "California Drought PDSI: Test Set Predictions",
+        subtitle = "XGBoost (100 trees, depth = 3, lr = 0.05)",
+        x = "Predicted PDSI",
+        y = "Observed PDSI"
+    ) +
+    theme_bw()
+```
+
+Or in `python`: 
+
+```{python}
+#| eval: false
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split, KFold, cross_validate
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
+
+# -------------------------------------------------------------------------
+# 1. Ingestion & Split
+# -------------------------------------------------------------------------
+url = "http://michael-weylandt.com/STAT3106/problem_sets/data/ps02_ca_drought.csv"
+ca_drought = pd.read_csv(url)
+
+# First column is identifier/label, second column is the target (pdsi)
+id_col = ca_drought.columns[0]
+target_col = "pdsi"
+feature_cols = [c for c in ca_drought.columns if c not in (id_col, target_col)]
+
+X = ca_drought[feature_cols]
+y = ca_drought[target_col]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=3106
+)
+
+# -------------------------------------------------------------------------
+# 2. Pipelines & Cross-Validation
+# -------------------------------------------------------------------------
+# VarianceThreshold(threshold=0.0) matches step_zv() in recipes
+xgb_pipe = Pipeline([
+    ("filter_zv", VarianceThreshold(threshold=0.0)),
+    ("regressor", XGBRegressor(
+        n_estimators=100,
+        max_depth=3,
+        learning_rate=0.05,
+        n_jobs=1,
+        random_state=3106
+    ))
+])
+
+lgbm_pipe = Pipeline([
+    ("filter_zv", VarianceThreshold(threshold=0.0)),
+    ("regressor", LGBMRegressor(
+        n_estimators=100,
+        max_depth=4,
+        num_leaves=15,
+        learning_rate=0.05,
+        verbosity=-1,
+        random_state=3106
+    ))
+])
+
+kf = KFold(n_splits=5, shuffle=True, random_state=3106)
+scoring = {
+    "rmse": "neg_root_mean_squared_error",
+    "r2": "r2",
+    "mae": "neg_mean_absolute_error"
+}
+
+xgb_cv = cross_validate(xgb_pipe, X_train, y_train, cv=kf, scoring=scoring)
+lgbm_cv = cross_validate(lgbm_pipe, X_train, y_train, cv=kf, scoring=scoring)
+
+# Summarize CV metrics
+cv_summary = pd.DataFrame({
+    "Model": ["XGBoost (Depth-Wise)", "LightGBM (Leaf-Wise)"],
+    "RMSE": [-xgb_cv["test_rmse"].mean(), -lgbm_cv["test_rmse"].mean()],
+    "RMSE_SE": [xgb_cv["test_rmse"].std() / np.sqrt(5), lgbm_cv["test_rmse"].std() / np.sqrt(5)],
+    "R2": [xgb_cv["test_r2"].mean(), lgbm_cv["test_r2"].mean()],
+    "MAE": [-xgb_cv["test_mae"].mean(), -lgbm_cv["test_mae"].mean()]
+})
+
+print(cv_summary.to_string(index=False))
+
+# -------------------------------------------------------------------------
+# 3. Final Fit & Evaluation
+# -------------------------------------------------------------------------
+xgb_pipe.fit(X_train, y_train)
+y_pred = xgb_pipe.predict(X_test)
+
+test_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+test_r2 = r2_score(y_test, y_pred)
+test_mae = mean_absolute_error(y_test, y_pred)
+
+print(f"\nTest Set Metrics (XGBoost):")
+print(f"RMSE: {test_rmse:.4f} | R²: {test_r2:.4f} | MAE: {test_mae:.4f}")
+
+# -------------------------------------------------------------------------
+# 4. Plot Observed vs. Predicted
+# -------------------------------------------------------------------------
+plt.figure(figsize=(7, 6))
+plt.scatter(y_pred, y_test, alpha=0.5, color="midnightblue", edgecolors="none")
+
+# 45-degree reference line
+min_val = min(y_test.min(), y_pred.min())
+max_val = max(y_test.max(), y_pred.max())
+plt.plot([min_val, max_val], [min_val, max_val], color="firebrick", linestyle="--")
+
+plt.xlabel("Predicted PDSI")
+plt.ylabel("Observed PDSI")
+plt.title("California Drought PDSI: Test Set Predictions\nXGBoost (100 trees, depth = 3, lr = 0.05)")
+plt.tight_layout()
+plt.show()
+```
+
+## Other Forms of Boosting
+
+### Gradient Boosting Variants
+
+Due to the enormous success of `xgboost`, many other gradient boosting libraries
+exist, typically optimized for different engineering trade-offs (speed vs accuracy). 
+`lightgbm` is a particularly useful version that emphasizes speed and
+memory-efficiency and has particularly nice handling of categorical features. 
+(See comparison [here](https://xgboost.org/concept/xgboost-vs-lightgbm-comparison/))
+[`CatBoost`](https://catboost.ai/docs/en/) is similarly optimized for categorical
+features and uses a clever approach to avoid the 'column explosion' we sometimes
+encounter with high-cardinality categorical features. 
+
+### AdaBoost
+
+The _Adaptive Boosting_ or AdaBoost family of boosting algorithms uses a 
+different approach to sequential construction. Rather than fitting to residuals,
+AdaBoost instead upweights those samples that were previously misclassified
+and downweights samples that the ensemble is already getting right, forcing the
+next learner to focus on the 'harder' cases. It can be shown that Adaboost is
+gradient boosting with a particular loss function. 
+
+## Boosting vs RF
+
+- Tree size: 
+  - RF uses _deep_ flexible trees and controls them via *bagging* and feature sampling
+  - Boosting uses _shallow_ trees
+- Danger of overfitting is higher for boosting, not really possible (at least via
+  'overbagging') for RFs
+
+
 
 [^stump]: To my eye, this is more like the very sad Charlie Brown Christmas
 tree with one branch than a true *stump*, but if the worlds of statistics
