@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-11-16">
 <title>Notes for Lecture #19: Unit III. Classification &amp; Ensemble Methods: Practical Challenges – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -136,24 +136,39 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li>
+<a href="#multi-class-classifiers" id="toc-multi-class-classifiers" class="nav-link active" data-scroll-target="#multi-class-classifiers">Multi-Class Classifiers</a>
+  <ul class="collapse">
+<li><a href="#native-multi-class" id="toc-native-multi-class" class="nav-link" data-scroll-target="#native-multi-class">Native Multi-Class</a></li>
+  <li><a href="#one-vs-rest" id="toc-one-vs-rest" class="nav-link" data-scroll-target="#one-vs-rest">One-vs-Rest</a></li>
+  <li><a href="#one-vs-one" id="toc-one-vs-one" class="nav-link" data-scroll-target="#one-vs-one">One-vs-One</a></li>
+  <li><a href="#assessing-multi-class-accuracy" id="toc-assessing-multi-class-accuracy" class="nav-link" data-scroll-target="#assessing-multi-class-accuracy">Assessing Multi-Class Accuracy</a></li>
+  </ul>
+</li>
+  <li><a href="#unbalanced-classifiers" id="toc-unbalanced-classifiers" class="nav-link" data-scroll-target="#unbalanced-classifiers">Unbalanced Classifiers</a></li>
+  <li><a href="#interpreting-performance-measures" id="toc-interpreting-performance-measures" class="nav-link" data-scroll-target="#interpreting-performance-measures">Interpreting Performance Measures</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes19.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes19.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #19: Unit III. Classification &amp; Ensemble Methods: Practical Challenges</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">November 16, 2026</p>
     </div>
   </div>
   
@@ -164,15 +179,241 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
 <hr>
+<p>Today, we’re going to look at some of the practical challenges associated with classification. Specifically, I want to hit:</p>
+<ul>
+<li>Moving from binary to multi-class classification</li>
+<li>Unbalanced data</li>
+<li>Performance Measures</li>
+</ul>
+<section id="multi-class-classifiers" class="level2"><h2 class="anchored" data-anchor-id="multi-class-classifiers">Multi-Class Classifiers</h2>
+<p>So far, we have mainly focused on <em>binary</em> classifiers, which distinguish between two classes, conventionally called <span class="math inline">\(\{0, 1\}\)</span>, <span class="math inline">\(\{\pm 1\}\)</span>, positive/negative <em>etc.</em> When we move to <em>multi-class</em> classifiers-those with 3 or more (unordered) outcomes-we have to do a bit more work. There are three broad strategies you can consider:</p>
+<ul>
+<li><p>Native multi-class: certain models can be made ‘multi-class’ with minimal additional effort. This is obviously a very nice scenario, but it does restrict the models available to you.</p></li>
+<li><p>One-vs-One: Given <span class="math inline">\(K\)</span> possible classes, train <span class="math inline">\(\binom{K}{2} = \frac{K(K-1)}{2}\)</span> binary classifiers to compare each pair</p></li>
+<li><p>One-vs-Rest: Given <span class="math inline">\(K\)</span> possible classes, train <span class="math inline">\(K\)</span> binary classifiers to predict each class vs ‘something else’</p></li>
+</ul>
+<p>Let’s examine these each in turn.</p>
+<section id="native-multi-class" class="level3"><h3 class="anchored" data-anchor-id="native-multi-class">Native Multi-Class</h3>
+<p>There are two broad families of models that are natively (or near natively) suitable for multi-class classification. The first are our beloved decision trees (and things built on top of trees, like random forests or boosting methods). The extension here is rather straightforward: the only tweak we need is to modify our split criterion: Rather than using binary impurity of each leaf, we use a multi-class modification:</p>
+<p><span class="math display">\[\text{Impurity} = 1 - \sum_{k=1}^K p_k^2\]</span></p>
+<p>where <span class="math inline">\(p_k\)</span> is the fraction of observations in class <span class="math inline">\(k\)</span> associated with that leaf. Here, a very pure (all one class) leaf will have <span class="math inline">\(p_1 \approx 1\)</span> and <span class="math inline">\(p_{k} \approx 0\)</span> for all other <span class="math inline">\(k\)</span>, giving an Impurity close to zero (good!). This is essentially the same as the binary case, except we’re using a sum over <span class="math inline">\(k\)</span> probabilities.</p>
+<p>Alternatively, we can use a deviance (likelihood) based loss:</p>
+<p><span class="math display">\[ \text{Entropy} = -\sum_k p_k \log(p_k)\]</span></p>
+<p>As before, this is small when one <span class="math inline">\(p_k\)</span> is close to 1 and the others are all near zero. Note that this is basically the binomial deviance, but here summing over a set of <span class="math inline">\(p_k\)</span> that add to one instead of <span class="math inline">\(p\)</span> and <span class="math inline">\(1-p\)</span>.</p>
+<p>Other than this, multiclass decision trees work like their binary counterparts (though some of the pre-sorting algorithmic tricks aren’t quite as effective). Importantly, they retain their advantages of interpretability, flexibility, and tunability (deeper vs shallow trees).</p>
+<p>Generative classifiers extend to multi-class problems in the obvious way. Instead of fitting two ‘reverse’ models <span class="math inline">\(p(X | Y=0)\)</span> and <span class="math inline">\(p(X | Y=1)\)</span>, we need <span class="math inline">\(K\)</span> models for each <span class="math inline">\(p(X | Y = k)\)</span> and the Bayes’ rule denominator is now a sum of <span class="math inline">\(K\)</span> terms, but no other modifications are needed. (These are necessarily more ‘data hungry’ but that’s true of any multi-class problem.)</p>
+<p>Finally, we can also extend logistic regression to the multi-class setting using our general GLM machinery. While logistic regression was built on the <em>Bernoulli</em> (binomial) distribution, a suitable multi-class GLM will require a multi-class distribution. Specifically, we will build on the <a href="https://en.wikipedia.org/wiki/Categorical_distribution">categorical distribution</a>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>The categorical distribution takes a set of <span class="math inline">\(K\)</span> probabilities, <span class="math inline">\(\mathbf{p} = (p_1, p_2, \dots, p_K)\)</span>, summing to 1, and samples according to those probabilities. A Bernoulli distribution is then just a 2-class categorical with <span class="math inline">\(\mathbf{p} = (p, 1 - p)\)</span>. The linear predictor term is a bit more complicated: we have <span class="math inline">\(K\)</span> sets of coefficients, one for each class. These give us <span class="math inline">\(\eta_1, \dots, \eta_K\)</span> which we then need to ‘squish’ into a proper probability vector. The soft-max function to which we have made repeated reference is exactly the right adaptor here:</p>
+<p><span class="math display">\[\mathbf{p} = (p_1, \dots, p_K) = (\mu_1, \dots, \mu_K) = (\text{softmax}(\eta_1 | \eta_1, \dots, \eta_K), \dots, \text{softmax}(\eta_K | \eta_1, \dots, \eta_K))\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\text{softmax}(\eta_1|\eta_1, \dots, \eta_K) = \frac{e^{\eta_1}}{\sum_{k=1}^K e^{\eta_k}}\]</span></p>
+<p>You should be able to convince yourself that this is exactly the same as the logistic (sigmoid) link we use for ordinary logistic regression.</p>
+<p>While this can be built using essentially the same tools as logistic regression, the fitting and interpretation is a bit trickier. Specifically, note that</p>
+<p><span class="math display">\[\text{softmax}(\eta_1 + c|\eta_1 + c, \dots, \eta_K + c) = \frac{e^{\eta_1 + c}}{\sum_{k=1}^K e^{\eta_k + c}} = \frac{e^{\eta_1}}{\sum_{k=1}^K e^{\eta_k}} = \text{softmax}(\eta_1|\eta_1, \dots, \eta_K)\]</span></p>
+<p>so the problem is not quite well-specified. Adding a constant to all terms gives the same prediction. To work around this, we typically add an additional constraint or ridge-style penalty that encourages the smallest set of coefficients and intercept terms.</p>
+<p>Once the model is fit, the interpretation is a bit trickier as we now have <span class="math inline">\(K\)</span> sets of coefficients, but the general direction and sign rules are unchanged from the binary case.</p>
+</section><section id="one-vs-rest" class="level3"><h3 class="anchored" data-anchor-id="one-vs-rest">One-vs-Rest</h3>
+<p>For models where a natively multi-class version do not exist (margin based models) or the natively multi-class models are too finicky to work with (multinomial regression), we can also hack together an approach based on a <em>set</em> of binary classifiers.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>Suppose we have a three way classification problem: dog <em>vs</em> cat <em>vs</em> bird. We can build <em>three</em> ‘one-vs-rest’ classifiers of the form:</p>
+<ul>
+<li>dog <em>vs</em> not dog</li>
+<li>cat <em>vs</em> not cat</li>
+<li>bird <em>vs</em> not bird</li>
+</ul>
+<p>To construct these, we essentially ‘one hot encode’ our response variable <span class="math inline">\(Y\)</span> and train different classifiers for each (expanded) column of the response. (Note that these classifiers might be quite unbalanced, a problem we’ll come back to in a bit.) After fitting these classifiers, how can we make our predictions? Suppose we have a new test point and run it through our classifiers and get the following probabilities:</p>
+<ul>
+<li>dog (30%) <em>vs</em> not dog (70%)</li>
+<li>cat (40%) <em>vs</em> not cat (60%)</li>
+<li>bird (10%) <em>vs</em> not bird (90%)</li>
+</ul>
+<p>How should we aggregate these to make a proper multi-class prediction?</p>
+<p>One approach is simply to take the most confident prediction (<code>cat</code>). This ‘maximum score’ strategy is simple enough, but it might feel a bit odd to make a prediction in situations in which all probabilities are low. We can alternatively normalize the probabilities using the softmax transform to get</p>
+<p><span class="math inline">\(\mathbf{p} = \frac{1}{e^{0.3} + e^{0.4} + e^{0.1}}\left(e^{0.3}, e^{0.4}, e^{0.1}\right) \approx (34\%, 38\%, 28\%)\)</span></p>
+<p>or a simple ‘sum to one’ transform.</p>
+<p><span class="math inline">\(\mathbf{p} = \frac{1}{0.3 + 0.4 + 0.1}\left(0.3, 0.4, 0.1\right) \approx (37.5\%, 50\%, 12.5\%)\)</span></p>
+<p>I am not aware of any strong argument for one transform <em>vs</em> another (and for a hard / point prediction they all give the same modal class) but if you are looking at probabilitistic quality measures (like calibration), it may be worth considering both strategies.</p>
+<p>This OvR strategy is rather fast (requiring only <span class="math inline">\(K\)</span> simple models) and inherits nice properties of the binary classifiers. As we’ve seen, there’s no guarantee that the probabilities are meaningful and you should check calibration of the resulting multi-way classifier, but that can usually be addressed after the fact. More tricky is the fact that the individual classification problems can be quite unbalanced. If you, <em>e.g.</em>, have a balanced 10-way classification problem, each of these classifiers will be 10/90, which can cause problems for some methods.</p>
+</section><section id="one-vs-one" class="level3"><h3 class="anchored" data-anchor-id="one-vs-one">One-vs-One</h3>
+<p>Finally, you can also aggregate classifiers using a “one-vs-one” strategy. In this case, we train <span class="math inline">\(\binom{K}{2} = K(K-1)/2\)</span> classifiers to compare all pairs. For our 3-way case above, we would fit</p>
+<ul>
+<li>cat <em>vs</em> dog</li>
+<li>cat <em>vs</em> bird</li>
+<li>dog <em>vs</em> bird</li>
+</ul>
+<p>(These have the same number of classifiers for <span class="math inline">\(K=3\)</span>, but for <span class="math inline">\(K &gt; 3\)</span>, OvO requires fitting more models.) As before, we have to determine how we might aggregate probabilities:</p>
+<ul>
+<li>cat (60%) <em>vs</em> dog (40%)</li>
+<li>cat (90%) <em>vs</em> bird (10%)</li>
+<li>dog (75%) <em>vs</em> bird (25%)</li>
+</ul>
+<p>The simplest strategy here would be to count ‘wins’:</p>
+<ul>
+<li>cat: 2 wins</li>
+<li>dog: 1 win</li>
+<li>bird: 0 wins</li>
+</ul>
+<p>and to predict <code>cat</code>. This is simple enough, but it can have some real pitfalls:</p>
+<ol type="1">
+<li>It’s not hard to come up with ‘rock-paper-scissors’ scenarios in which there is no clear winner</li>
+<li>There’s an ‘irrelevant classifier’ that gets a vote. Suppose the image was <em>actually</em> a cat. Why are we letting ‘dog <em>vs.</em> bird’ get a say here?</li>
+</ol>
+<p>As <span class="math inline">\(K\)</span> gets large, this becomes particularly problematic.</p>
+<p>For these reasons, I don’t really like the OvO strategy and rarely use it.</p>
+</section><section id="assessing-multi-class-accuracy" class="level3"><h3 class="anchored" data-anchor-id="assessing-multi-class-accuracy">Assessing Multi-Class Accuracy</h3>
+<p>Our standard accuracy metrics (TPR, <span class="math inline">\(F_1\)</span>, <em>etc</em>) derived from the <span class="math inline">\(2 \times 2\)</span> classification table do not extend as simply to the <span class="math inline">\(K\)</span>-way case. OvO and OvR extensions of these measures exist for the multi-way case, but I find it’s hard to beat a direct examination of the classification table (confusion matrix)</p>
+</section></section><section id="unbalanced-classifiers" class="level2"><h2 class="anchored" data-anchor-id="unbalanced-classifiers">Unbalanced Classifiers</h2>
+<p>When facing real classification problems, it is not uncommon to find data sets that are not 50/50. For instance, if you are a bank you run a fraud detector on every credit card charge that comes over the wire. Clearly (thankfully!) the vast majority of these are not fraudulent. But a simple accuracy metric can be quite useless in this setting. The ‘never fraud’ predictor may have 99.9% Accuracy, but zero utility.</p>
+<p>How should you approach this scenario? There are three broad response strategies:</p>
+<ol type="1">
+<li>Use an adaptive classification threshold. In the fraud example, we might find that allowing a fraudulent transaction (and exposing our customers to identity theft) is <em>much</em> worse than forcing them to swipe twice or use a different card. Accounting for this, we might push our classification threshold to reject anything with a &gt;3% chance of being fraud, rather than a more intuitive 50%.</li>
+</ol>
+<p>Modifying the threshold can work, but it still requires a classifier that is able to distinguish the classes (just not at the 50% point). If your classifier isn’t distinguishing classes well, this form of post-processing might not be enough and a more direct intervention might be needed.</p>
+<ol start="2" type="1">
+<li>We can modify the classification problem to upweight the rare class. Instead of optimizing binomial deviance (logistic regression) as an unweighted sum over all classes, we can put a weight <span class="math inline">\(w &gt; 1\)</span> on the rare classes. By telling the optimizer that missing a fraud is 100 times worse than blocking a valid transaction, the model will become more aware of (and hopefully better at identifying!) the rare class. Because almost all of our classifiers are defined by a ‘sum of loss’ problem, this strategy can be applied in a variety of circumstances.</li>
+</ol>
+<p>This sort of upweighting can be quite effective, but if those rare points are weird/noisy for whatever reason, upweighting them can induce a ‘variance’ penalty. Still, keep it in mind as it is quick and powerful.</p>
+<p>In situations where upweighting and changing the threshold <em>still</em> aren’t enough to get acceptable performance, we can actually go in and adjust our training data.</p>
+<ol start="3" type="1">
+<li>
+<p>Modify the training data to either:</p>
+<ul>
+<li>randomly drop some rows of the majority class, improving balance</li>
+<li>duplicate some rows of the minority class, improving balance</li>
+<li>include additional synthetic rows for the minority class. (This is often called ‘SMOTE’ for <a href="https://en.wikipedia.org/wiki/Synthetic_minority_oversampling_technique">‘Synthetic Minority Oversampling Technique’</a>)</li>
+</ul>
+</li>
+</ol>
+<p>This is obviously the most drastic strategy we might consider as we’re really messing with the training data directly. It has some clear pitfalls you should watch out for:</p>
+<ul>
+<li>Dropping rows can drop signal</li>
+<li>Replicating rows (or using synthetic combinations of rows) can result in data leakage.</li>
+</ul>
+<p>If you duplicate a row <em>before</em> splitting, the same row can wind up in both your training and your validation/test set. To avoid this, make sure to do any data modification <em>within</em>/<em>inside</em> of your data splitting strategy (<em>e.g.</em>, within each cross validation fold.)</p>
+<p>These data modification strategies are quite dramatic, but they can be powerful and practical, particularly for algorithms / software that isn’t amenable to observation weighting or that doesn’t play well with ties.</p>
+<p>Finally, note that unbalanced classifiers can also occur when the data is collected in a non-representative way. As you saw in the previous homework, we have far less data on rejected mortgage applications because they didn’t get as far in the underwriting process.</p>
+</section><section id="interpreting-performance-measures" class="level2"><h2 class="anchored" data-anchor-id="interpreting-performance-measures">Interpreting Performance Measures</h2>
+<p>When we started classification, we introduced the <span class="math inline">\(2 \times 2\)</span> classification table and the various metrics that can be derived from it. Let’s review some of these again:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Metric</th>
+<th style="text-align: left;">Formula &amp; Plain-English Meaning</th>
+<th style="text-align: left;">Best Used When…</th>
+<th style="text-align: left;">Major Flaws &amp; Blind Spots</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Accuracy</strong></td>
+<td style="text-align: left;">
+<span class="math inline">\(\frac{\text{TP} + \text{TN}}{N}\)</span><br><em>Fraction of all predictions that are correct.</em>
+</td>
+<td style="text-align: left;">Classes are roughly balanced and false positives and false negatives carry equal cost.</td>
+<td style="text-align: left;">
+<strong>Broken under class imbalance</strong> (predicting all negatives on 99% negative data yields 99% accuracy). Treats all mistakes as equally bad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Recall (Sensitivity / TPR)</strong></td>
+<td style="text-align: left;">
+<span class="math inline">\(\frac{\text{TP}}{\text{TP} + \text{FN}}\)</span><br><em>Of all actual positives, what fraction did we catch?</em>
+</td>
+<td style="text-align: left;">Missing a positive is catastrophic (e.g., cancer screening, airport security, fraud containment).</td>
+<td style="text-align: left;">
+<strong>Trivial to game:</strong> Predicting “Positive” for every single observation achieves 100% recall while drowning users in false alarms.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Precision (PPV)</strong></td>
+<td style="text-align: left;">
+<span class="math inline">\(\frac{\text{TP}}{\text{TP} + \text{FP}}\)</span><br><em>Of all cases we flagged as positive, what fraction actually were?</em>
+</td>
+<td style="text-align: left;">False alarms are expensive or erode user trust (e.g., spam filters, manual audit queues, automated account bans).</td>
+<td style="text-align: left;">
+<strong>Ignores missed positives:</strong> Flagging only the single most obvious positive case in the dataset gives 100% precision while missing 99.9% of cases.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Specificity (TNR)</strong></td>
+<td style="text-align: left;">
+<span class="math inline">\(\frac{\text{TN}}{\text{TN} + \text{FP}}\)</span><br><em>Of all actual negatives, what fraction did we correctly clear?</em>
+</td>
+<td style="text-align: left;">Medical diagnostics (ruling out disease) and minimizing disruption to normal users.</td>
+<td style="text-align: left;">Inflated when true negatives are abundant; says nothing about how many actual positives were caught.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong><span class="math inline">\(F_1\)</span> Score (and <span class="math inline">\(F_\beta\)</span>)</strong></td>
+<td style="text-align: left;">
+<span class="math inline">\(2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}\)</span><br><em>Harmonic mean of Precision and Recall.</em>
+</td>
+<td style="text-align: left;">You need a single summary balance of catching positives and avoiding false alarms (especially on imbalanced data).</td>
+<td style="text-align: left;">
+<strong>Completely ignores True Negatives (<span class="math inline">\(\text{TN}\)</span>).</strong> Assumes Precision and Recall are equally important (unless generalized to <span class="math inline">\(F_\beta\)</span>, which weights recall <span class="math inline">\(\beta\)</span> times as much as precision).</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Matthews Correlation Coefficient (MCC)</strong></td>
+<td style="text-align: left;">
+<span class="math inline">\(\frac{\text{TP}\cdot\text{TN} - \text{FP}\cdot\text{FN}}{\sqrt{(\text{TP}+\text{FP})(\text{TP}+\text{FN})(\text{TN}+\text{FP})(\text{TN}+\text{FN})}}\)</span><br><em>Pearson correlation between true and predicted binary labels (<span class="math inline">\(-1\)</span> to <span class="math inline">\(+1\)</span>).</em>
+</td>
+<td style="text-align: left;">You want a single, symmetric confusion-matrix metric that rewards high performance across <strong>all four</strong> cells simultaneously.</td>
+<td style="text-align: left;">Harder to explain to non-technical stakeholders than precision/recall; undefined if an entire row or column of the confusion matrix is zero.</td>
+</tr>
+</tbody>
+</table>
+<p>Beyond these scalar measures, you will also see two ‘area-based’ measures, the ROC-AUC (sometimes just referred to as <strong>the</strong> AUC) and the PR-AUC:</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching packages ────────────────────────────────────── tidymodels 1.5.0 ──</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>✔ broom        1.0.13     ✔ rsample      1.3.2 
+✔ dials        1.4.4      ✔ tailor       0.1.0 
+✔ infer        1.1.0      ✔ tune         2.1.0 
+✔ modeldata    1.6.0      ✔ workflows    1.3.0 
+✔ parsnip      1.6.1      ✔ workflowsets 1.1.1 
+✔ recipes      1.4.0      ✔ yardstick    1.4.0 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
+✖ scales::discard() masks purrr::discard()
+✖ dplyr::filter()   masks stats::filter()
+✖ recipes::fixed()  masks stringr::fixed()
+✖ dplyr::lag()      masks stats::lag()
+✖ yardstick::spec() masks readr::spec()
+✖ recipes::step()   masks stats::step()</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes19_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For the ROC curve, we plot TPR against FPR at <em>every possible threshold</em>. All else being equal, a curve that is more ‘up and left’ will give more predictive power and will have a larger area under the curve. This is a useful technique for getting an overall picture, but it does not necessarily give proper guidance <em>at a particular threshold</em>.</p>
+<p>An alternative to the ROC is the PR curve which plots precision against recall.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes19_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that the ‘baseline’ here is based on the positive prevalance (<em>i.e.</em>, the ‘prior’ or fixed/null model probability), not a straight 50/50 tradeoff.</p>
+<p>As with ROC-AUC, this gives a nice summary picture, but it may not be determinative at a single threshold value.</p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>You might also hear reference to the multinomial distribution in this context. In the terminology convention I prefer, Bernoulli is to Categorical as Binomial is to Multinomial.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>While we will have many binary classifiers here, this isn’t really an <em>ensemble</em> type of problem. We just create the different binary classifiers as parts from which we will build a single multi-class classifier. We aren’t hoping to aggregate them to achieve a higher level of performance.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +817,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes19.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes19.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes19.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes19.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -9,3 +9,370 @@ notes_title: "`r readr::read_csv('key_dates.csv') |> dplyr::filter(Item == 'Clas
 Outline: 
 
 --- 
+
+Today, we're going to look at some of the practical challenges associated with
+classification. Specifically, I want to hit: 
+
+- Moving from binary to multi-class classification
+- Unbalanced data
+- Performance Measures
+
+## Multi-Class Classifiers
+
+So far, we have mainly focused on _binary_ classifiers, which distinguish between
+two classes, conventionally called $\{0, 1\}$, $\{\pm 1\}$, positive/negative
+*etc.* When we move to _multi-class_ classifiers-those with 3 or more (unordered)
+outcomes-we have to do a bit more work. There are three broad strategies you can
+consider: 
+
+- Native multi-class: certain models can be made 'multi-class' with minimal
+  additional effort. This is obviously a very nice scenario, but it does 
+  restrict the models available to you. 
+  
+- One-vs-One: Given $K$ possible classes, train $\binom{K}{2} = \frac{K(K-1)}{2}$
+  binary classifiers to compare each pair
+  
+- One-vs-Rest: Given $K$ possible classes, train $K$ binary classifiers to 
+  predict each class vs 'something else'
+  
+Let's examine these each in turn. 
+
+### Native Multi-Class
+
+There are two broad families of models that are natively (or near natively)
+suitable for multi-class classification. The first are our beloved decision
+trees (and things built on top of trees, like random forests or boosting methods).
+The extension here is rather straightforward: the only tweak we need is to
+modify our split criterion: Rather than using binary impurity of each leaf, we 
+use a multi-class modification: 
+
+$$\text{Impurity} = 1 - \sum_{k=1}^K p_k^2$$ 
+
+where $p_k$ is the fraction of observations in class $k$ associated with that
+leaf. Here, a very pure (all one class) leaf will have $p_1 \approx 1$ and
+$p_{k} \approx 0$ for all other $k$, giving an Impurity close to zero (good!).
+This is essentially the same as the binary case, except we're using a sum over
+$k$ probabilities. 
+
+Alternatively, we can use a deviance (likelihood) based loss: 
+
+$$ \text{Entropy} = -\sum_k p_k \log(p_k)$$
+
+As before, this is small when one $p_k$ is close to 1 and the others are all
+near zero. Note that this is basically the binomial deviance, but here summing
+over a set of $p_k$ that add to one instead of $p$ and $1-p$. 
+
+Other than this, multiclass decision trees work like their binary counterparts
+(though some of the pre-sorting algorithmic tricks aren't quite as effective). 
+Importantly, they retain their advantages of interpretability, flexibility, and
+tunability (deeper vs shallow trees). 
+
+Generative classifiers extend to multi-class problems in the obvious way. Instead
+of fitting two 'reverse' models $p(X | Y=0)$ and $p(X | Y=1)$, we need $K$ models
+for each $p(X | Y = k)$ and the Bayes' rule denominator is now a sum of $K$ terms,
+but no other modifications are needed. (These are necessarily more 'data hungry'
+but that's true of any multi-class problem.)
+
+Finally, we can also extend logistic regression to the multi-class setting
+using our general GLM machinery. While logistic regression was built on the 
+_Bernoulli_ (binomial) distribution, a suitable multi-class GLM will require a
+multi-class distribution. Specifically, we will build on the 
+[categorical distribution](https://en.wikipedia.org/wiki/Categorical_distribution).[^mult]
+
+The categorical distribution takes a set of $K$ probabilities, 
+$\mathbf{p} = (p_1, p_2, \dots, p_K)$, summing to 1,
+and samples according to those probabilities. A Bernoulli distribution is then
+just a 2-class categorical with $\mathbf{p} = (p, 1 - p)$. The linear predictor
+term is a bit more complicated: we have $K$ sets of coefficients, one for each
+class. These give us $\eta_1, \dots, \eta_K$ which we then need to 'squish' into
+a proper probability vector. The soft-max function to which we have made 
+repeated reference is exactly the right adaptor here: 
+
+$$\mathbf{p} = (p_1, \dots, p_K) = (\mu_1, \dots, \mu_K) = (\text{softmax}(\eta_1 | \eta_1, \dots, \eta_K), \dots, \text{softmax}(\eta_K | \eta_1, \dots, \eta_K))$$
+
+where 
+
+$$\text{softmax}(\eta_1|\eta_1, \dots, \eta_K) = \frac{e^{\eta_1}}{\sum_{k=1}^K e^{\eta_k}}$$
+
+You should be able to convince yourself that this is exactly the same as the 
+logistic (sigmoid) link we use for ordinary logistic regression. 
+
+While this can be built using essentially the same tools as logistic regression, 
+the fitting and interpretation is a bit trickier. Specifically, note that
+
+$$\text{softmax}(\eta_1 + c|\eta_1 + c, \dots, \eta_K + c) = \frac{e^{\eta_1 + c}}{\sum_{k=1}^K e^{\eta_k + c}} = \frac{e^{\eta_1}}{\sum_{k=1}^K e^{\eta_k}} = \text{softmax}(\eta_1|\eta_1, \dots, \eta_K)$$
+
+so the problem is not quite well-specified. Adding a constant to all terms gives
+the same prediction. To work around this, we typically add an additional 
+constraint or ridge-style penalty that encourages the smallest set of coefficients
+and intercept terms. 
+
+Once the model is fit, the interpretation is a bit trickier as we now have $K$
+sets of coefficients, but the general direction and sign rules are unchanged from
+the binary case. 
+
+[^mult]: You might also hear reference to the multinomial distribution in this
+context. In the terminology convention I prefer, Bernoulli is to Categorical as
+Binomial is to Multinomial. 
+
+### One-vs-Rest
+
+For models where a natively multi-class version do not exist (margin based models)
+or the natively multi-class models are too finicky to work with (multinomial
+regression), we can also hack together an approach based on a _set_ of 
+binary classifiers.[^ens] 
+
+Suppose we have a three way classification problem: dog *vs* cat *vs* bird. We
+can build _three_ 'one-vs-rest' classifiers of the form: 
+
+- dog *vs* not dog
+- cat *vs* not cat
+- bird *vs* not bird
+
+To construct these, we essentially 'one hot encode' our response variable $Y$
+and train different classifiers for each (expanded) column of the response. 
+(Note that these classifiers might be quite unbalanced, a problem we'll come
+back to in a bit.) After fitting these classifiers, how can we make our
+predictions? Suppose we have a new test point and run it through our classifiers
+and get the following probabilities: 
+
+- dog (30%) *vs* not dog (70%)
+- cat (40%) *vs* not cat (60%)
+- bird (10%) *vs* not bird (90%)
+
+How should we aggregate these to make a proper multi-class prediction? 
+
+One approach is simply to take the most confident prediction (`cat`). This
+'maximum score' strategy is simple enough, but it might feel a bit odd to
+make a prediction in situations in which all probabilities are low. We can 
+alternatively normalize the probabilities using the softmax transform to get
+
+$\mathbf{p} = \frac{1}{e^{0.3} + e^{0.4} + e^{0.1}}\left(e^{0.3}, e^{0.4}, e^{0.1}\right) \approx (34\%, 38\%, 28\%)$
+
+or a simple 'sum to one' transform. 
+
+$\mathbf{p} = \frac{1}{0.3 + 0.4 + 0.1}\left(0.3, 0.4, 0.1\right) \approx (37.5\%, 50\%, 12.5\%)$
+
+I am not aware of any strong argument for one transform *vs* another (and for a 
+hard / point prediction they all give the same modal class) but if you are looking
+at probabilitistic quality measures (like calibration), it may be worth considering
+both strategies. 
+
+This OvR strategy is rather fast (requiring only $K$ simple models) and inherits
+nice properties of the binary classifiers. As we've seen, there's no guarantee
+that the probabilities are meaningful and you should check calibration of the
+resulting multi-way classifier, but that can usually be addressed after the fact.
+More tricky is the fact that the individual classification problems can be
+quite unbalanced. If you, *e.g.*, have a balanced 10-way classification problem,
+each of these classifiers will be 10/90, which can cause problems for some methods.
+
+[^ens]: While we will have many binary classifiers here, this isn't really an
+_ensemble_ type of problem. We just create the different binary classifiers as 
+parts from which we will build a single multi-class classifier. We aren't hoping
+to aggregate them to achieve a higher level of performance.
+
+### One-vs-One
+
+Finally, you can also aggregate classifiers using a "one-vs-one" strategy. In
+this case, we train $\binom{K}{2} = K(K-1)/2$ classifiers to compare all pairs.
+For our 3-way case above, we would fit
+
+- cat *vs* dog
+- cat *vs* bird
+- dog *vs* bird
+
+(These have the same number of classifiers for $K=3$, but for $K > 3$, OvO 
+requires fitting more models.) As before, we have to determine how we might 
+aggregate probabilities: 
+
+
+- cat (60%) *vs* dog (40%)
+- cat (90%) *vs* bird (10%)
+- dog (75%) *vs* bird (25%)
+
+The simplest strategy here would be to count 'wins': 
+
+- cat: 2 wins
+- dog: 1 win
+- bird: 0 wins
+
+and to predict `cat`. This is simple enough, but it can have some real pitfalls:
+
+1) It's not hard to come up with 'rock-paper-scissors' scenarios in which there
+   is no clear winner
+2) There's an 'irrelevant classifier' that gets a vote. Suppose the image was
+   _actually_ a cat. Why are we letting 'dog *vs.* bird' get a say here? 
+   
+As $K$ gets large, this becomes particularly problematic. 
+
+For these reasons, I don't really like the OvO strategy and rarely use it. 
+
+### Assessing Multi-Class Accuracy
+
+Our standard accuracy metrics (TPR, $F_1$, *etc*) derived from the $2 \times 2$
+classification table do not extend as simply to the $K$-way case. OvO and OvR 
+extensions of these measures exist for the multi-way case, but I find it's hard
+to beat a direct examination of the classification table (confusion matrix)
+
+## Unbalanced Classifiers
+
+When facing real classification problems, it is not uncommon to find data sets
+that are not 50/50. For instance, if you are a bank you run a fraud detector on
+every credit card charge that comes over the wire. Clearly (thankfully!) the
+vast majority of these are not fraudulent. But a simple accuracy metric 
+can be quite useless in this setting. The 'never fraud' predictor may have
+99.9% Accuracy, but zero utility. 
+
+How should you approach this scenario? There are three broad response strategies: 
+
+1) Use an adaptive classification threshold. In the fraud example, we might find
+   that allowing a fraudulent transaction (and exposing our customers to identity
+   theft) is *much* worse than forcing them to swipe twice or use a different
+   card. Accounting for this, we might push our classification threshold to
+   reject anything with a >3% chance of being fraud, rather than a more intuitive
+   50%. 
+   
+Modifying the threshold can work, but it still requires a classifier that is
+able to distinguish the classes (just not at the 50% point). If your classifier
+isn't distinguishing classes well, this form of post-processing might not be
+enough and a more direct intervention might be needed. 
+
+2) We can modify the classification problem to upweight the rare class. Instead
+   of optimizing binomial deviance (logistic regression) as an unweighted sum
+   over all classes, we can put a weight $w > 1$ on the rare classes. By telling
+   the optimizer that missing a fraud is 100 times worse than blocking a valid
+   transaction, the model will become more aware of (and hopefully better at 
+   identifying!) the rare class. Because almost all of our classifiers are defined
+   by a 'sum of loss' problem, this strategy can be applied in a variety of 
+   circumstances. 
+   
+This sort of upweighting can be quite effective, but if those rare points are
+weird/noisy for whatever reason, upweighting them can induce a 'variance' penalty.
+Still, keep it in mind as it is quick and powerful. 
+
+In situations where upweighting and changing the threshold _still_ aren't enough
+to get acceptable performance, we can actually go in and adjust our training
+data. 
+
+3) Modify the training data to either: 
+
+   - randomly drop some rows of the majority class, improving balance
+   - duplicate some rows of the minority class, improving balance
+   - include additional synthetic rows for the minority class. (This is often
+     called 'SMOTE' for ['Synthetic Minority Oversampling Technique'](https://en.wikipedia.org/wiki/Synthetic_minority_oversampling_technique))
+   
+This is obviously the most drastic strategy we might consider as we're really
+messing with the training data directly. It has some clear pitfalls you should
+watch out for: 
+
+- Dropping rows can drop signal 
+- Replicating rows (or using synthetic combinations of rows) can result in data
+  leakage. 
+  
+If you duplicate a row _before_ splitting, the same row can wind up in both
+your training and your validation/test set. To avoid this, make sure to do any
+data modification _within_/_inside_ of your data splitting strategy (*e.g.*, 
+within each cross validation fold.)
+
+These data modification strategies are quite dramatic, but they can be powerful
+and practical, particularly for algorithms / software that isn't amenable to
+observation weighting or that doesn't play well with ties. 
+
+Finally, note that unbalanced classifiers can also occur when the data is 
+collected in a non-representative way. As you saw in the previous homework, we
+have far less data on rejected mortgage applications because they didn't get as
+far in the underwriting process.
+
+## Interpreting Performance Measures
+
+When we started classification, we introduced the $2 \times 2$ classification
+table and the various metrics that can be derived from it. Let's review some
+of these again: 
+
+| Metric | Formula & Plain-English Meaning | Best Used When... | Major Flaws & Blind Spots |
+| :--- | :--- | :--- | :--- |
+| **Accuracy** | $\frac{\text{TP} + \text{TN}}{N}$<br>*Fraction of all predictions that are correct.* | Classes are roughly balanced and false positives and false negatives carry equal cost. | **Broken under class imbalance** (predicting all negatives on 99% negative data yields 99% accuracy). Treats all mistakes as equally bad. |
+| **Recall (Sensitivity / TPR)** | $\frac{\text{TP}}{\text{TP} + \text{FN}}$<br>*Of all actual positives, what fraction did we catch?* | Missing a positive is catastrophic (e.g., cancer screening, airport security, fraud containment). | **Trivial to game:** Predicting "Positive" for every single observation achieves 100% recall while drowning users in false alarms. |
+| **Precision (PPV)** | $\frac{\text{TP}}{\text{TP} + \text{FP}}$<br>*Of all cases we flagged as positive, what fraction actually were?* | False alarms are expensive or erode user trust (e.g., spam filters, manual audit queues, automated account bans). | **Ignores missed positives:** Flagging only the single most obvious positive case in the dataset gives 100% precision while missing 99.9% of cases. |
+| **Specificity (TNR)** | $\frac{\text{TN}}{\text{TN} + \text{FP}}$<br>*Of all actual negatives, what fraction did we correctly clear?* | Medical diagnostics (ruling out disease) and minimizing disruption to normal users. | Inflated when true negatives are abundant; says nothing about how many actual positives were caught. |
+| **$F_1$ Score (and $F_\beta$)** | $2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$<br>*Harmonic mean of Precision and Recall.* | You need a single summary balance of catching positives and avoiding false alarms (especially on imbalanced data). | **Completely ignores True Negatives ($\text{TN}$).** Assumes Precision and Recall are equally important (unless generalized to $F_\beta$, which weights recall $\beta$ times as much as precision). |
+| **Matthews Correlation Coefficient (MCC)** | $\frac{\text{TP}\cdot\text{TN} - \text{FP}\cdot\text{FN}}{\sqrt{(\text{TP}+\text{FP})(\text{TP}+\text{FN})(\text{TN}+\text{FP})(\text{TN}+\text{FN})}}$<br>*Pearson correlation between true and predicted binary labels ($-1$ to $+1$).* | You want a single, symmetric confusion-matrix metric that rewards high performance across **all four** cells simultaneously. | Harder to explain to non-technical stakeholders than precision/recall; undefined if an entire row or column of the confusion matrix is zero. |
+
+
+Beyond these scalar measures, you will also see two 'area-based' measures, the
+ROC-AUC (sometimes just referred to as **the** AUC) and the PR-AUC: 
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(tidymodels) # Includes yardstick for roc_curve() and roc_auc()
+
+
+sim_preds <- tibble(
+  truth = factor(rbinom(500, size = 1, prob = 0.30), levels = c(1, 0), labels = c("positive", "negative")),
+  # Simulate scores with signal separation + noise
+  latent_score = if_else(truth == "positive", rnorm(500, mean = 1.2, sd = 1), rnorm(500, mean = 0, sd = 1)),
+  .pred_positive = plogis(latent_score)
+)
+
+auc_val <- sim_preds |>
+  roc_auc(truth = truth, .pred_positive) |>
+  pull(.estimate)
+
+roc_df <- sim_preds |>
+  roc_curve(truth = truth, .pred_positive)
+
+ggplot(roc_df, aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path(color = "midnightblue", linewidth = 1.2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  coord_equal() +
+  labs(
+    title = "ROC Curve",
+    subtitle = sprintf("ROC-AUC = %.3f", auc_val),
+    x = "False Positive Rate (1 - Specificity)",
+    y = "True Positive Rate (Sensitivity / Recall)"
+  ) +
+  theme_minimal()
+```
+
+For the ROC curve, we plot TPR against FPR at *every possible
+threshold*. All else being equal, a curve that is more 'up and
+left' will give more predictive power and will have a larger
+area under the curve. This is a useful technique for getting
+an overall picture, but it does not necessarily give proper 
+guidance _at a particular threshold_. 
+
+An alternative to the ROC is the PR curve which plots
+precision against recall. 
+
+```{r}
+#| echo: false
+
+pr_auc_val <- sim_preds |>
+  pr_auc(truth = truth, .pred_positive) |>
+  pull(.estimate)
+
+pr_df <- sim_preds |>
+  pr_curve(truth = truth, .pred_positive)
+
+# Positive class prevalence (the random-classifier baseline for PR curves)
+pos_baseline <- mean(sim_preds$truth == "positive")
+
+ggplot(pr_df, aes(x = recall, y = precision)) +
+  geom_path(color = "darkgreen", linewidth = 1.2) +
+  geom_hline(yintercept = pos_baseline, linetype = "dashed", color = "gray50") +
+  coord_equal(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(
+    title = "Precision–Recall Curve",
+    subtitle = sprintf("PR-AUC = %.3f | Random Baseline = %.2f", pr_auc_val, pos_baseline),
+    x = "Recall (Sensitivity)",
+    y = "Precision (Positive Predictive Value)"
+  ) +
+  theme_minimal()
+```
+
+Note that the 'baseline' here is based on the positive prevalance (*i.e.*, the 'prior' or fixed/null model probability), not a 
+straight 50/50 tradeoff. 
+
+As with ROC-AUC, this gives a nice summary picture, but it may not
+be determinative at a single threshold value. 
