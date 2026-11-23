@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="dcterms.date" content="2026-09-08">
+<meta name="dcterms.date" content="2026-11-23">
 <title>Notes for Lecture #20: Unit IV. Neural Methods: A Shallow Introduction to Deep Learning – STAT 3106</title>
 <style>
 /* Default styles provided by pandoc.
@@ -23,6 +23,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -136,24 +171,29 @@ window.Quarto = {
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
-  <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#neural-architectures" id="toc-neural-architectures" class="nav-link active" data-scroll-target="#neural-architectures">Neural Architectures</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes20.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes20.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<main class="content column-page-right" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
 <h1 class="title">Notes for Lecture #20: Unit IV. Neural Methods: A Shallow Introduction to Deep Learning</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta column-page-right">
 
     
     <div>
     <div class="quarto-title-meta-heading">Last Updated</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2026</p>
+      <p class="date">November 23, 2026</p>
     </div>
   </div>
   
@@ -164,15 +204,215 @@ window.Quarto = {
 
 </header><div style="display: none;">
 <p><span class="math display">\[
-$\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}}
+$\newcommand{\Xcal}{\mathcal{X}}\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb{V}} \newcommand{\P}{\mathbb{P}} \newcommand{\C}{\mathbb{C}} \newcommand{\bbeta}{\mathbb{\beta}} \newcommand{\bone}{\mathbf{1}} \newcommand{\bzero}{\mathbf{0}} \newcommand{\ba}{\mathbf{a}} \newcommand{\bb}{\mathbf{b}} \newcommand{\bc}{\mathbf{c}} \newcommand{\bv}{\mathbf{v}} \newcommand{\br}{\mathbf{r}} \newcommand{\bw}{\mathbf{w}} \newcommand{\bx}{\mathbf{x}} \newcommand{\by}{\mathbf{y}} \newcommand{\bz}{\mathbf{z}} \newcommand{\bX}{\mathbf{X}} \newcommand{\bA}{\mathbf{A}} \newcommand{\bB}{\mathbf{B}} \newcommand{\bC}{\mathbf{C}} \newcommand{\bD}{\mathbf{D}} \newcommand{\bu}{\mathbf{u}} \newcommand{\bU}{\mathbf{U}} \newcommand{\bV}{\mathbf{V}} \newcommand{\bI}{\mathbf{I}} \newcommand{\bH}{\mathbf{H}} \newcommand{\bW}{\mathbf{W}} \newcommand{\bK}{\mathbf{K}} \newcommand{\bR}{\mathbf{R}} \newcommand{\argmin}{\text{arg\,min}} \newcommand{\argmax}{\text{arg\,max}} \newcommand{\MSE}{\text{MSE}} \newcommand{\Fcal}{\mathcal{F}} \newcommand{\Dcal}{\mathcal{D}} \newcommand{\Ycal}{\mathcal{Y}} \newcommand{\Ocal}{\mathcal{O}} \newcommand{\bv}{\mathbf{v}} \newcommand{\Tr}{\text{Tr}} \newcommand{\Ccal}{\mathcal{C}}
 \]</span></p>
 </div>
 <p>Outline:</p>
+<ul>
+<li>NN Applications</li>
+<li>Universal Approximators</li>
+<li>Inductive Biases</li>
+<li>Activations</li>
+<li>Preferred Regimes</li>
+</ul>
 <hr>
+<p>Today we begin our brief (three-class) tour of <em>neural network</em> methods. While neural networks fell out of favor for many years, they are absolutely having a renaissance as the methods that underlie a decade and a half of remarkable advances in image and text processing. The successes of neural networks for modeling of <em>tabular</em> data have not been quite as stunning, but you will see an example of some quite powerful new approaches in your final problem set.</p>
+<p>Before we get into details, it’s worth pausing to discuss the <em>neural</em> in neural networks. Neural network methods are quite old, dating from the first few decades from machine learning and were designed to mimic pioneering work from that ear on neuronal (brain cell) function. At this point, the reference to individual neurons is more metaphor than mechanism (at least to my mind) as modern neural networks are far removed from those early forays. As we will see, in at least one application domain (supervised image classification), neural networks do seem to operate in a manner similar to the human brain (specifically the visual cortex), but the more direct connection is to classical EE/CS approaches to image processing. (If an idea is ‘right’, it’s perhaps not surprising that both physical and digital systems converge on it.) Inverting the relationship, the remarkable success of these methods in text data has lead some researchers to attempt to understand the brain as functioning like a modern LLM; the verdict is still out on those efforts.</p>
+<p>For our purposes, we will treat the neural lingo as a rather idiosyncratic set of jargon choices (even within a field that isn’t known for the clarify of its jargon). If you are already quite knowledgeable about <em>actual</em> neuroscience, I ask your patience with some of the lingo. I don’t take it all that literally and I recommend you don’t either.</p>
+<p>So - disclaimers disclaimed - why are we interested in neural methods? In brief, they work remarkably well and we’re interested in things that work well. Modern applications of NNs include:</p>
+<ul>
+<li>Image Processing:
+<ul>
+<li>Segmentation (dividing images into different ‘things’)</li>
+<li>High-Cardinality Classification (<em>what</em> is an image a picture of?)</li>
+<li>Generation (creating highly realistic images)</li>
+</ul>
+</li>
+<li>Text Processing:
+<ul>
+<li>Automatic translation</li>
+<li>Text generation and completion</li>
+</ul>
+</li>
+</ul>
+<p>What do these methods have in common? At least three things stand out:</p>
+<ul>
+<li>These are problems where our standard (tabular) methods cannot easily be applied without exceptionally complicated <em>pre-processing</em>. Even then, tabular methods tend not to perform all that well</li>
+<li>These are domains with absolutely <em>enormous</em> training sets</li>
+<li>Any mechanistic relationship (if we choose to believe one exists) is <em>incredibly</em> complex and our traditional approach of ‘(nearly) linearize, average some stuff, and hope for the best’ stands no real chance of working.</li>
+</ul>
+<p>These motivate at least one philosophy of neural methods: flexible, <em>universal</em> function approximators. We apply these methods in ‘enormous <span class="math inline">\(n\)</span>’ regimes, where we seek to model a <em>very</em> complex underlying relationship and we have the data necessary to do so. Obviously, there is quite a lot to argue for this perspective: neural networks seem to do <span class="math inline">\(\approx\)</span> anything (at least in the right hands) and they are incredibly data hungry. But why <em>neural</em> networks? After all, we have already seen several universal approximators, from <span class="math inline">\(K\)</span>-NN to (maximal) decision trees.</p>
+<p>While it seems that your favorite LLM can do <em>anything</em>, this doesn’t actually seem to be the case. The neural networks that dominate image classification are <em>very</em> different from those that specialize in text generation. When you see ChatGPT translating ancient Sumerian and generating images of thundering herds of nature’s most noble beast (the basset hound), there are several quite distinct systems at work under the hood.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>Any story about <em>universality</em> has to reckon with the fact that it is the <em>category</em> of neural networks that seems to be universal, not any individual neural network. What is it that makes one type of neural network good for Task A and a different type good for Task B?</p>
+<p>Structurally, it’s a matter of <em>design</em>. A model built to take in (fixed size) images and produce a scalar label (an image classifier) necessarily has a different structure (architecture) than a model that takes in an arbitrary text string and produces an image. But it’s more than just a matter of ‘fitting’ the input and output spaces: the <em>guts</em> of these different models are quite different. Specifically, we design them to emphasize (or de-emphasize) different aspects of our data. While an image classifier should probably give the same label if an image is flipped along its vertical axis, reversing a sentence fundamentally changes its meaning. (A penguin looking to the left and a penguin looking to the right are both obviously penguins, but the sentences “My wife is too good for me.” and “I am too good for my wife.” are different on a <em>very</em> deep level, even beyond their literal meaning.)</p>
+<p>This suggests to use that neural networks exhibit a strong <em>inductive bias</em>: that is, their structure inclines-or sometimes even forces-them to interpret data in a particular way and to identify and rely on certain types of patterns. Inductive bias is clearly not unique to neural networks - as we’ve discussed, all the different methods we’ve considered fit different types of patterns, from the (linear) relationships found by linear regression to the Mondrian-type patterns of decision trees. But this concept plays a more central role in neural networks: classical methods tend to use rather rough-and-ready inductive biases (decision trees work well for any function that can be well approximated by a step function, a class so broad as to be practically meaningless) while neural networks are quite deeply optimized for individual problems.</p>
+<p>You might remark that individual machine learners don’t actually do that sort of deep optimization. The explosive growth of these methods seems to be in part a reflection of the fact that ‘off the shelf’ methods - sometimes even pre-trained models where the weights are not learned from data, but just downloaded off a website - are incredibly performant. One ‘sociological’ theory of the past 15-20 years of machine learning is that, as a field, we have run a giant search over <span class="math inline">\(\approx\)</span> all possible neural networks and those that thrived have done so precisely because they work well on so many problems.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> I find this quite compelling: there’s no real reason to think that <em>any</em> random neural network will be fantastic for any particular task, but the specific methods we have identified are indeed quite remarkable: the ‘marketplace of ideas’ has been enormously successful in the field of machine learning.</p>
+<p>Looking ahead, this sets the stage for our discussion of neural methods:</p>
+<ul>
+<li>Today, we’ll talk about the <em>general</em> ideas that underlie all neural network methods</li>
+<li>Next week, we’ll spend two classes talking about specific network architectures, the inductive biases they generate, and what that implies about interpretation and potential failure modes.</li>
+</ul>
+<section id="neural-architectures" class="level2"><h2 class="anchored" data-anchor-id="neural-architectures">Neural Architectures</h2>
+<p>So, without being too specific, we have a view of neural networks as a sort of <em>universal</em> approximator across all non-linear functions. The class of all non-linear functions is clearly too broad to work with directly, so what does this look like in practice?</p>
+<p>As it has been so many times before, our starting point is linear models which we tweak to generate our relevant non-linearity. In the neural context, we are motivated by actual neurons: to a reasonable approximation, actual neurons take in electro-chemical signals from multiple inputs (sensory nerves or other neurons) at its input points (dendrites), aggregates them, and if they exceed some threshold, send a signal outwards via the axon. Mathematically, we might have something like this:</p>
+<p><span class="math display">\[\text{Axon} = f\left(\sum_i w_i \text{Dendrite}_i\right)\]</span></p>
+<p>where <span class="math inline">\(f\)</span> is some function that generally ‘squishes’ small inputs and lets something through if the input is sufficiently large.</p>
+<p>(Again, to all neuro-informed folks reading this, please excuse the <em>massive</em> oversimplification and inaccurate representation of actual biology.)</p>
+<p>Making this a bit more mathematical, we can set this up as something like the following:</p>
+<p><span class="math display">\[y = f\left(\beta_0 + \sum_i \beta_i x_i\right)\]</span></p>
+<p>or in a more compact form:</p>
+<p><span class="math display">\[ y = f(b + \bx^{\top}\bw) \]</span></p>
+<p>To make a <em>deep</em> neural network, we simply start nesting this type of structure using the <em>output</em> of one function as the <em>input</em> to the next. (In the biological analogy, one neuron feeds into another and the output of that neuron is the input to yet another, <em>etc.</em>) This gives us something like:</p>
+<p><span class="math display">\[\begin{align*}
+\bx_1 &amp;= f(b_0 + \bx^{\top}\bw_0)\\
+\bx_2 &amp;= f(b_1 + \bx^{\top}_1\bw_1)\\
+\bx_3 &amp;= f(b_2 + \bx^{\top}_2\bw_2)\\
+\dots \\
+y &amp;= f(b_k + \bx^{\top}_k\bw_k)\\
+\end{align*}\]</span></p>
+<p>In this case, the intermediate values can be vectors of values (instead of scalars) and we interpret things as vectors and matrices, applying <span class="math inline">\(f(\cdot)\)</span> pointwise as needed. This type of simple structure can produce <em>remarkable</em> complexity. To wit: I have generated several shapes below using different numbers of <em>layers</em> (intermediate steps).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generated by Gemini after some back and forth</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">relu</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">pmax</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">z</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span>, length.out <span class="op">=</span> <span class="fl">601</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># --- Row 1: Structured / nested shapes (3, 5, 7, 9 ReLUs) ---</span></span>
+<span></span>
+<span><span class="co"># Col 1 (3 ReLUs): Single tent y = ReLU(1 - |x|)</span></span>
+<span><span class="va">y_r1_c1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">abs_x</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">+</span> <span class="fu">relu</span><span class="op">(</span><span class="op">-</span><span class="va">xi</span><span class="op">)</span>                 <span class="co"># 2 ReLUs</span></span>
+<span>  <span class="fu">relu</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">abs_x</span><span class="op">)</span>                               <span class="co"># +1 ReLU -&gt; 3 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Col 2 (5 ReLUs): Flat-top mesa on [-1.5, 1.5]</span></span>
+<span><span class="va">y_r1_c2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">u1</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">)</span>                          <span class="co"># 1</span></span>
+<span>  <span class="va">u2</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="op">-</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">)</span>                         <span class="co"># 2</span></span>
+<span>  <span class="va">u3</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span>                          <span class="co"># 3</span></span>
+<span>  <span class="va">u4</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="op">-</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span>                         <span class="co"># 4</span></span>
+<span>  <span class="fu">relu</span><span class="op">(</span><span class="op">(</span><span class="va">u1</span> <span class="op">-</span> <span class="va">u3</span><span class="op">)</span> <span class="op">+</span> <span class="op">(</span><span class="va">u2</span> <span class="op">-</span> <span class="va">u4</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>               <span class="co"># +1 ReLU -&gt; 5 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Col 3 (7 ReLUs): Nested two-tier ziggurat / step-pyramid</span></span>
+<span><span class="va">y_r1_c3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">)</span>                          <span class="co"># 1</span></span>
+<span>  <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="op">-</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">1.5</span><span class="op">)</span>                         <span class="co"># 2</span></span>
+<span>  <span class="va">outer</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">r1</span> <span class="op">+</span> <span class="va">r2</span> <span class="op">-</span> <span class="fl">3.0</span><span class="op">)</span>                  <span class="co"># 3</span></span>
+<span>  <span class="va">notch</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="fl">1.0</span> <span class="op">-</span> <span class="va">outer</span><span class="op">)</span>                    <span class="co"># 4</span></span>
+<span>  <span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span>                          <span class="co"># 5</span></span>
+<span>  <span class="va">s2</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="op">-</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span>                         <span class="co"># 6</span></span>
+<span>  <span class="va">inner</span> <span class="op">&lt;-</span> <span class="fu">relu</span><span class="op">(</span><span class="va">s1</span> <span class="op">+</span> <span class="va">s2</span> <span class="op">-</span> <span class="fl">1.0</span><span class="op">)</span>                  <span class="co"># 7 -&gt; 7 total</span></span>
+<span>  <span class="va">notch</span> <span class="op">+</span> <span class="va">inner</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Col 4 (9 ReLUs): Multi-peak / valley wave from 3 tents (3 * 3 = 9 ReLUs)</span></span>
+<span><span class="va">y_r1_c4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">peak_at</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">center</span>, <span class="va">amp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">z</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="op">(</span><span class="va">xi</span> <span class="op">-</span> <span class="va">center</span><span class="op">)</span></span>
+<span>    <span class="va">amp</span> <span class="op">*</span> <span class="fu">relu</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="op">(</span><span class="fu">relu</span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op">+</span> <span class="fu">relu</span><span class="op">(</span><span class="op">-</span><span class="va">z</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>        <span class="co"># 3 ReLUs per peak</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu">peak_at</span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.0</span><span class="op">)</span> <span class="op">+</span> <span class="fu">peak_at</span><span class="op">(</span><span class="fl">0.0</span>, <span class="op">-</span><span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span> <span class="fu">peak_at</span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">1.2</span><span class="op">)</span> <span class="co"># 9 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># --- Row 2: Contrasting shapes with matching ReLU counts (3, 5, 7, 9 ReLUs) ---</span></span>
+<span></span>
+<span><span class="co"># Col 1 (3 ReLUs): Asymmetric V-trough / bend</span></span>
+<span><span class="va">y_r2_c1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">-</span><span class="fl">1.5</span> <span class="op">*</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">+</span> <span class="fl">1.0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fl">2.0</span> <span class="op">*</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">-</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">-</span></span>
+<span>    <span class="fl">0.5</span> <span class="op">*</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">-</span> <span class="fl">2.0</span><span class="op">)</span>                       <span class="co"># 3 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Col 2 (5 ReLUs): 5-hinge alternating zigzag</span></span>
+<span><span class="va">knots5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.0</span>, <span class="fl">2.0</span>, length.out <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">signs5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1.2</span>, <span class="op">-</span><span class="fl">2.4</span>, <span class="fl">2.4</span>, <span class="op">-</span><span class="fl">2.4</span>, <span class="fl">1.2</span><span class="op">)</span></span>
+<span><span class="va">y_r2_c2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">signs5</span> <span class="op">*</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">-</span> <span class="va">knots5</span><span class="op">)</span><span class="op">)</span>               <span class="co"># 5 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Col 3 (7 ReLUs): Monotonic 7-hinge ramp / staircase</span></span>
+<span><span class="va">knots7</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.4</span>, <span class="fl">2.4</span>, length.out <span class="op">=</span> <span class="fl">7</span><span class="op">)</span></span>
+<span><span class="va">y_r2_c3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">-</span> <span class="va">knots7</span><span class="op">)</span><span class="op">)</span>                  <span class="co"># 7 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Col 4 (9 ReLUs): 9-hinge high-contrast sawtooth comb</span></span>
+<span><span class="va">knots9</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.4</span>, <span class="fl">2.4</span>, length.out <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
+<span><span class="va">signs9</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y_r2_c4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xi</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">signs9</span> <span class="op">*</span> <span class="fu">relu</span><span class="op">(</span><span class="va">xi</span> <span class="op">-</span> <span class="va">knots9</span><span class="op">)</span><span class="op">)</span>               <span class="co"># 9 total</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">facet_labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  r1_c1 <span class="op">=</span> <span class="st">"Single Tent (3 ReLUs)"</span>,</span>
+<span>  r1_c2 <span class="op">=</span> <span class="st">"Flat-Top Mesa (5 ReLUs)"</span>,</span>
+<span>  r1_c3 <span class="op">=</span> <span class="st">"Two-Tier Ziggurat (7 ReLUs)"</span>,</span>
+<span>  r1_c4 <span class="op">=</span> <span class="st">"Multi-Peak Wave (9 ReLUs)"</span>,</span>
+<span>  r2_c1 <span class="op">=</span> <span class="st">"Asymmetric Trough (3 ReLUs)"</span>,</span>
+<span>  r2_c2 <span class="op">=</span> <span class="st">"5-Hinge Zigzag (5 ReLUs)"</span>,</span>
+<span>  r2_c3 <span class="op">=</span> <span class="st">"7-Hinge Ramp (7 ReLUs)"</span>,</span>
+<span>  r2_c4 <span class="op">=</span> <span class="st">"9-Hinge Sawtooth (9 ReLUs)"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r1_c1</span>, shape <span class="op">=</span> <span class="st">"r1_c1"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r1_c2</span>, shape <span class="op">=</span> <span class="st">"r1_c2"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r1_c3</span>, shape <span class="op">=</span> <span class="st">"r1_c3"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r1_c4</span>, shape <span class="op">=</span> <span class="st">"r1_c4"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r2_c1</span>, shape <span class="op">=</span> <span class="st">"r2_c1"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r2_c2</span>, shape <span class="op">=</span> <span class="st">"r2_c2"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r2_c3</span>, shape <span class="op">=</span> <span class="st">"r2_c3"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y_r2_c4</span>, shape <span class="op">=</span> <span class="st">"r2_c4"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">df</span><span class="op">$</span><span class="va">shape</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">shape</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">facet_labels</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, color <span class="op">=</span> <span class="va">shape</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span></span>
+<span>    <span class="op">~</span> <span class="va">shape</span>,</span>
+<span>    scales <span class="op">=</span> <span class="st">"free_y"</span>,</span>
+<span>    ncol <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    labeller <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labeller.html">labeller</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="va">facet_labels</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"1D ReLU Shapes Across 4 Columns (3, 5, 7, 9 ReLUs) and 2 Rows"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"f(x)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    legend.position <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>    strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="notes20_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Clearly, more steps gives us more expressivity (more possible shapes) but even in this simple 1D example, we can generate an impressive variety.</p>
+<p>So what <em>activation function</em> <span class="math inline">\(f\)</span> should we choose here? ReLU, gradients, sigmoids and gradient decay, <em>etc</em></p>
 
 
-
-</main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1">
+<p>Hadley Wickham has a very nice series of posts explaining the concepts of <em>tools</em> and <em>harnesses</em> within a larger LLM:</p>
+<ul>
+<li><a href="https://substack.hadley.nz/p/what-is-an-agent">Post 1</a></li>
+<li><a href="https://substack.hadley.nz/p/your-llm-cant-math-and-thats-ok">Post 2</a></li>
+<li><a href="https://substack.hadley.nz/p/a-coding-agent-is-six-functions-in">Post 3</a></li>
+<li><a href="https://substack.hadley.nz/p/help-my-coding-agent-can-run-code">Post 4</a></li>
+<li><a href="https://substack.hadley.nz/p/auto-mode-knows-its-dangerous-and">Post 5</a></li>
+</ul>
+<p><a href="https://substack.hadley.nz/p/a-no-bullshit-guide-to-llms">This post</a> is a bit older, but still quite helpful. See also <a href="https://www.argmin.net/p/secrets-of-intelligence-services">this post</a> from Ben Recht.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p>
+</li>
+<li id="fn2"><p>I first heard this theory from Ben’s talks and <a href="https://www.argmin.net/p/rigor-vs-github-descent">substack</a>, but I don’t know if he claims ownership of it.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -576,4 +816,4 @@ $\newcommand{\R}{\mathbb{R}} \newcommand{\E}{\mathbb{E}} \newcommand{\V}{\mathbb
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes20.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes20.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/michaelweylandt/STAT3106/edit/main/notes/notes20.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/blob/main/notes/notes20.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/michaelweylandt/STAT3106/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
